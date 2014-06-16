@@ -2,13 +2,24 @@
 class Inv_meta_model extends CI_Model {
 	const TABLE_TYPE = 'inv_meta_type';
 	const TABLE_CODE = 'inv_meta_code';
-	
-	public function get_meta_code_item($typeId) {
-		$where = array (
-				'typeId' => $typeId 
-		);
-		$query = $this->db->get_where ( self::TABLE_CODE, $where );
-		return $query->row_array ();
+
+	public function get_meta_types() {
+		$this->db->select ( 'typeId, typeDesc' );
+		$this->db->order_by ( 'typeId', 'asc' );
+		$query = $this->db->get_where ( self::TABLE_TYPE );
+		$meta_types = $query->result_array ();
+		$data = array ();
+		foreach ( $meta_types as $meta_type ) {
+			$type_id = $meta_type ['typeId'];
+			$where = array (
+					'typeId' => $type_id 
+			);
+			$this->db->select ( 'key, value' );
+			$this->db->order_by ( 'pos', 'asc' );
+			$meta_type['metaCodes'] = $this->db->get_where ( self::TABLE_CODE, $where )->result_array ();
+			$data [] = $meta_type;
+		}
+		return $data;
 	}
 
 	public function get_last_update_time() {

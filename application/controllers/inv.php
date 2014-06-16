@@ -20,6 +20,30 @@ class Inv extends CI_Controller {
 		$this->load->model ( 'inv_user_model' );
 		$this->load->model ( 'inv_recommendation_model' );
 	}
+	
+	/* ---------------- Meta Type Releated ---------------- */
+	/**
+	 * Echo the last update time of the meta data to the response.
+	 * Output: The Unix timestamp.
+	 * E.g.: {"time":1402940786}
+	 */
+	public function get_meta_type_last_update_time() {
+		$time = $this->inv_meta_model->get_last_update_time();
+		$this->output
+		->set_content_type('application/json')
+		->set_output(json_encode(array('time' => $time)));
+	}
+	
+	/**
+	 * Echo all meta types information to the response.
+	 * Output: The array of meta type.
+	 * E.g.: [{"typeId":"1","typeDesc":"Category","metaCodes":[{"key":"BOK","value":"Books"}]]
+	 */
+	public function get_meta_types() {
+		$data = json_encode($this->inv_meta_model->get_meta_types());
+		$this->output->set_content_type('application/json')->set_output($data);
+	}
+	
 	public function user_page() {
 		$this->load->helper ( 'form' );
 		$this->load->view ( 'inv/user_form' );
@@ -62,10 +86,6 @@ class Inv extends CI_Controller {
 			$data ['message'] = 'Token Error.';
 			return $data;
 		}
-	}
-	
-	public function get_meta_type_last_update_time() {
-		return $this->inv_meta_model->get_last_update_time();
 	}
 	
 	public function add_item() {
