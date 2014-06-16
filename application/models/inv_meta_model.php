@@ -1,5 +1,5 @@
 <?php
-class Inv_item_model extends CI_Model {
+class Inv_meta_model extends CI_Model {
 	const TABLE_TYPE = 'inv_meta_type';
 	const TABLE_CODE = 'inv_meta_code';
 	
@@ -10,6 +10,14 @@ class Inv_item_model extends CI_Model {
 		$query = $this->db->get_where ( self::TABLE_CODE, $where );
 		return $query->row_array ();
 	}
+
+	public function get_last_update_time() {
+		$this->db->select_max('recUpdateTime');
+		$query = $this->db->get( self::TABLE_TYPE );
+		$time = $query->row_array()['recUpdateTime'];
+		return strtotime($time);
+	}
+	
 	public function add_inv_item($data) {
 		return $this->db->insert ( self::TABLE_ITEM, $data );
 	}

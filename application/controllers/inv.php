@@ -6,8 +6,9 @@ const FAILURE = 0;
 const UPLOAD_BASE_PATH = '/var/uploads/';
 
 /**
- *
+ * 
  * @property Inv_item_model $inv_item_model
+ * @property Inv_meta_model $inv_meta_model
  * @property Inv_user_model $inv_user_model
  * @property Inv_recommendation_model $inv_recommendation_model
  */
@@ -15,6 +16,7 @@ class Inv extends CI_Controller {
 	function __construct() {
 		parent::__construct ();
 		$this->load->model ( 'inv_item_model' );
+		$this->load->model ( 'inv_meta_model' );
 		$this->load->model ( 'inv_user_model' );
 		$this->load->model ( 'inv_recommendation_model' );
 	}
@@ -61,6 +63,11 @@ class Inv extends CI_Controller {
 			return $data;
 		}
 	}
+	
+	public function get_meta_type_last_update_time() {
+		return $this->inv_meta_model->get_last_update_time();
+	}
+	
 	public function add_item() {
 		$check = $this->check_token ();
 		if ($check) {
