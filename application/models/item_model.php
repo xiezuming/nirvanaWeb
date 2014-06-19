@@ -1,6 +1,6 @@
 <?php
-class Inv_item_model extends CI_Model {
-	const TABLE_ITEM = 'inv_item';
+class Item_model extends CI_Model {
+	const TABLE_ITEM = 'item';
 	public function get_inv_item($userId, $itemId) {
 		$where = array (
 				'userId' => $userId,

@@ -1,7 +1,7 @@
 <?php
-class Inv_meta_model extends CI_Model {
-	const TABLE_TYPE = 'inv_meta_type';
-	const TABLE_CODE = 'inv_meta_code';
+class Meta_model extends CI_Model {
+	const TABLE_TYPE = 'meta_type';
+	const TABLE_CODE = 'meta_code';
 
 	public function get_meta_types() {
 		$this->db->select ( 'typeId, typeDesc' );

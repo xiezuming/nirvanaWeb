@@ -7,46 +7,21 @@ const UPLOAD_BASE_PATH = '/var/uploads/';
 
 /**
  * 
- * @property Inv_item_model $inv_item_model
- * @property Inv_meta_model $inv_meta_model
- * @property Inv_user_model $inv_user_model
+ * @property Item_model $item_model
+ * @property User_model $user_model
  * @property Inv_recommendation_model $inv_recommendation_model
  */
 class Inv extends CI_Controller {
 	function __construct() {
 		parent::__construct ();
-		$this->load->model ( 'inv_item_model' );
-		$this->load->model ( 'inv_meta_model' );
-		$this->load->model ( 'inv_user_model' );
+		$this->load->model ( 'item_model' );
+		$this->load->model ( 'user_model' );
 		$this->load->model ( 'inv_recommendation_model' );
 	}
-	
-	/* ---------------- Meta Type Releated ---------------- */
-	/**
-	 * Echo the last update time of the meta data to the response.
-	 * Output: The Unix timestamp.
-	 * E.g.: {"time":1402940786}
-	 */
-	public function get_meta_type_last_update_time() {
-		$time = $this->inv_meta_model->get_last_update_time();
-		$this->output
-		->set_content_type('application/json')
-		->set_output(json_encode(array('time' => $time)));
-	}
-	
-	/**
-	 * Echo all meta types information to the response.
-	 * Output: The array of meta type.
-	 * E.g.: [{"typeId":"1","typeDesc":"Category","metaCodes":[{"key":"BOK","value":"Books"}]]
-	 */
-	public function get_meta_types() {
-		$data = json_encode($this->inv_meta_model->get_meta_types());
-		$this->output->set_content_type('application/json')->set_output($data);
-	}
-	
+
 	public function user_page() {
 		$this->load->helper ( 'form' );
-		$this->load->view ( 'inv/user_form' );
+		$this->load->view ( 'user/user_form' );
 	}
 	public function create_user() {
 		$userName = $this->input->post ( 'userName' );

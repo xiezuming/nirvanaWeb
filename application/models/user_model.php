@@ -1,6 +1,6 @@
 <?php
-class Inv_user_model extends CI_Model {
-	const TABLE_USER = 'inv_user';
+class User_model extends CI_Model {
+	const TABLE_USER = 'user';
 	public function create_user($userName, $password) {
 		$userId = $this->gen_uuid();
 		$data = array (

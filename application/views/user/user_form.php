@@ -1,5 +1,8 @@
+<h1>User Test Page</h1>
+<hr />
+
 <p>Create User</p>
-<?php echo form_open('inv/create_user')?>
+<?php echo form_open('user/create_user')?>
 <label>userName</label>
 <input name="userName" />
 <br />
@@ -12,7 +15,7 @@
 <hr />
 
 <p>Login</p>
-<?php echo form_open('inv/login')?>
+<?php echo form_open('user/login')?>
 <label>userName</label>
 <input name="userName" />
 <br />
@@ -25,7 +28,7 @@
 <hr />
 
 <p>Logout</p>
-<?php echo form_open('inv/logout')?>
+<?php echo form_open('user/logout')?>
 <label>userId</label>
 <input name="userId" />
 <br />
