@@ -23,7 +23,7 @@ class Meta extends CI_Controller {
 	public function get_meta_type_last_update_time() {
 		$time = $this->meta_model->get_last_update_time ();
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( array (
-				'time' => $time 
+				'meta_type_last_update_time' => $time 
 		) ) );
 	}
 	
@@ -33,7 +33,9 @@ class Meta extends CI_Controller {
 	 * E.g.: [{"typeId":"1","typeDesc":"Category","metaCodes":[{"key":"BOK","value":"Books"}]]
 	 */
 	public function get_meta_types() {
-		$data = json_encode ( $this->meta_model->get_meta_types () );
+		$data = json_encode ( array (
+				'meta_types' => $this->meta_model->get_meta_types () 
+		) );
 		$this->output->set_content_type ( 'application/json' )->set_output ( $data );
 	}
 }
