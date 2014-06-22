@@ -29,7 +29,11 @@ class User extends CI_Controller {
 				$data ['result'] = FAILURE;
 				$data ['message'] = 'The user exists.';
 			} else {
-				$this->user_model->create_user ( $userName, $password );
+				$userId = $this->user_model->create_user ( $userName, $password );
+				$data ['result'] = SUCCESS;
+				$data ['data'] = array (
+						'userId' => $userId 
+				);
 			}
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );

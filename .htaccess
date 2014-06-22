@@ -1,3 +1,4 @@
 RewriteEngine on
 RewriteCond $1 !^(index\.php|images|robots\.txt)
-RewriteRule ^(.*)$ /wetag/index.php/$1 [L]
+RewriteBase /wetag
+RewriteRule ^(.*)$ index.php/$1 [L]

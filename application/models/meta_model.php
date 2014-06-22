@@ -25,7 +25,8 @@ class Meta_model extends CI_Model {
 	public function get_last_update_time() {
 		$this->db->select_max('recUpdateTime');
 		$query = $this->db->get( self::TABLE_TYPE );
-		$time = $query->row_array()['recUpdateTime'];
+		$row = $query->row_array();
+		$time = $row['recUpdateTime'];
 		return strtotime($time);
 	}
 	
