@@ -14,8 +14,8 @@
 <?php echo '</form>'?>
 <hr />
 
-<p>Login</p>
-<?php echo form_open('user/login')?>
+<p>Sign In</p>
+<?php echo form_open('user/sign_in')?>
 <label>userName</label>
 <input name="userName" />
 <br />
@@ -23,14 +23,7 @@
 <input name="password" type="password" />
 <br />
 <br />
-<input type="submit" value="Login" />
+<input type="submit" value="Sign In" />
 <?php echo '</form>'?>
 <hr />
 
-<p>Logout</p>
-<?php echo form_open('user/logout')?>
-<label>userId</label>
-<input name="userId" />
-<br />
-<input type="submit" value="Logout" />
-<?php echo '</form>'?>
