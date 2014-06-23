@@ -38,6 +38,28 @@ class Algorithm extends CI_Controller {
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	public function query_categories_by_title() {
+		$title = $this->input->post ( 'title' );
+		if (empty ( $title )) {
+			show_error ( 'Title is empty.' );
+			return;
+		} else {
+			$input = array (
+					$title 
+			);
+			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_categories_by_title.py';
+			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
+			$categories = $this->get_real_result ( $result );
+			
+			$data ['title'] = 'Inv List';
+			$data ['categories'] = $categories;
+			
+			$this->load->view ( 'templates/header', $data );
+			$this->load->view ( 'algorithm/categories', $data );
+			$this->load->view ( 'templates/footer' );
+		}
+		// $this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 	private function get_real_result($result) {
 		$pos = stripos ( $result, PYTHON_PLACEHOLD );
 		if ($pos) {
