@@ -2,7 +2,7 @@
 Query item market price and expected price.
 The input is the command argument one. The output result is console ouput stirng.
 The input and output foramtion is JSON.
-If can't find the information, nothing will be printed to consle.
+If can't find the information, nothing will be printed to console.
 
 Input Parameters: barcode, title
 Output: The price information group by conditon key.

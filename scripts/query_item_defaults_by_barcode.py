@@ -2,7 +2,7 @@
 Query item default informations by barcode.
 The input is the command argument one. The output result is console ouput stirng.
 The input and output foramtion is JSON.
-If can't find the information, nothing will be printed to consle.
+If can't find the information, nothing will be printed to console.
 
 Input Parameters: barcode
 Output: The dict of information: title, category, salesChannel, imageUrl
