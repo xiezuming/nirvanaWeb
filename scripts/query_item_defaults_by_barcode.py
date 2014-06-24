@@ -5,7 +5,7 @@ The input and output foramtion is JSON.
 If can't find the information, nothing will be printed to consle.
 
 Input Parameters: barcode
-Output: The dict of information: title, category, marketPriceMin, marketPriceMax, expectedPrice, salesChannel, imageUrl
+Output: The dict of information: title, category, salesChannel, imageUrl
 
 '''
 

@@ -38,6 +38,32 @@ class Algorithm extends CI_Controller {
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	public function query_item_prices() {
+		$barcode = $this->input->post ( 'barcode' );
+		$title = $this->input->post ( 'title' );
+		if (empty ( $barcode ) && empty ( $title )) {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Internal Error: Inputs is empty.';
+		} else {
+			$input = array (
+					$barcode,
+					$title
+			);
+			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_item_prices.py';
+			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
+			$result = $this->get_real_result ( $result );
+			if (empty ( $result )) {
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'No result found for barcode.';
+			} else {
+				$data ['result'] = SUCCESS;
+				$data ['data'] = array (
+						'item_prices' => $result
+				);
+			}
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 	public function query_categories_by_title() {
 		$title = $this->input->post ( 'title' );
 		if (empty ( $title )) {
