@@ -54,9 +54,9 @@ class Algorithm extends CI_Controller {
 			$data ['title'] = 'Inv List';
 			$data ['categories'] = $categories;
 			
-			$this->load->view ( 'templates/header', $data );
+			$this->load->view ( 'templates/header_app', $data );
 			$this->load->view ( 'algorithm/categories', $data );
-			$this->load->view ( 'templates/footer' );
+			$this->load->view ( 'templates/footer_app' );
 		}
 		// $this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
