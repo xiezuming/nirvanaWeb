@@ -23,9 +23,6 @@ except:
 result = {
   'title': 'Apple MacBook Air A1465 11.6\' Laptop - MD711LL/A (June, 2013)',
   'category': 'ELE',
-  'marketPriceMin': 100.0,
-  'marketPriceMax': 200.0,
-  'expectedPrice': 120.0,
   'salesChannel': 'EB',
   'imageUrl': 'http://thumbs2.ebaystatic.com/d/l225/m/maNLzwO1dp6Z9F2-fkPhKBQ.jpg'
 }

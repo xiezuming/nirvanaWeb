@@ -43,7 +43,7 @@ class Algorithm extends CI_Controller {
 		$title = $this->input->post ( 'title' );
 		if (empty ( $barcode ) && empty ( $title )) {
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'Internal Error: Inputs is empty.';
+			$data ['message'] = 'Internal Error: The inputs is empty.';
 		} else {
 			$input = array (
 					$barcode,
