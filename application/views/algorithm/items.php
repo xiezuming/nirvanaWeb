@@ -3,10 +3,8 @@
 
 <table>
 <?php echo form_open('algorithm/query_similar_itmes')?>
-	<?php echo form_hidden('title', $query_title)?>
-	
 	<?php $first = true;?>
-	<?php foreach ($categories as $category): ?>
+	<?php foreach ($items as $item): ?>
 	<tr>
 		<td>
 		<?php
@@ -16,7 +14,7 @@
 				'value' => $category ['catNum'],
 				'checked' => $first 
 		) )?>
-		<?php echo form_label($category['catNameLong'], $category['catNum'])?>
+		<?php echo form_label($item['catNameLong'], $category['catNum'])?>
 		</td>
 	</tr>
 	<?php $first = false;?>

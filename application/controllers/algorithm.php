@@ -47,7 +47,7 @@ class Algorithm extends CI_Controller {
 		} else {
 			$input = array (
 					$barcode,
-					$title
+					$title 
 			);
 			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_item_prices.py';
 			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
@@ -58,7 +58,7 @@ class Algorithm extends CI_Controller {
 			} else {
 				$data ['result'] = SUCCESS;
 				$data ['data'] = array (
-						'item_prices' => $result
+						'item_prices' => $result 
 				);
 			}
 		}
@@ -77,14 +77,40 @@ class Algorithm extends CI_Controller {
 			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
 			$categories = $this->get_real_result ( $result );
 			
-			$data ['title'] = 'Inv List';
+			$data ['title'] = 'Step 1/2: Category List';
+			$data ['query_title'] = $title;
 			$data ['categories'] = $categories;
 			
+			$this->load->helper ( 'form' );
 			$this->load->view ( 'templates/header_app', $data );
 			$this->load->view ( 'algorithm/categories', $data );
 			$this->load->view ( 'templates/footer_app' );
 		}
 		// $this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function query_similar_itmes() {
+		$catNum = $this->input->post ( 'catNum' );
+		$title = $this->input->post ( 'title' );
+		if (empty ( $catNum )) {
+			show_error ( 'Category number is empty.' );
+			return;
+		} else {
+			$input = array (
+					$title,
+					$catNum 
+			);
+			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_similar_itmes.py';
+			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
+			$items = $this->get_real_result ( $result );
+			
+			$data ['title'] = 'Step 2/2: Item List';
+			$data ['items'] = $items;
+			
+			$this->load->helper ( 'form' );
+			$this->load->view ( 'templates/header_app', $data );
+			$this->load->view ( 'algorithm/items', $data );
+			$this->load->view ( 'templates/footer_app' );
+		}
 	}
 	private function get_real_result($result) {
 		$pos = stripos ( $result, PYTHON_PLACEHOLD );
