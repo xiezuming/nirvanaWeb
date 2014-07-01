@@ -99,18 +99,44 @@ class Algorithm extends CI_Controller {
 					$title,
 					$catNum 
 			);
-			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_similar_itmes.py';
+			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_similar_items.py';
 			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
+			log_message ( 'error', 'query_similar_itmes: $result = ' . $result );
 			$items = $this->get_real_result ( $result );
 			
 			$data ['title'] = 'Step 2/2: Item List';
 			$data ['items'] = $items;
 			
 			$this->load->helper ( 'form' );
+			$this->load->helper ( 'html' );
 			$this->load->view ( 'templates/header_app', $data );
 			$this->load->view ( 'algorithm/items', $data );
 			$this->load->view ( 'templates/footer_app' );
 		}
+	}
+	public function query_item_defaults_by_similar_item() {
+		$itemUrl = $this->input->post ( 'itemUrl' );
+		if (empty ( $itemUrl )) {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Internal Error: Item url is empty.';
+		} else {
+			$input = array (
+					$itemUrl 
+			);
+			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_item_defaults_by_similar_item.py';
+			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
+			$result = $this->get_real_result ( $result );
+			if (empty ( $result )) {
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'No result found for barcode.';
+			} else {
+				$data ['result'] = SUCCESS;
+				$data ['data'] = array (
+						'item_defaults' => $result 
+				);
+			}
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	private function get_real_result($result) {
 		$pos = stripos ( $result, PYTHON_PLACEHOLD );

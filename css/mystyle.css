@@ -158,7 +158,7 @@ a:hover {
 }
 
 #content {
-	margin: 20px 40px 0 40px;
+	margin: 10px 5px 0px 5px;
 	padding: 0;
 }
 
@@ -382,24 +382,6 @@ form {
 	border: 0;
 }
 
-.submit {
-	display: inline-block;
-	*display: inline; /*IE 6/7*/
-	zoom: 1;
-	line-height: normal;
-	white-space: nowrap;
-	vertical-align: baseline;
-	text-align: center;
-	cursor: pointer;
-	-webkit-user-drag: none;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	background-color: rgb(0, 120, 231);
-	color: #fff;
-}
-
 table {
 	font-family: verdana, arial, sans-serif;
 	border-width: 0px;
@@ -421,7 +403,6 @@ td {
 	font-size: 12px;
 	padding: 6px;
 	color: #000;
-	background-color: #f3f3f3;
 }
 
 table.bordertable {
@@ -484,11 +465,14 @@ div.error {
 }
 
 input[type=submit] {
-	background-color: rgb(0, 120, 231);
+	background: -webkit-gradient(linear, 0 0, 0 100%, from(#0078E7), to(#0078E7)); /** Chrome Safari **/
+	background: -moz-linear-gradient(top, #0078E7, #0078E7); /** FireFox **/
+	background: -o-linear-gradient(top, #0078E7, #0078E7);  /** Opear **/
 	color: #fff;
 	border-style: none;
-	height: 2em;
-	width: 8em;
+	font-size: 18px;
+	height: 34px;
+	width: 120px;
 }
 
 select {

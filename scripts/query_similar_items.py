@@ -21,8 +21,7 @@ except:
 #input: title => data[0]
 #input: catNum => data[1]
 
-result = 
-[
+result = [
   {
     "title": "Apple iPhone 5s (Latest Model) 16GB Factory Unlocked NEW",
     "url": "http://www.ebay.com/itm/1",

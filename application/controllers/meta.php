@@ -18,25 +18,27 @@ class Meta extends CI_Controller {
 	/**
 	 * Echo the last update time of the meta data to the response.
 	 * Output: The Unix timestamp.
-	 * E.g.: {"time":1402940786}
+	 * E.g.: {"result":1,"data":{"meta_type_last_update_time":1402940786}}
 	 */
 	public function get_meta_type_last_update_time() {
-		$time = $this->meta_model->get_last_update_time ();
-		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( array (
-				'meta_type_last_update_time' => $time 
-		) ) );
+		$data ['result'] = SUCCESS;
+		$data ['data'] = array (
+				'meta_type_last_update_time' => $this->meta_model->get_last_update_time () 
+		);
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	
 	/**
 	 * Echo all meta types information to the response.
 	 * Output: The array of meta type.
-	 * E.g.: [{"typeId":"1","typeDesc":"Category","metaCodes":[{"key":"BOK","value":"Books"}]]
+	 * E.g.: {"result":1,"data":{"meta_types":[{"typeId":"1","typeDesc":"Category","metaCodes":[{"key":"BOK","value":"Books"}]]}}
 	 */
 	public function get_meta_types() {
-		$data = json_encode ( array (
+		$data ['result'] = SUCCESS;
+		$data ['data'] = array (
 				'meta_types' => $this->meta_model->get_meta_types () 
-		) );
-		$this->output->set_content_type ( 'application/json' )->set_output ( $data );
+		);
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 }
 

@@ -1,27 +1,35 @@
 
-<h2>Please choose the most relevant category:</h2>
+<h2>Please choose an item similar to yours:</h2>
 
+<?php echo form_open('algorithm/query_item_defaults_by_similar_item')?>
 <table>
-<?php echo form_open('algorithm/query_similar_itmes')?>
-	<?php $first = true;?>
+	<?php $i = 0;?>
 	<?php foreach ($items as $item): ?>
 	<tr>
-		<td>
-		<?php
-		echo form_radio ( array (
-				'name' => 'catNum',
-				'id' => $category ['catNum'],
-				'value' => $category ['catNum'],
-				'checked' => $first 
-		) )?>
-		<?php echo form_label($item['catNameLong'], $category['catNum'])?>
-		</td>
+	<?php
+		$id = 'item' . $i;
+		$radio_properties = array (
+				'name' => 'itemUrl',
+				'id' => $id,
+				'value' => $item ['url'],
+				'checked' => ! $i 
+		);
+		$image_properties = array (
+				'src' => $item ['image'],
+				'width' => '150' 
+		);
+		$i ++;
+		?>
+		
+		<td><?php echo form_radio ( $radio_properties )?></td>
+		<td><?php echo form_label ( img($image_properties), $id )?></td>
+		<td><?php echo form_label($item['title'], $id)?></td>
 	</tr>
-	<?php $first = false;?>
 	<?php endforeach ?>
 	<tr>
-		<td align='center'><?php echo form_submit('submit', 'OK')?></td>
+		<td align='center' colspan='3'><?php echo form_submit('submit', 'OK')?></td>
 	</tr>
+</table>
 <?php echo '</form>'?>
 
-</table>
+

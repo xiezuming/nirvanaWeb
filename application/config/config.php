@@ -15,8 +15,8 @@
 |
 */
 $active_item = 'local';
-$base_url_arr['local'] = 'http://192.168.10.17/wetag/';
-$base_url_arr['happitail'] = 'http://happitail.dyndns.info/wetag/';
+$base_url_arr['local'] = 'http://192.168.10.17/wetag_app/';
+$base_url_arr['happitail'] = 'http://happitail.dyndns.info/wetag_app/';
 
 $config['base_url'] = $base_url_arr[$active_item];
 
