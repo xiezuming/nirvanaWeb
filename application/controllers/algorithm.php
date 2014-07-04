@@ -101,7 +101,7 @@ class Algorithm extends CI_Controller {
 			);
 			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_similar_items.py';
 			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
-			log_message ( 'error', 'query_similar_itmes: $result = ' . $result );
+			log_message ( 'debug', 'query_similar_itmes: $result = ' . $result );
 			$items = $this->get_real_result ( $result );
 			
 			$data ['title'] = 'Step 2/2: Item List';

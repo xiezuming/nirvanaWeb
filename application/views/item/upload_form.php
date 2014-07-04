@@ -6,7 +6,7 @@
 
 <?php echo $error;?>
 
-<?php echo form_open_multipart('inv/upload');?>
+<?php echo form_open_multipart('item/upload');?>
 
 	<label>userId</label>
 	<input name="userId" />
