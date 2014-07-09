@@ -1,7 +1,9 @@
 
 <h2>Please choose an item similar to yours:</h2>
 
-<?php echo form_open('algorithm/query_item_defaults_by_similar_item')?>
+<?php echo form_open('algorithm/query_item_info_by_similar_item')?>
+<?php echo form_hidden('title', $query_title)?>
+<?php echo form_hidden('catNum', $catNum)?>
 <table>
 	<?php $i = 0;?>
 	<?php foreach ($items as $item): ?>
@@ -9,7 +11,7 @@
 	<?php
 		$id = 'item' . $i;
 		$radio_properties = array (
-				'name' => 'itemUrl',
+				'name' => 'similarItemUrl',
 				'id' => $id,
 				'value' => $item ['url'],
 				'checked' => ! $i 

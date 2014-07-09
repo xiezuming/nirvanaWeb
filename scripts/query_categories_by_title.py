@@ -39,6 +39,5 @@ result = [
   }
 ]
 
-print 'test'
 print '***|||RESULT|||***'
 print json.dumps(result)

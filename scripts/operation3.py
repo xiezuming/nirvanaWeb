@@ -17,7 +17,10 @@ import re
 import mechanize
 import cookielib
 import urllib
-import Image
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 import ftplib
 import math
 from datetime import datetime
