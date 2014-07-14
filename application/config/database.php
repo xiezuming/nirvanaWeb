@@ -55,7 +55,7 @@ $db['local']['database'] = 'wetag';
 $db['local']['dbdriver'] = 'mysql';
 $db['local']['dbprefix'] = '';
 $db['local']['pconnect'] = TRUE;
-$db['local']['db_debug'] = TRUE;
+$db['local']['db_debug'] = FALSE;
 $db['local']['cache_on'] = FALSE;
 $db['local']['cachedir'] = '';
 $db['local']['char_set'] = 'utf8';
@@ -80,6 +80,8 @@ $db['happitail']['swap_pre'] = '';
 $db['happitail']['autoinit'] = TRUE;
 $db['happitail']['stricton'] = FALSE;
 
+$db['wp'] = $db['local'];
+$db['wp']['database']="wp";
 
 /* End of file database.php */
 /* Location: ./application/config/database.php */

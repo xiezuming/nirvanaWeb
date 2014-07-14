@@ -26,6 +26,7 @@ class Item extends CI_Controller {
 	}
 	public function update_item() {
 		$input_data = $this->get_input_data ();
+		$input_data['synchWp'] = 'N';
 		$itemId = $input_data ['itemId'];
 		
 		log_message ( 'debug', 'update_item: $itemId = ' . $itemId );
@@ -45,7 +46,8 @@ class Item extends CI_Controller {
 			$this->item_model->delete_photos ( $itemId );
 			
 			$item ['photoNames'] = implode ( ";", $photoNames );
-			;
+			unset($item['synchWp']);
+			
 			$this->item_model->insert_item_history ( $item );
 			$this->item_model->update_item ( $input_data );
 		} else {
@@ -60,6 +62,21 @@ class Item extends CI_Controller {
 		}
 		
 		$this->db->trans_complete ();
+		if ($this->db->trans_status() === FALSE)
+		{
+			log_message('error', 'Failed to update the database.');
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Failed to update the database.';
+			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+			return;
+		}
+		// synchronize to wp database
+		
+		$this->db = $this->load->database('wp', TRUE);
+		$this->db->insert( 'wp_UPCP_Items', $input_data );
+		if (mysql_errno() !== 0) {
+			log_message('error', 'Failed to synchronize the item to WP database. ' . mysql_error());
+		}
 		
 		$data ['result'] = SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
@@ -133,6 +150,9 @@ class Item extends CI_Controller {
 			}
 		}
 		return $input_data;
+	}
+	
+	private function map_item_to_wpitem($item){
 	}
 	private function endsWith($haystack, $needle) {
 		return $needle === "" || substr ( $haystack, - strlen ( $needle ) ) === $needle;
