@@ -21,7 +21,7 @@ class Algorithm extends CI_Controller {
 			$data ['message'] = 'Internal Error: Barcode is empty.';
 		} else {
 			$input = array (
-					$barcode
+					$barcode 
 			);
 			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_item_defaults_by_barcode.py';
 			log_message ( 'debug', $cmd );
@@ -47,7 +47,7 @@ class Algorithm extends CI_Controller {
 		} else {
 			$input = array (
 					$barcode,
-					''
+					'' 
 			);
 			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_item_prices.py';
 			log_message ( 'debug', $cmd );
@@ -107,6 +107,13 @@ class Algorithm extends CI_Controller {
 			log_message ( 'debug', 'query_similar_itmes: $result = ' . $result );
 			$items = $this->get_real_result ( $result );
 			
+			if (count ( items ) == 1) {
+				$this->session->set_flashdata ( 'title', $title );
+				$this->session->set_flashdata ( 'catNum', $catNum );
+				$this->session->set_flashdata ( 'similarItemUrl', $items [0] ['url'] );
+				redirect ( 'algorithm/query_item_info_by_similar_item' );
+			}
+			
 			$data ['title'] = 'Step 2/2: Item List';
 			$data ['items'] = $items;
 			$data ['query_title'] = $title;
@@ -121,8 +128,18 @@ class Algorithm extends CI_Controller {
 	}
 	public function query_item_info_by_similar_item() {
 		$title = $this->input->post ( 'title' );
+		if (empty ( $title ) && $this->session->flashdata ( 'title' ))
+			$title = $this->session->flashdata ( 'title' );
 		$catNum = $this->input->post ( 'catNum' );
+		if (empty ( $catNum ) && $this->session->flashdata ( 'catNum' ))
+			$catNum = $this->session->flashdata ( 'catNum' );
 		$similarItemUrl = $this->input->post ( 'similarItemUrl' );
+		if (empty ( $similarItemUrl ) && $this->session->flashdata ( 'similarItemUrl' ))
+			$similarItemUrl = $this->session->flashdata ( 'similarItemUrl' );
+		log_message ( 'debug', 'query_item_info_by_similar_item: $title = ' . $title );
+		log_message ( 'debug', 'query_item_info_by_similar_item: $catNum = ' . $catNum );
+		log_message ( 'debug', 'query_item_info_by_similar_item: $similarItemUrl = ' . $similarItemUrl );
+		
 		if (empty ( $title ) || empty ( $catNum ) || empty ( $similarItemUrl )) {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'Internal Error: Title, category number or item url is empty.';
