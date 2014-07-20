@@ -107,35 +107,28 @@ class Algorithm extends CI_Controller {
 			log_message ( 'debug', 'query_similar_itmes: $result = ' . $result );
 			$items = $this->get_real_result ( $result );
 			
-			if (count ( items ) == 1) {
-				$this->session->set_flashdata ( 'title', $title );
-				$this->session->set_flashdata ( 'catNum', $catNum );
-				$this->session->set_flashdata ( 'similarItemUrl', $items [0] ['url'] );
-				redirect ( 'algorithm/query_item_info_by_similar_item' );
-			}
+			$this->load->helper ( 'form' );
+			$this->load->helper ( 'html' );
 			
-			$data ['title'] = 'Step 2/2: Item List';
-			$data ['items'] = $items;
 			$data ['query_title'] = $title;
 			$data ['catNum'] = $catNum;
 			
-			$this->load->helper ( 'form' );
-			$this->load->helper ( 'html' );
 			$this->load->view ( 'templates/header_app', $data );
-			$this->load->view ( 'algorithm/items', $data );
+			if (count ( $items ) == 1) {
+				$data ['similarItemUrl'] = $items [0] ['url'];
+				$this->load->view ( 'algorithm/jump_final', $data );
+			} else {
+				$data ['title'] = 'Step 2/2: Item List';
+				$data ['items'] = $items;
+				$this->load->view ( 'algorithm/items', $data );
+			}
 			$this->load->view ( 'templates/footer_app' );
 		}
 	}
 	public function query_item_info_by_similar_item() {
 		$title = $this->input->post ( 'title' );
-		if (empty ( $title ) && $this->session->flashdata ( 'title' ))
-			$title = $this->session->flashdata ( 'title' );
 		$catNum = $this->input->post ( 'catNum' );
-		if (empty ( $catNum ) && $this->session->flashdata ( 'catNum' ))
-			$catNum = $this->session->flashdata ( 'catNum' );
 		$similarItemUrl = $this->input->post ( 'similarItemUrl' );
-		if (empty ( $similarItemUrl ) && $this->session->flashdata ( 'similarItemUrl' ))
-			$similarItemUrl = $this->session->flashdata ( 'similarItemUrl' );
 		log_message ( 'debug', 'query_item_info_by_similar_item: $title = ' . $title );
 		log_message ( 'debug', 'query_item_info_by_similar_item: $catNum = ' . $catNum );
 		log_message ( 'debug', 'query_item_info_by_similar_item: $similarItemUrl = ' . $similarItemUrl );
