@@ -2,7 +2,6 @@
 class Meta_model extends CI_Model {
 	const TABLE_TYPE = 'meta_type';
 	const TABLE_CODE = 'meta_code';
-
 	public function get_meta_types() {
 		$this->db->select ( 'typeId, typeDesc' );
 		$this->db->order_by ( 'typeId', 'asc' );
@@ -16,50 +15,24 @@ class Meta_model extends CI_Model {
 			);
 			$this->db->select ( 'key, value' );
 			$this->db->order_by ( 'pos', 'asc' );
-			$meta_type['metaCodes'] = $this->db->get_where ( self::TABLE_CODE, $where )->result_array ();
+			$meta_type ['metaCodes'] = $this->db->get_where ( self::TABLE_CODE, $where )->result_array ();
 			$data [] = $meta_type;
 		}
 		return $data;
 	}
-
 	public function get_last_update_time() {
-		$this->db->select_max('recUpdateTime');
-		$query = $this->db->get( self::TABLE_TYPE );
-		$row = $query->row_array();
-		$time = $row['recUpdateTime'];
-		return strtotime($time);
+		$this->db->select_max ( 'recUpdateTime' );
+		$query = $this->db->get ( self::TABLE_TYPE );
+		$row = $query->row_array ();
+		$time = $row ['recUpdateTime'];
+		return strtotime ( $time );
 	}
-	
-	public function add_inv_item($data) {
-		return $this->db->insert ( self::TABLE_ITEM, $data );
-	}
-	public function delete_inv_itme($inv_item) {
+	public function get_meta_code($type_id, $code_key) {
 		$where = array (
-				'userId' => $inv_item ['userId'],
-				'itemId' => $inv_item ['itemId'] 
+				'typeId' => $type_id,
+				'key' => $code_key 
 		);
-		$this->db->delete ( self::TABLE_ITEM, $where );
-	}
-	
-	public function get_available_inv_list($where){
-		$this->db->select('*');
-		$this->db->from('inv_item');
-		$this->db->join('inv_search_result', 'inv_item.userId = inv_search_result.userId and inv_item.itemId = inv_search_result.itemId');
-		if (isset($where) && $where)
-			$this->db->where($where, NULL, FALSE);
-		$this->db->limit(10);
-		$this->db->order_by("inv_item.userId asc, inv_item.itemId asc");
-		$query = $this->db->get();
-		return $query->result_array();
-	}
-	
-	public function count_available_inv_list($where){
-		$this->db->select('*');
-		$this->db->from('inv_item');
-		$this->db->join('inv_search_result', 'inv_item.userId = inv_search_result.userId and inv_item.itemId = inv_search_result.itemId');
-		if (isset($where) && $where)
-			$this->db->where($where, NULL, FALSE);
-		return $this->db->count_all_results();
+		return $this->db->get_where ( self::TABLE_CODE, $where )->row_array ();
 	}
 }
 ?>

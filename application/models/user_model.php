@@ -11,6 +11,14 @@ class User_model extends CI_Model {
 		$this->db->insert ( self::TABLE_USER, $data );
 		return $userId;
 	}
+	public function get_user($userId) {
+		$where = array (
+				'userId' => $userId
+		);
+		$query = $this->db->get_where ( self::TABLE_USER, $where );
+		$user = $query->row_array ();
+		return $user;
+	}
 	public function query_user($userName) {
 		$where = array (
 				'userName' => $userName 

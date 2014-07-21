@@ -2,59 +2,63 @@
 class Item_model extends CI_Model {
 	const TABLE_ITEM = 'item';
 	const TABLE_HISTORY = 'item_history';
-	const TABLE_PHOTO = 'item_photo';
+	const TABLE_IMAGE = 'item_image';
+	
+	/* ======== ITEM ======== */
 	public function get_item($itemId) {
 		$this->db->where ( 'itemId', $itemId );
 		$query = $this->db->get ( self::TABLE_ITEM );
-		return $query->row_array ();
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Item_model.get_item: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		$result = $query->row_array ();
+		return $result;
 	}
 	public function insert_item($data) {
-		return $this->db->insert ( self::TABLE_ITEM, $data );
+		$result = $this->db->insert ( self::TABLE_ITEM, $data );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Item_model.insert_item: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $result;
 	}
 	public function update_item($item) {
 		$this->db->where ( 'itemId', $item ['itemId'] );
-		return $this->db->update ( self::TABLE_ITEM, $item );
+		$result = $this->db->update ( self::TABLE_ITEM, $item );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Item_model.update_item: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $result;
 	}
 	public function delete_item($item) {
 		$this->db->where ( 'itemId', $item ['itemId'] );
 		$this->db->delete ( self::TABLE_ITEM );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Item_model.delete_item: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 	}
-	public function get_available_inv_list($where) {
-		$this->db->select ( '*' );
-		$this->db->from ( 'inv_item' );
-		$this->db->join ( 'inv_search_result', 'inv_item.userId = inv_search_result.userId and inv_item.itemId = inv_search_result.itemId' );
-		if (isset ( $where ) && $where)
-			$this->db->where ( $where, NULL, FALSE );
-		$this->db->limit ( 10 );
-		$this->db->order_by ( "inv_item.userId asc, inv_item.itemId asc" );
-		$query = $this->db->get ();
-		return $query->result_array ();
-	}
-	public function count_available_inv_list($where) {
-		$this->db->select ( '*' );
-		$this->db->from ( 'inv_item' );
-		$this->db->join ( 'inv_search_result', 'inv_item.userId = inv_search_result.userId and inv_item.itemId = inv_search_result.itemId' );
-		if (isset ( $where ) && $where)
-			$this->db->where ( $where, NULL, FALSE );
-		return $this->db->count_all_results ();
-	}
+	/* ======== ITEM HISTORY ======== */
 	public function insert_item_history($data) {
-		return $this->db->insert ( self::TABLE_HISTORY, $data );
+		$result = $this->db->insert ( self::TABLE_HISTORY, $data );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Item_model.insert_item_history: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $result;
 	}
-	public function get_photos($itemId) {
-		$this->db->where ( 'itemId', $itemId );
-		$query = $this->db->get ( self::TABLE_PHOTO );
+	/* ======== ITEM IMAGE ======== */
+	public function get_images($globalItemId) {
+		$this->db->where ( 'Global_Item_ID', $globalItemId );
+		$query = $this->db->get ( self::TABLE_IMAGE );
 		return $query->result_array ();
 	}
-	public function insert_photo($itemId, $photoName) {
-		return $this->db->insert ( self::TABLE_PHOTO, array (
-				'itemId' => $itemId,
-				'photoName' => $photoName 
+	public function insert_image($globalItemId, $imageName) {
+		$result = $this->db->insert ( self::TABLE_IMAGE, array (
+				'Global_Item_ID' => $globalItemId,
+				'imageName' => $imageName,
+				'synchWp' => 'N' 
 		) );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Item_model.insert_image: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $result;
 	}
-	public function delete_photos($itemId) {
-		$this->db->where ( 'itemId', $itemId );
-		$this->db->delete ( self::TABLE_PHOTO );
+	public function delete_image($globalItemId, $imageName) {
+		$this->db->where ( 'Global_Item_ID', $globalItemId );
+		$this->db->where ( 'imageName', $imageName );
+		$this->db->delete ( self::TABLE_IMAGE );
 	}
 }
 ?>
