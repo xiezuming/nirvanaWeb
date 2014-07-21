@@ -9,6 +9,25 @@ Output: The dict of information: title, category, salesChannel, imageUrl
 
 '''
 
+
+categoryMap = {
+    'appliances':               'APP',
+    'automotive, industry':     'AUT',
+    'beauty, health, grocery':  'BEA',
+    'books':                    'BOK',
+    'clothing, shoes, jewelry': 'CLO',
+    'collectibles':             'COL',
+    'electronics, computers':   'ELE',
+    'everything else':          'ELS',
+    'furniture':                'FUR',
+    'gift cards':               'GIF',
+    'home, garden, tools':      'HOM',
+    'movies, music, games':     'MOV',
+    'sports, outdoors':         'SPR',
+    'toys, kids, baby':         'TOY'
+    }
+    
+    
 import sys, json
 import InvAlgo
 
@@ -42,7 +61,7 @@ else:
         
         
     result = {}
-    queryResult = InvAlgo.queryBarcode(data[0])
+    queryResult = InvAlgo.queryEPID(data[0])
     # print queryResult
 
     if queryResult.get('title', ''):
@@ -50,7 +69,7 @@ else:
         # result['expectedPrice'] = queryResult.get('expectation', 0.5)
         # result['marketPriceMin'] = queryResult.get('marketPriceMin', 0.5)
         # result['marketPriceMax'] = queryResult.get('marketPriceMax', 0.5)
-        result['category'] = queryResult.get('userCat', '')
+        result['category'] = categoryMap.get(queryResult.get('userCat', '').lower(), '')
         result['salesChannel'] = 'EB'
         result['imageUrl'] = queryResult.get('imageUrl', '')
         
@@ -66,7 +85,7 @@ else:
     # result = {
       # 'title': 'Apple MacBook Air A1465 11.6\' Laptop - MD711LL/A (June, 2013)',
       # 'category': 'ELE',
-      # 'salesChannel': 'eBay',
+      # 'salesChannel': 'EB',
       # 'imageUrl': 'http://thumbs2.ebaystatic.com/d/l225/m/maNLzwO1dp6Z9F2-fkPhKBQ.jpg'
     # }
 

@@ -9,7 +9,9 @@ Output:
 
 '''
 
+    
 import sys, json
+import InvAlgo
 
 try:
     print sys.argv[1];
@@ -20,24 +22,44 @@ except:
 #TODO add query algorithm
 #input: title => data[0]
 
-result = [
-  {
-    'catNum': '12345',
-    'catNameLong': 'Household Suppliers & Cleaning>Vacuum Parts & Accessories',
-  },
-  {
-    'catNum': '12346',
-    'catNameLong': 'Wholesale Lots > Tools > Power Tools',
-  },
-  {
-    'catNum': '12347',
-    'catNameLong': 'Home Improvement > Electrical & Solar > Other',
-  },
-  {
-    'catNum': '12348',
-    'catNameLong': 'Camera & Photo Accessories > Batteries',
-  }
-]
+
+if not data[0]:
+    print 'No title found from the input.'   
+    
+    result = [
+      {
+        'catNum': '12345',
+        'catNameLong': 'Household Suppliers & Cleaning>Vacuum Parts & Accessories',
+      },
+      {
+        'catNum': '12346',
+        'catNameLong': 'Wholesale Lots > Tools > Power Tools',
+      },
+      {
+        'catNum': '12347',
+        'catNameLong': 'Home Improvement > Electrical & Solar > Other',
+      },
+      {
+        'catNum': '12348',
+        'catNameLong': 'Camera & Photo Accessories > Batteries',
+      }
+    ]
+    
+else:
+    
+    result = InvAlgo.queryCategory(data[0])
+    # a = [
+      # {
+        # 'catNum': '12348',
+        # 'catNameLong': 'Camera & Photo Accessories > Batteries',
+      # }
+    # ]
+    # result += result1[1:2]
+    # result += a
+    
+    # print a
+    # print result
+    
 
 print '***|||RESULT|||***'
 print json.dumps(result)

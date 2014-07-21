@@ -15,7 +15,7 @@ categoryMap1 = {
     'business & industrial': 'Automotive, Industry',
     'cameras & photo': 'Electronics, Computers',
     'cell phones & accessories': 'Electronics, Computers',
-    'clothing, shoes & accessories': 'Clothing, Shows, Jewelry',
+    'clothing, shoes & accessories': 'Clothing, Shoes, Jewelry',
     'coins & paper money': 'Collectibles',
     'collectibles': 'Collectibles',
     'computers/tablets & networking': 'Electronics, Computers',
@@ -28,7 +28,7 @@ categoryMap1 = {
     'gift cards & coupons': 'Gift Cards',
     'health & beauty': 'Beauty, Health, Grocery',
     'home & garden': 'Home, Garden, Tools',
-    'jewelry & watches': 'Clothing, Shows, Jewelry',
+    'jewelry & watches': 'Clothing, Shoes, Jewelry',
     'music': 'Movies, Music, Games',
     'musical instruments & gear': 'Movies, Music, Games',
     'pet supplies': 'Home, Garden, Tools',
@@ -53,7 +53,7 @@ categoryMap2 = {
     'business industrial': 'Automotive, Industry',
     'cameras photo': 'Electronics, Computers',
     'cell phones accessories': 'Electronics, Computers',
-    'clothing, shoes accessories': 'Clothing, Shows, Jewelry',
+    'clothing, shoes accessories': 'Clothing, Shoes, Jewelry',
     'coins paper money': 'Collectibles',
     'collectibles': 'Collectibles',
     'computers tablets networking': 'Electronics, Computers',
@@ -66,7 +66,7 @@ categoryMap2 = {
     'gift cards coupons': 'Gift Cards',
     'health beauty': 'Beauty, Health, Grocery',
     'home garden': 'Home, Garden, Tools',
-    'jewelry watches': 'Clothing, Shows, Jewelry',
+    'jewelry watches': 'Clothing, Shoes, Jewelry',
     'music': 'Movies, Music, Games',
     'musical instruments gear': 'Movies, Music, Games',
     'pet supplies': 'Home, Garden, Tools',
@@ -152,7 +152,7 @@ def queryProduct(itemInfo):
     
     # req = opener.open(searchUrl) 
     # redirUrl = req.geturl()
-    strHTML, redirUrl = operation3.url2str(searchUrl)
+    strHTML, redirUrl = operation3.url2strmore(searchUrl)
     print redirUrl
     recommendedItem = {}
     if '/ctg/' in redirUrl:
@@ -206,7 +206,7 @@ def queryProduct(itemInfo):
                     # print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketNew'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketNew'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketNew']
                 elif conditionStr.lower() == 'good' or conditionStr.lower() == 'used':
@@ -215,7 +215,7 @@ def queryProduct(itemInfo):
                     #print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketUsed']
                 elif (not usedFound) and ('refurbished' not in conditionStr.lower()):
@@ -225,7 +225,7 @@ def queryProduct(itemInfo):
                     #print etree.tostring(recommendedTag)
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketUsed']
             #print recommendedItem
@@ -247,7 +247,7 @@ def queryProduct(itemInfo):
                     # searchResult = parseProductPageSold(strHTML)
             # print searchResult
             
-            epInfo['catogry'] = category
+            epInfo['category'] = category
             epInfo['userCat'] = userCat
             epInfo['recommendedItem'] = recommendedItem
             epInfo['epid'] = epid
@@ -336,7 +336,7 @@ def queryProduct(itemInfo):
 
         # # print 'searchResult:'
         # # print searchResult
-        # resellValue['catogry'] = category
+        # resellValue['category'] = category
         # resellValue['userCat'] = searchResult.get('userCat', '')
         # resellValue['recommendedItem'] = {}
         # resellValue['firstPageItems'] = searchResult.get('firstPageItems', [])
@@ -390,12 +390,13 @@ def queryProduct(itemInfo):
                 
     # else:
         # #Get category default values if the search cannot find a match.
-        # if resellValue.get('catogry', ''):
+        # if resellValue.get('category', ''):
             # #print resellValue
             # #Get the url for all items inside the category
             # searchUrl = (searchUrlOrig.split('_nkw', 1)[0]+searchUrlOrig.split('_nkw', 1)[-1].split('&', 1)[-1]).replace('sch/', 'sch/'+category+'/')
             # req = opener.open(searchUrl)
             # print req.url
+            
             # strHTML = req.read()
                     
             # f = open('ebay.html', 'w')
@@ -450,6 +451,448 @@ def queryProduct(itemInfo):
     
 
     
+    
+#http://www.ebay.com/sch/i.html?_nkw=the+davinci+code&_sop=12
+#&_sop=12 means best match; &LH_BIN=1 means buy it now; &LH_ItemCondition=4 means used, 3 means new; LH_PreFloc=1 means US Only
+#on productised item page. ?&tabs=15 for all items. &LH_BIN=1 for buy it now
+def queryPriceAllCond2(itemInfo):
+#search for best matched price to sell on ebay
+#itemInfo is dict with keys: barcode, title, category
+#
+
+    resellValue = {}
+    
+    # opener = urllib2.build_opener(urllib2.HTTPRedirectHandler)
+    
+    # itemInfo = {'barcode': '0818406569', 'title': 'Blackjack: Play Like The Pros', 'condition': 'Used-good'}
+    # itemInfo = {'barcode': '0321611136', 'title': 'Blackjack: Play Like The Pros', 'condition': 'Used-good'}
+    # # # itemInfo = {'barcode': '4043972146181', 'title': 'Blackjack: Play Like The Pros', 'condition': 'Used-good'}
+    # # itemInfo = {'barcode': '4043972146181', 'title': 'Blackjack: Play Like The Pros', 'condition': 'New'}
+    # itemInfo = {'barcode': '', 'title': 'Tomtom XL 340TM', 'condition': 'Used-good'}
+    # # itemInfo = {'barcode': '', 'title': 'iphone 4 black', 'condition': 'Used-good'}
+    # itemInfo = {'barcode': '', 'title': 'iphone 4 white', 'condition': 'New'}
+    # # itemInfo = {'barcode': '', 'title': 'Blackjack: Play Like The Pros', 'condition': 'New'}
+    # # itemInfo = {'barcode': '', 'title': 'Blackjack: Play Like The Pros', 'condition': 'Used-good'}
+    
+    # print itemInfo
+    
+    cookie = cookielib.CookieJar()   
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
+    opener.addheaders = [('User-agent', 'Chrome/21.0.1180.57 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1')]
+    # opener.addheaders = [('User-agent', 'Chrome/21.0.1180.57')]
+    
+
+    if itemInfo.get('barcode', ''):
+        barcode = itemInfo['barcode'].lstrip('0');
+        if len(barcode)==9 or len(barcode)==11:
+            barcode = '0' + barcode #A simple hack to compensate the mistakenly stripped zero for isbn or upc.
+        searchUrl = 'http://www.ebay.com/sch/i.html?_nkw='+barcode
+    elif itemInfo.get('title', ''):
+        searchUrl = ('http://www.ebay.com/sch/i.html?_nkw='+urllib.quote(itemInfo['title'].strip()))
+    else:
+        return resellValue
+   
+    condition = 'new'
+    #Simplify condition to 'new' and 'used' two levels for now.
+    # if 'new' in itemInfo.get('condition', '').lower():
+        # condition = 'new'
+    # else:
+        # condition = 'used'
+        
+    #Get category from itemInfo
+    category = itemInfo.get('category', '')
+    
+    binStr = '&LH_BIN=1'
+    matchStr = '&_sop=12'
+    locStr = '&LH_PrefLoc=1'
+    nItemsStr = '&_ipg=200'
+    completedStr = '&LH_Complete=1'
+    soldStr = '&LH_Sold=1'
+    viewStr = '&_dmd=1' #1 for list view, #2 for gallery view
+    condNewStr = '&LH_ItemCondition=3'
+    condUsedStr = '&LH_ItemCondition=4'
+    # if 'new' in itemInfo.get('condition', '').lower():
+        # condUrlStr = '&LH_ItemCondition=3'          
+    # else:
+        # condUrlStr = '&LH_ItemCondition=4'
+        
+        
+    #Check for condition new first
+    queryUrl = matchStr+condNewStr+locStr+nItemsStr+viewStr+completedStr+soldStr
+    searchUrl += queryUrl
+    searchUrlOrig = searchUrl #Saved for calculating category default value.
+    searchUrl = searchUrl.replace('sch/', 'sch/'+category+'/')
+    # print searchUrl
+    
+    req = opener.open(searchUrl) 
+    redirUrl = req.geturl()
+    # print redirUrl
+    recommendedItem = {}
+    if '/ctg/' in redirUrl:
+        #Get the recommended item
+        strHTML = req.read()
+        if strHTML:
+            recommendedItem['link'] = redirUrl
+            root = etree.HTML(strHTML)
+            titleTags = root.xpath('//h3[@class="tpc-titr"]')
+            if titleTags:
+                recommendedItem['title'] = titleTags[0].text
+                    
+            imgTags = root.xpath('//div[@id="v4-15"]//img')
+            # print imgTags
+            if imgTags:
+                imgUrl = imgTags[0].get('xrc', '')
+                # print imgUrl
+                if imgUrl:
+                    recommendedItem['imgUrl'] = imgUrl
+            
+            # Category number
+            catTags = root.xpath('//li[@itemprop="offers"]/a')
+            if catTags:
+                category = catTags[0].get('href', '').split('_pcategid=')[-1].split('&')[0]
+                # print category
+            
+            
+            # User Category
+            userCat = ''
+            topCatTags = root.xpath('//meta[@name = "keywords"]')
+            if topCatTags:
+                topCatStr = topCatTags[0].get('content')
+                topCatStr = topCatStr.split(', ebay, listings')[0].split(',')[-1].strip()
+                # print topCatStr
+                userCat = categoryMap2.get(topCatStr.lower(), '')
+                # print userCat
+            
+     
+            
+            #Get the brand new and used prices for the recommended item.
+            recommendedTags = root.xpath('//table[@class="bb-btbl"]')
+            usedFound = 0
+            for recommendedTag in recommendedTags:
+                conditionStr = ''.join(recommendedTag.xpath('.//div[@class="bb-cd"]//div[@class="bb-rtd"]//text()')).strip()
+                # print conditionStr
+                if 'brand new' in conditionStr.lower() or conditionStr.lower()[:3] == 'new':
+                    priceStr = ''.join(recommendedTag.xpath('.//div[@class="bb-l"]//strong//text()'))
+                    # print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
+                    # print priceStr
+                    if priceStr:
+                        recommendedItem['marketNew'] = float(priceStr.strip().replace('$', '').replace(',',''))
+                        # print conditionStr
+                        # print recommendedItem['marketNew']
+                elif conditionStr.lower() == 'good' or conditionStr.lower() == 'used':
+                    usedFound = 1
+                    priceStr = ''.join(recommendedTag.xpath('.//div[@class="bb-l"]//strong//text()'))
+                    #print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
+                    # print priceStr
+                    if priceStr:
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
+                        # print conditionStr
+                        # print recommendedItem['marketUsed']
+                elif (not usedFound) and ('refurbished' not in conditionStr.lower()):
+                    usedFound = 1
+                    priceStr = ''.join(recommendedTag.xpath('.//div[@class="bb-l"]//strong//text()'))
+                    # print recommendedTag.xpath('.//div[@class="bb-l"]//strong')
+                    #print etree.tostring(recommendedTag)
+                    # print priceStr
+                    if priceStr:
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
+                        # print conditionStr
+                        # print recommendedItem['marketUsed']
+            #print recommendedItem
+                
+            pricesUrl = redirUrl + queryUrl.replace('&', '?', 1)
+            # print pricesUrl
+            req = opener.open(pricesUrl)
+            strHTML = req.read()
+            # f = open('ebay.html', 'w')
+            # f.write(strHTML)
+            # f.close()
+            if strHTML:
+                searchResultNew = parseProductPageSold(strHTML)
+            
+            # print searchResult
+            
+            #Search for old condition
+            pricesUrl = pricesUrl.replace(condNewStr, condUsedStr)
+            req = opener.open(pricesUrl) 
+            strHTML = req.read()
+            if strHTML:
+                searchResultOld = parseProductPageSold(strHTML)
+            
+            
+            
+            #If no result found for 'new' items, used 'used' for search instead.
+            # if (not searchResult.get('firstPageItems', [])) and (condition == 'new'):
+                # # print 'No condition new sold items found, search for used items.'
+                # pricesUrl = pricesUrl.replace('&LH_ItemCondition=3', '&LH_ItemCondition=4')
+                # # print pricesUrl
+                # req = opener.open(pricesUrl) 
+                # strHTML = req.read()
+                # if strHTML:
+                    # searchResult = parseProductPageSold(strHTML)
+                    
+                    
+            # print searchResult
+            resellValue['category'] = category
+            resellValue['userCat'] = userCat
+            resellValue['recommendedItem'] = recommendedItem
+            resellValue['firstPageItemsNew'] = searchResultNew.get('firstPageItems', {})
+            resellValue['firstPageItemsOld'] = searchResultOld.get('firstPageItems', {})
+            if not resellValue['firstPageItemsNew']:
+                resellValue['firstPageItemsNew'] = resellValue['firstPageItemsOld']
+            # Always get the new title from the product page function.
+            resellValue['title'] = recommendedItem.get('title', '')
+            # if itemInfo.get('title'):
+                # resellValue['title'] = itemInfo['title']
+            # else:
+                # resellValue['title'] = recommendedItem.get('title', '')
+                
+            resellValue['resellNew'] = searchResultNew.get('resellPrice',  0)
+            resellValue['resellOld'] = searchResultOld.get('resellPrice',  0)
+            if not resellValue['resellNew']:
+                resellValue['resellNew'] = resellValue['resellOld'] 
+            
+            # if searchResult.get('resellPrice', 0):
+                # if condition == 'new':
+                    # resellValue['resellNew'] = searchResult['resellPrice']
+
+                    # # if recommendedItem.get('marketNew', 0) and recommendedItem.get('marketNew', 0)<resellValue['resellNew']:
+                        # # resellValue['resellNew'] = recommendedItem['marketNew']
+                # else:
+                    # resellValue['resellUsed'] = searchResult['resellPrice']
+
+                    # if recommendedItem.get('marketUsed', 0) and recommendedItem.get('marketUsed', 0)<resellValue['resellUsed']:
+                        # resellValue['resellUsed'] = recommendedItem['marketUsed']
+            
+            # print resellValue
+     
+    else:
+        # #print 'I am here'
+        # # Log in to ebay
+        # cookie = cookielib.CookieJar()   
+        # opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
+        # opener.addheaders = [('User-agent', 'Chrome/21.0.1180.57 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1')]
+        # # opener.addheaders = [('User-agent', 'Chrome/21.0.1180.57')]
+    
+        
+        if not category:
+            if itemInfo.get('title', ''):
+                categories, opener = queryCategory(itemInfo['title'].strip())
+            elif itemInfo.get('barcode', ''):
+                categories, opener = queryCategory(barcode)
+            if categories:
+                category = categories[0][0]
+            searchUrl = searchUrl.replace('sch/', 'sch/'+category+'/')
+            req = opener.open(searchUrl)
+
+
+        strHTML = req.read()
+        # f = open('ebay.html', 'w')
+        # f.write(strHTML)
+        # f.close()
+        
+        
+        if strHTML:
+            searchResultNew = parseCompletedPage(strHTML, req.url)
+            
+        searchUrl = searchUrl.replace(condNewStr, condUsedStr)
+        req = opener.open(searchUrl) 
+        strHTML = req.read()
+        if strHTML:
+            searchResultOld = parseCompletedPage(strHTML, req.url) 
+
+        # searchResult = parseCompletedPage(strHTML, req.url)        
+        # #If no result found for 'new' items, used 'used' for search instead.
+        # if (not searchResult.get('firstPageItems', [])) and (condition == 'new'):
+            # # print 'No condition new sold items found, search for used items.'
+            # searchUrl = searchUrl.replace('&LH_ItemCondition=3', '&LH_ItemCondition=4')
+            # # print searchUrl
+            # req = opener.open(searchUrl) 
+            # strHTML = req.read()
+            # if strHTML:
+                # searchResult = parseCompletedPage(strHTML, req.url) 
+
+        # print 'searchResult:'
+        # print searchResult
+        resellValue['category'] = category
+        if searchResultNew.get('userCat', ''):
+            resellValue['userCat'] = searchResultNew.get('userCat', '')
+        elif searchResultOld.get('userCat', ''):
+            resellValue['userCat'] = searchResultOld.get('userCat', '')
+        resellValue['recommendedItem'] = {}
+        resellValue['firstPageItemsNew'] = searchResultNew.get('firstPageItems', {})
+        resellValue['firstPageItemsOld'] = searchResultOld.get('firstPageItems', {})
+        # if itemInfo.get('title', ''):
+            # resellValue['title'] = itemInfo['title']
+        # elif itemInfo.get('barcode', '') and len(resellValue['firstPageItems']):
+            # resellValue['title'] = resellValue['firstPageItems'][0]['title']
+            
+        resellValue['resellNew'] = searchResultNew.get('resellPrice',  0)
+        resellValue['resellOld'] = searchResultOld.get('resellPrice',  0)
+        if not resellValue['resellNew']:
+            resellValue['resellNew'] = resellValue['resellOld'] 
+            
+        # if searchResult.get('resellPrice', 0):
+            # if 'new' in itemInfo.get('condition', '').lower():
+                # resellValue['resellNew'] = searchResult['resellPrice']
+                # # if recommendedItem.get('marketNew', 0) and recommendedItem.get('marketNew', 0)<resellValue['resellNew']:
+                    # # resellValue['resellNew'] = recommendedItem['marketNew']
+            # else:
+                # resellValue['resellUsed'] = searchResult['resellPrice']
+                # # if recommendedItem.get('marketUsed', 0) and recommendedItem.get('marketUsed', 0)<resellValue['resellUsed']:
+                    # # resellValue['resellUsed'] = recommendedItem['marketUsed']
+    
+    #Get the range for New:
+    newSoldFound = True
+    Nitems = len(resellValue.get('firstPageItemsNew', {}))
+    # print 'Sold items: %d' % Nitems
+    sortedItems = sorted(resellValue['firstPageItemsNew'], key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+    if Nitems:
+        if Nitems > 1:
+            pointLow = min(float(Nitems-1)/4, 1)*0.25
+            pointHigh = 0.75
+            # pointExp = 0.25+ max(min(float(Nitems-10)/90, 1), 0)*0.125
+            pointExp = 0.25
+            pricePerLow = operation3.percentile(sortedItems, pointLow, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))*0.75
+            pricePerExp = operation3.percentile(sortedItems, pointExp, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+            pricePerHigh = operation3.percentile(sortedItems, pointHigh, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+            #Removing the (x-3)*0.8 method for the local based app.
+            # resellValue['rangeLowNew'] = (pricePerLow-3)*0.8
+            resellValue['rangeLowNew'] = pricePerLow
+            resellValue['rangeHighNew'] = pricePerHigh
+            resellValue['expectationNew'] = pricePerExp
+            if (resellValue['rangeHighNew']-resellValue['expectationNew'])>(resellValue['expectationNew']-resellValue['rangeLowNew'])*2:
+                resellValue['rangeHighNew'] = resellValue['rangeLowNew']+(resellValue['expectationNew']-resellValue['rangeLowNew'])*3
+            # print 'pointLow: %.2f, %.2f' % (pointLow, resellValue['rangeLow'])
+            # print 'pointHigh: %.2f, %.2f' % (pointHigh, resellValue['rangeHigh'])
+            # print 'pointExp: %.2f, %.2f' % (pointExp, resellValue['expectation'])
+        else:
+            resellValue['rangeHighNew'] = sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0)
+            resellValue['rangeLowNew'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0))*0.5
+            resellValue['expectationNew'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0))*2/3
+            # print 'pointLow: %.2f' % (resellValue['rangeLow'])
+            # print 'pointHigh: %.2f' % (resellValue['rangeHigh'])
+            # print 'pointExp: %.2f' % (resellValue['expectation'])
+        
+        # if 'new' in itemInfo.get('condition', '').lower():
+            # # print 'listNew: 0.5, %.2f' % resellValue.get('resellNew', 0)
+            # pass
+        # else:
+            # # print 'listUsed: 0.5, %.2f' % resellValue.get('resellUsed', 0)
+            # pass
+    else: 
+        newSoldFound = False
+
+      
+    #Get the range for Old:
+    Nitems = len(resellValue.get('firstPageItemsOld', {}))
+    # print 'Sold items: %d' % Nitems
+    sortedItems = sorted(resellValue['firstPageItemsOld'], key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+    if Nitems:
+        if Nitems > 1:
+            pointLow = min(float(Nitems-1)/4, 1)*0.25
+            pointHigh = 0.75
+            # pointExp = 0.25+ max(min(float(Nitems-10)/90, 1), 0)*0.125
+            pointExp = 0.25
+            pricePerLow = operation3.percentile(sortedItems, pointLow, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))*0.75
+            pricePerExp = operation3.percentile(sortedItems, pointExp, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+            pricePerHigh = operation3.percentile(sortedItems, pointHigh, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+            resellValue['rangeLowOld'] = pricePerLow
+            resellValue['rangeHighOld'] = pricePerHigh
+            resellValue['expectationOld'] = pricePerExp
+            if (resellValue['rangeHighOld']-resellValue['expectationOld'])>(resellValue['expectationOld']-resellValue['rangeLowOld'])*2:
+                resellValue['rangeHighOld'] = resellValue['rangeLowOld']+(resellValue['expectationOld']-resellValue['rangeLowOld'])*3
+            # print 'pointLow: %.2f, %.2f' % (pointLow, resellValue['rangeLow'])
+            # print 'pointHigh: %.2f, %.2f' % (pointHigh, resellValue['rangeHigh'])
+            # print 'pointExp: %.2f, %.2f' % (pointExp, resellValue['expectation'])
+        else:
+            resellValue['rangeHighOld'] = sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0)
+            resellValue['rangeLowOld'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0))*0.5
+            resellValue['expectationOld'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0))*2/3
+            # print 'pointLow: %.2f' % (resellValue['rangeLow'])
+            # print 'pointHigh: %.2f' % (resellValue['rangeHigh'])
+            # print 'pointExp: %.2f' % (resellValue['expectation'])
+        
+        # if 'new' in itemInfo.get('condition', '').lower():
+            # # print 'listNew: 0.5, %.2f' % resellValue.get('resellNew', 0)
+            # pass
+        # else:
+            # # print 'listUsed: 0.5, %.2f' % resellValue.get('resellUsed', 0)
+            # pass
+                
+        
+                   
+    else:
+        #Get category default values if the search cannot find a match.
+        if resellValue.get('category', ''):
+            #print resellValue
+            #Get the url for all items inside the category
+            #Here the condition in searchUrl is old. ToDo: make it more explicit and clear.
+            searchUrl = (searchUrlOrig.split('_nkw', 1)[0]+searchUrlOrig.split('_nkw', 1)[-1].split('&', 1)[-1]).replace('sch/', 'sch/'+category+'/')
+            req = opener.open(searchUrl)
+            # print req.url
+            strHTML = req.read()
+                    
+            # f = open('ebay.html', 'w')
+            # f.write(strHTML)
+            # f.close()
+            
+            searchResult = parseCompletedPage(strHTML, req.url)  
+            resellValue['resellUsed'] = searchResult.get('resellPrice', 0)
+            if not newSoldFound:
+                resellValue['resellNew']  =  resellValue['resellOld']  
+     
+            # if searchResult.get('resellPrice', 0):
+                # if 'new' in itemInfo.get('condition', '').lower():
+                    # resellValue['resellNew'] = searchResult['resellPrice']
+                # else:
+                    # resellValue['resellUsed'] = searchResult['resellPrice']
+                    
+            Nitems = len(searchResult.get('firstPageItems', []))
+            # print 'Default items in category: %d' % Nitems
+            if Nitems:
+                resellValue['default'] = 1;
+                sortedItems = sorted(searchResult['firstPageItems'], key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+                pointExp = 0.25
+                pricePerExp = operation3.percentile(sortedItems, pointExp, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+                # print pointExp
+                resellValue['rangeHighOld'] = pricePerExp*1.5
+                resellValue['rangeLowOld'] = pricePerExp*0.75
+                resellValue['expectationOld'] = pricePerExp
+                # print 'pointLow: %.2f' % (resellValue['rangeLow'])
+                # print 'pointHigh: %.2f' % (resellValue['rangeHigh'])
+                # print 'pointExp: %.2f' % (resellValue['expectation'])
+                
+                # if 'new' in itemInfo.get('condition', '').lower():
+                    # print 'listNew: 0.5, %.2f' % resellValue.get('resellNew', 0)
+                # else:
+
+                    # print 'listUsed: 0.5, %.2f' % resellValue.get('resellUsed', 0)
+            
+            # print searchResult
+                
+    # print newSoldFound
+    if not newSoldFound:
+        resellValue['rangeHighNew'] = resellValue.get('rangeHighOld', 0)
+        resellValue['rangeLowNew'] = resellValue.get('rangeLowOld', 0)
+        resellValue['expectationNew'] = resellValue.get('expectationOld', 0)
+
+
+
+
+
+        # print resellValue
+            
+            
+        # f = open('ebay.html', 'w')
+        # f.write(strHTML)
+        # f.close()
+
+    
+    return resellValue
+            
+##End of queryPriceAllCond2(itemInfo)
+
         
          
 #http://www.ebay.com/sch/i.html?_nkw=the+davinci+code&_sop=12
@@ -574,7 +1017,7 @@ def queryPriceAllCond(itemInfo):
                     # print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketNew'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketNew'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketNew']
                 elif conditionStr.lower() == 'good' or conditionStr.lower() == 'used':
@@ -583,7 +1026,7 @@ def queryPriceAllCond(itemInfo):
                     #print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketUsed']
                 elif (not usedFound) and ('refurbished' not in conditionStr.lower()):
@@ -593,7 +1036,7 @@ def queryPriceAllCond(itemInfo):
                     #print etree.tostring(recommendedTag)
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketUsed']
             #print recommendedItem
@@ -631,7 +1074,7 @@ def queryPriceAllCond(itemInfo):
                     
                     
             # print searchResult
-            resellValue['catogry'] = category
+            resellValue['category'] = category
             resellValue['userCat'] = userCat
             resellValue['recommendedItem'] = recommendedItem
             resellValue['firstPageItemsNew'] = searchResultNew.get('firstPageItems', {})
@@ -734,7 +1177,7 @@ def queryPriceAllCond(itemInfo):
 
         # # print 'searchResult:'
         # # print searchResult
-        # resellValue['catogry'] = category
+        # resellValue['category'] = category
         # resellValue['userCat'] = searchResult.get('userCat', '')
         # resellValue['recommendedItem'] = {}
         # resellValue['firstPageItems'] = searchResult.get('firstPageItems', [])
@@ -832,7 +1275,7 @@ def queryPriceAllCond(itemInfo):
                    
     else:
         #Get category default values if the search cannot find a match.
-        if resellValue.get('catogry', ''):
+        if resellValue.get('category', ''):
             #print resellValue
             #Get the url for all items inside the category
             #Here the condition in searchUrl is old. ToDo: make it more explicit and clear.
@@ -908,7 +1351,7 @@ def queryPriceAllCond(itemInfo):
 def queryPrice(itemInfo):
 #search for best matched price to sell on ebay
 #itemInfo is dict with keys: barcode, title, condition
-#
+#Jiong 20140716: Added condition='mixed' and passed-in category number.
 
     resellValue = {}
     
@@ -945,9 +1388,14 @@ def queryPrice(itemInfo):
     #Simplify condition to 'free' and 'used' two levels for now.
     if 'new' in itemInfo.get('condition', '').lower():
         condition = 'new'
+    elif 'mixed' in itemInfo.get('condition', '').lower():
+        condition = 'mixed'
     else:
         condition = 'used'
         
+    #Get category from itemInfo
+    category = itemInfo.get('category', '')
+    
     
     binStr = '&LH_BIN=1'
     matchStr = '&_sop=12'
@@ -956,13 +1404,20 @@ def queryPrice(itemInfo):
     completedStr = '&LH_Complete=1'
     soldStr = '&LH_Sold=1'
     viewStr = '&_dmd=1' #1 for list view, #2 for gallery view
-    if 'new' in itemInfo.get('condition', '').lower():
-        condUrlStr = '&LH_ItemCondition=3'          
+    if condition == 'new':
+        condUrlStr = '&LH_ItemCondition=3'    
+    elif condition == 'mixed':
+        condUrlStr = ''
     else:
         condUrlStr = '&LH_ItemCondition=4'
-    queryUrl = matchStr+condUrlStr+locStr+nItemsStr+viewStr+completedStr+soldStr
+    if not itemInfo.get('listingStatus', '').lower() == 'active':
+        queryUrl = matchStr+condUrlStr+locStr+nItemsStr+viewStr+completedStr+soldStr
+    else :
+        queryUrl = matchStr+condUrlStr+locStr+nItemsStr+viewStr
     searchUrl += queryUrl
     searchUrlOrig = searchUrl #Saved for calculating category default value.
+    searchUrl = searchUrl.replace('sch/', 'sch/'+category+'/')
+    
     # print searchUrl
     
     req = opener.open(searchUrl) 
@@ -988,7 +1443,6 @@ def queryPrice(itemInfo):
                     recommendedItem['imgUrl'] = imgUrl
             
             # Category number
-            category = ''
             catTags = root.xpath('//li[@itemprop="offers"]/a')
             if catTags:
                 category = catTags[0].get('href', '').split('_pcategid=')[-1].split('&')[0]
@@ -1018,7 +1472,7 @@ def queryPrice(itemInfo):
                     # print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketNew'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketNew'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketNew']
                 elif conditionStr.lower() == 'good' or conditionStr.lower() == 'used':
@@ -1027,7 +1481,7 @@ def queryPrice(itemInfo):
                     #print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketUsed']
                 elif (not usedFound) and ('refurbished' not in conditionStr.lower()):
@@ -1037,7 +1491,7 @@ def queryPrice(itemInfo):
                     #print etree.tostring(recommendedTag)
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketUsed']
             #print recommendedItem
@@ -1058,7 +1512,7 @@ def queryPrice(itemInfo):
                 if strHTML:
                     searchResult = parseProductPageSold(strHTML)
             # print searchResult
-            resellValue['catogry'] = category
+            resellValue['category'] = category
             resellValue['userCat'] = userCat
             resellValue['recommendedItem'] = recommendedItem
             resellValue['firstPageItems'] = searchResult.get('firstPageItems', {})
@@ -1071,33 +1525,37 @@ def queryPrice(itemInfo):
             if searchResult.get('resellPrice', 0):
                 if condition == 'new':
                     resellValue['resellNew'] = searchResult['resellPrice']
-
                     # if recommendedItem.get('marketNew', 0) and recommendedItem.get('marketNew', 0)<resellValue['resellNew']:
                         # resellValue['resellNew'] = recommendedItem['marketNew']
+                elif condition == 'mixed':
+                    resellValue['resellMixed'] = searchResult['resellPrice']
+                    # if recommendedItem.get('marketMixed', 0) and recommendedItem.get('marketMixed', 0)<resellValue['resellMixed']:
+                        # resellValue['resellMixed'] = recommendedItem['marketMixed']
                 else:
                     resellValue['resellUsed'] = searchResult['resellPrice']
-
                     # if recommendedItem.get('marketUsed', 0) and recommendedItem.get('marketUsed', 0)<resellValue['resellUsed']:
                         # resellValue['resellUsed'] = recommendedItem['marketUsed']
             
             # print resellValue
      
     else:
-        #print 'I am here'
-        # Log in to ebay
-        cookie = cookielib.CookieJar()   
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
-        opener.addheaders = [('User-agent', 'Chrome/21.0.1180.57 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1')]
-        # opener.addheaders = [('User-agent', 'Chrome/21.0.1180.57')]
+        # #print 'I am here'
+        # # Log in to ebay
+        # cookie = cookielib.CookieJar()   
+        # opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
+        # opener.addheaders = [('User-agent', 'Chrome/21.0.1180.57 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/537.1 (KHTML, like Gecko) Safari/537.1')]
+        # # opener.addheaders = [('User-agent', 'Chrome/21.0.1180.57')]
     
         
-        category = ''
-        if itemInfo.get('title', ''):
-            categories, opener = queryCategory(itemInfo['title'].strip())
-        elif itemInfo.get('barcode', ''):
-            categories, opener = queryCategory(barcode)
-        if categories:
-            category = categories[0][0]
+        if not category:
+            if itemInfo.get('title', ''):
+                categories, opener = queryCategory(itemInfo['title'].strip())
+            elif itemInfo.get('barcode', ''):
+                categories, opener = queryCategory(barcode)
+            if categories:
+                category = categories[0][0]
+            searchUrl = searchUrl.replace('sch/', 'sch/'+category+'/')
+            req = opener.open(searchUrl)
         # print category
             
         # ebayCred = operation3.getDBLogin('ebaydealsea')
@@ -1119,8 +1577,6 @@ def queryPrice(itemInfo):
                 # category = optionTags[0].get('value', '')
                 # print optionTags[0].text
         # print 'Category: ' + category
-        searchUrl = searchUrl.replace('sch/', 'sch/'+category+'/')
-        req = opener.open(searchUrl)
 
 
 
@@ -1152,7 +1608,7 @@ def queryPrice(itemInfo):
 
         # print 'searchResult:'
         # print searchResult
-        resellValue['catogry'] = category
+        resellValue['category'] = category
         resellValue['userCat'] = searchResult.get('userCat', '')
         resellValue['recommendedItem'] = {}
         resellValue['firstPageItems'] = searchResult.get('firstPageItems', [])
@@ -1165,6 +1621,10 @@ def queryPrice(itemInfo):
                 resellValue['resellNew'] = searchResult['resellPrice']
                 # if recommendedItem.get('marketNew', 0) and recommendedItem.get('marketNew', 0)<resellValue['resellNew']:
                     # resellValue['resellNew'] = recommendedItem['marketNew']
+            if 'mixed' in itemInfo.get('condition', '').lower():
+                resellValue['resellMixed'] = searchResult['resellPrice']
+                # if recommendedItem.get('marketMixed', 0) and recommendedItem.get('marketMixed', 0)<resellValue['resellMixed']:
+                    # resellValue['resellMixed'] = recommendedItem['marketMixed']
             else:
                 resellValue['resellUsed'] = searchResult['resellPrice']
                 # if recommendedItem.get('marketUsed', 0) and recommendedItem.get('marketUsed', 0)<resellValue['resellUsed']:
@@ -1173,16 +1633,20 @@ def queryPrice(itemInfo):
     #Get the range:
     Nitems = len(resellValue.get('firstPageItems', {}))
     # print 'Sold items: %d' % Nitems
-    sortedItems = sorted(resellValue['firstPageItems'], key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+    sortedItems = sorted(resellValue['firstPageItems'], key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)+d.get('market',0)))
+    # print sortedItems
     if Nitems:
         if Nitems > 1:
             pointLow = min(float(Nitems-1)/4, 1)*0.25
             pointHigh = 0.75
             # pointExp = 0.25+ max(min(float(Nitems-10)/90, 1), 0)*0.125
             pointExp = 0.25
-            pricePerLow = operation3.percentile(sortedItems, pointLow, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))*0.75
-            pricePerExp = operation3.percentile(sortedItems, pointExp, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
-            pricePerHigh = operation3.percentile(sortedItems, pointHigh, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+            pricePerLow = operation3.percentile(sortedItems, pointLow, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)+d.get('market',0)))*0.75
+            pricePerExp = operation3.percentile(sortedItems, pointExp, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)+d.get('market',0)))
+            pricePerHigh = operation3.percentile(sortedItems, pointHigh, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)+d.get('market',0)))
+            # print pricePerHigh
+            # print pricePerLow
+            # print pricePerExp
             resellValue['rangeLow'] = (pricePerLow-3)*0.8
             resellValue['rangeHigh'] = (pricePerHigh-3)*0.8
             resellValue['expectation'] = (pricePerExp-3)*0.8
@@ -1192,25 +1656,25 @@ def queryPrice(itemInfo):
             # print 'pointHigh: %.2f, %.2f' % (pointHigh, resellValue['rangeHigh'])
             # print 'pointExp: %.2f, %.2f' % (pointExp, resellValue['expectation'])
         else:
-            resellValue['rangeHigh'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0)-3)*0.8
-            resellValue['rangeLow'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0)-3)*0.8*0.5
-            resellValue['expectation'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0)-3)*0.8*2/3
+            resellValue['rangeHigh'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0)+sortedItems[0].get('market', 0)-3)*0.8
+            resellValue['rangeLow'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0)+sortedItems[0].get('market', 0)-3)*0.8*0.5
+            resellValue['expectation'] = (sortedItems[0].get('marketNew', 0)+sortedItems[0].get('marketUsed', 0)+sortedItems[0].get('market', 0)-3)*0.8*2/3
             # print 'pointLow: %.2f' % (resellValue['rangeLow'])
             # print 'pointHigh: %.2f' % (resellValue['rangeHigh'])
             # print 'pointExp: %.2f' % (resellValue['expectation'])
         
-        if 'new' in itemInfo.get('condition', '').lower():
-            # print 'listNew: 0.5, %.2f' % resellValue.get('resellNew', 0)
-            pass
-        else:
-            # print 'listUsed: 0.5, %.2f' % resellValue.get('resellUsed', 0)
-            pass
+        # if 'new' in itemInfo.get('condition', '').lower():
+            # # print 'listNew: 0.5, %.2f' % resellValue.get('resellNew', 0)
+            # pass
+        # else:
+            # # print 'listUsed: 0.5, %.2f' % resellValue.get('resellUsed', 0)
+            # pass
                 
         
                    
     else:
         #Get category default values if the search cannot find a match.
-        if resellValue.get('catogry', ''):
+        if resellValue.get('category', ''):
             #print resellValue
             #Get the url for all items inside the category
             searchUrl = (searchUrlOrig.split('_nkw', 1)[0]+searchUrlOrig.split('_nkw', 1)[-1].split('&', 1)[-1]).replace('sch/', 'sch/'+category+'/')
@@ -1233,9 +1697,9 @@ def queryPrice(itemInfo):
             # print 'Default items in category: %d' % Nitems
             if Nitems:
                 resellValue['default'] = 1;
-                sortedItems = sorted(searchResult['firstPageItems'], key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+                sortedItems = sorted(searchResult['firstPageItems'], key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)+d.get('market',0)))
                 pointExp = 0.25
-                pricePerExp = operation3.percentile(sortedItems, pointExp, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+                pricePerExp = operation3.percentile(sortedItems, pointExp, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)+d.get('market',0)))
                 # print pointExp
                 resellValue['rangeHigh'] = (pricePerExp-3)*0.8*1.5
                 resellValue['rangeLow'] = (pricePerExp-3)*0.8*0.75
@@ -1366,7 +1830,7 @@ def queryPriceActive(itemInfo):
                     # print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketNew'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketNew'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketNew']
                 elif conditionStr.lower() == 'good' or conditionStr.lower() == 'used':
@@ -1375,7 +1839,7 @@ def queryPriceActive(itemInfo):
                     #print etree.tostring(recommendedTag.xpath('.//div[@class="bb-l"]')[0])
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketUsed']
                 elif (not usedFound) and ('refurbished' not in conditionStr.lower()):
@@ -1385,7 +1849,7 @@ def queryPriceActive(itemInfo):
                     #print etree.tostring(recommendedTag)
                     # print priceStr
                     if priceStr:
-                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', ''))
+                        recommendedItem['marketUsed'] = float(priceStr.strip().replace('$', '').replace(',',''))
                         # print conditionStr
                         # print recommendedItem['marketUsed']
             #print recommendedItem
@@ -1397,7 +1861,7 @@ def queryPriceActive(itemInfo):
             
             searchResult = parseProductPage(strHTML)
             # print searchResult
-            resellValue['catogry'] = category
+            resellValue['category'] = category
             resellValue['recommendedItem'] = recommendedItem
             resellValue['firstPageItems'] = searchResult.get('firstPageItems', {})
             if itemInfo.get('title'):
@@ -1455,7 +1919,7 @@ def queryPriceActive(itemInfo):
         
         searchResult = parseCompletedPage(strHTML, req.url)
         # print searchResult
-        resellValue['catogry'] = category
+        resellValue['category'] = category
         resellValue['recommendedItem'] = {}
         resellValue['firstPageItems'] = searchResult.get('firstPageItems', {})
         resellValue['title'] = itemInfo['title']
@@ -1515,8 +1979,10 @@ def queryCategory(strQuery, opener = None):
 
         req = opener.open(catSearchUrl)
         strHTML = req.read()
-
-
+        
+        # f = open('ebay.html', 'w')
+        # f.write(strHTML)
+        # f.close()
 
         root = etree.HTML(strHTML)
         optionTags = root.xpath('//div[@id="cat1_inp"]//option')
@@ -1531,15 +1997,10 @@ def queryCategory(strQuery, opener = None):
     # print categories
 
 
-
-
-
-
-
-
     return categories, opener
 
 ##End of queryCategory(itemInfo)
+
 
 
 def searchCompleted(itemInfo):
@@ -1634,6 +2095,8 @@ def parseCompletedPage(strHTML, url):
             condition = 'new'
         elif 'itemcondition=4' in url.lower():
             condition = 'used'
+        elif 'itemcondition' not in url.lower():
+            condition = 'unknown'
         else:
             condition = 'used'
             
@@ -1657,6 +2120,7 @@ def parseCompletedPage(strHTML, url):
         # listTags = root.xpath('//div[@class="rs rsw t225"][a[@id="mainContent"]]//tbody[@itemprop="itemOffered"]')
         listTags = root.xpath('//div[contains(@class, "rs rsw")][a[@id="mainContent"]]//*[@listingid]')
         # print listTags
+        # print 'here'
         for listTag in listTags:
             # print listTag.get('class')
             listItem = {}
@@ -1709,11 +2173,18 @@ def parseCompletedPage(strHTML, url):
                             listItem['marketNew'] += float(shippingStr.split('$')[-1].split()[0].replace(',', ''))
                         except Exception, e:
                             pass
-                if condition == 'used':
+                elif condition == 'used':
                     listItem['marketUsed'] = float(priceStr.replace('$', '').replace(',', ''))
                     if shippingStr and ('free' not in shippingStr.lower()):
                         try:
                             listItem['marketUsed'] += float(shippingStr.split('$')[-1].split()[0].replace(',', ''))
+                        except Exception, e:
+                            pass
+                else:
+                    listItem['market'] = float(priceStr.replace('$', '').replace(',', ''))
+                    if shippingStr and ('free' not in shippingStr.lower()):
+                        try:
+                            listItem['market'] += float(shippingStr.split('$')[-1].split()[0].replace(',', ''))
                         except Exception, e:
                             pass
             
@@ -1740,16 +2211,16 @@ def parseCompletedPage(strHTML, url):
         result['firstPageItems'] = listItems
         
         #Sort and then get the recommended resell price
-        sortedItems = sorted(soldItems, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+        sortedItems = sorted(soldItems, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)+d.get('market',0)))
         Nitems = len(sortedItems)
         # print 'Sold iems: %d' % Nitems
         if Nitems:
-            recommendedPrice = ((sortedItems[Nitems/2].get('marketNew', 0)+sortedItems[Nitems/2].get('marketUsed', 0))
-                + (sortedItems[(Nitems-1)/2].get('marketNew', 0)+sortedItems[(Nitems-1)/2].get('marketUsed', 0)))/2
+            recommendedPrice = ((sortedItems[Nitems/2].get('marketNew', 0)+sortedItems[Nitems/2].get('marketUsed', 0)+sortedItems[Nitems/2].get('market', 0))
+                + (sortedItems[(Nitems-1)/2].get('marketNew', 0)+sortedItems[(Nitems-1)/2].get('marketUsed', 0)+sortedItems[(Nitems-1)/2].get('market', 0)))/2
             result['resellPrice'] = recommendedPrice
         
-            pricePer25 = operation3.percentile(sortedItems, 0.25, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
-            pricePer75 = operation3.percentile(sortedItems, 0.75, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)))
+            pricePer25 = operation3.percentile(sortedItems, 0.25, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)+d.get('market',0)))
+            pricePer75 = operation3.percentile(sortedItems, 0.75, key=lambda d: (d.get('marketNew', 0)+d.get('marketUsed',0)+d.get('market',0)))
             result['range25'] = pricePer25
             result['range75'] = pricePer75
             
@@ -1895,7 +2366,7 @@ def parseProductPage(strHTML):
                 priceStr = priceStr[:dotPos+3]
             #print priceStr
             if priceStr:
-                price = float(priceStr.replace('$', ''))
+                price = float(priceStr.replace('$', '').replace(',', ''))
                 conditionStr = ''.join(listTag.xpath('.//div[@class="ls-c"]//span[@class="slr"]/b//text()')).strip().lower()
                 # print conditionStr
                 if 'brand new' in conditionStr or conditionStr[:3] == 'new':
@@ -1970,7 +2441,7 @@ def parseProductPageSold(strHTML):
                 priceStr = priceStr[:dotPos+3]
             #print priceStr
             if priceStr:
-                price = float(priceStr.replace('$', ''))
+                price = float(priceStr.replace('$', '').replace(',', ''))
                 conditionStr = ''.join(listTag.xpath('.//div[@class="ls-c"]//span[@class="slr"]/b//text()')).strip().lower()
                 # print conditionStr
                 if 'brand new' in conditionStr or conditionStr[:3] == 'new':

@@ -17,7 +17,10 @@ import re
 import mechanize
 import cookielib
 import urllib
-import Image
+try:
+    import Image
+except ImportError:
+    from PIL import Image
 import ftplib
 import math
 from datetime import datetime
@@ -235,6 +238,64 @@ def url2HTML(url,parser='etree'):
 
 
 def url2str(url,parser='etree'):
+    '''
+    retStr = url2str(url)
+    Get the string from a url using urllib2.
+    Try 20 times with timeout for each try 15 seconds. 
+    If failed, return a blank string.
+    
+    --Input
+    url: Url address, must begin with 'http://'
+    
+    --Output
+    retStr: Retrieved string. Blank string if failed.
+    3-13-2014: when parser='soup', return urlopen object
+    '''
+    
+    urllib2Header = {'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.57 Safari/537.1'}
+    tryCount = 0
+    retStr = ''
+    retObj = None
+    while True: #Retry 20 times to avoid temporary connection issue.
+        tryCount += 1
+        try:
+            req = urllib2.Request(url, headers=urllib2Header)
+            t1 = time.time()
+            if parser == 'soup':
+                retObj = urllib2.urlopen(req, timeout = 15)
+            elif parser == 'etree':
+                retObj = urllib2.urlopen(req, timeout = 15)
+                retStr = retObj.read()
+                retUrl = retObj.geturl()
+            if time.time()-t1 > 14.5: 
+                print 'urllib2.urlopen() timed out: %s' % url
+                print 'Retry #%d' % tryCount
+                if tryCount>=20:
+                    break
+                else: continue
+            #added 10-15-2013, if string is empty, retry
+            if (retStr=='' or retStr==None) and retObj == None: 
+                print 'urllib2.urlopen() empty string: %s' % url
+                print 'Retry #%d' % tryCount
+                if tryCount>=20:
+                    break
+                else: continue
+        except Exception, e:
+            print ('Cannot open url: %s, retry #%d' % (url, tryCount))
+            if tryCount>=20:   
+                print e
+                break
+            else: continue
+        break
+    if parser == 'etree':
+        return retStr
+    if parser == 'soup':
+        return retObj
+
+#End of url2str()
+
+
+def url2strmore(url,parser='etree'):
     '''
     retStr = url2str(url)
     Get the string from a url using urllib2.
@@ -2836,15 +2897,27 @@ def parseEbayListingPg(urlStr, url = ''):
                 catNumSplit = catTags[0].get('href', '').split('/')
                 if len(catNumSplit)>1:
                     itemDetails['catNum'] = catNumSplit[-2]
+            topCatTags = epidTags[0].getparent().getparent().xpath('./following-sibling::td/table//li[1]/a[1]')
+            if topCatTags:
+                itemDetails['topCatName'] = topCatTags[0].text
+                topCatNumSplit = topCatTags[0].get('href', '').split('/')
+                if len(topCatNumSplit)>1:
+                    itemDetails['topCatNum'] = topCatNumSplit[-2]
         else:
-            catTags = root.xpath('//li[contains(text(), "Listed in category:")][1]')
-            if catTags:
-                catTags = catTags[0].getparent().xpath('./following-sibling::td/table//li[last()]/a[1]')
+            catTags0 = root.xpath('//li[contains(text(), "Listed in category:")][1]')
+            if catTags0:
+                catTags = catTags0[0].getparent().xpath('./following-sibling::td/table//li[last()]/a[1]')
                 if catTags:
                     itemDetails['catName'] = catTags[0].text
                     catNumSplit = catTags[0].get('href', '').split('/')
                     if len(catNumSplit)>1:
                         itemDetails['catNum'] = catNumSplit[-2]
+                topCatTags = catTags0[0].getparent().xpath('./following-sibling::td/table//li[1]/a[1]')
+                if topCatTags:
+                    itemDetails['topCatName'] = topCatTags[0].text
+                    topCatNumSplit = topCatTags[0].get('href', '').split('/')
+                    if len(topCatNumSplit)>1:
+                        itemDetails['topCatNum'] = topCatNumSplit[-2]
         # 		print 'catName: ' + itemDetails.get('catName', '')
         # 		print 'catNum: ' + itemDetails.get('catNum', '')
         # 		print 'epid: '+itemDetails.get('epid', 'not found')
