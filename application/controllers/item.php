@@ -3,7 +3,6 @@ if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
 const SUCCESS = 1;
 const FAILURE = 0;
-const UPLOAD_BASE_PATH = '/var/uploads/wetag_app/';
 
 /**
  *
@@ -11,7 +10,6 @@ const UPLOAD_BASE_PATH = '/var/uploads/wetag_app/';
  * @property Catalogue_model $catalogue_model
  * @property Meta_model $meta_model
  * @property WordPress_model $wordPress_model
- * @property User_model $user_model
  */
 class Item extends CI_Controller {
 	function __construct() {
@@ -20,7 +18,6 @@ class Item extends CI_Controller {
 		$this->load->model ( 'catalogue_model' );
 		$this->load->model ( 'meta_model' );
 		$this->load->model ( 'wordPress_model' );
-		$this->load->model ( 'user_model' );
 	}
 	public function test_page() {
 		$this->load->helper ( 'form' );
@@ -28,11 +25,6 @@ class Item extends CI_Controller {
 		
 		$data ['field_names'] = $this->get_field_names ();
 		$this->load->view ( 'item/test_form', $data );
-	}
-	public function test() {
-		$item = $this->item_model->get_item ( '147A8BC3-E6DD-4FE2-981F-2E59255B6B72' );
-		echo 'result: ';
-		var_export ( $this->synchItem ( $item ) );
 	}
 	public function update_item() {
 		$input_data = $this->get_input_data ();
@@ -59,6 +51,7 @@ class Item extends CI_Controller {
 			// insert the item old row into the item history table
 			$this->item_model->insert_item_history ( $oldItem );
 			
+			$input_data ['synchWp'] = 'N';
 			$this->item_model->update_item ( $input_data );
 			$item = $this->item_model->get_item ( $itemId );
 		} else {
@@ -67,7 +60,7 @@ class Item extends CI_Controller {
 			$globalItemId = $item ['Global_Item_ID'];
 			
 			// add the new item into the user default catalogue
-			$this->catalogue_model->insert_user_default_catalogue_item_relation ( $item );
+			//$this->catalogue_model->insert_user_default_catalogue_item_relation ( $item );
 		}
 		
 		// update image names
@@ -89,7 +82,7 @@ class Item extends CI_Controller {
 		}
 		
 		// synchronize to wp database
-		$item ['$first_image_name'] = count ( $newImageNameArray ) > 0 ? $newImageNameArray [0] : '';
+		$item ['first_image_name'] = count ( $newImageNameArray ) > 0 ? $newImageNameArray [0] : '';
 		$success = $this->synchItem ( $item );
 		if ($success) {
 			$this->item_model->update_item ( array (
@@ -98,15 +91,23 @@ class Item extends CI_Controller {
 			) );
 		}
 		
+		// TODO call python script to resize and upload image files
+		
 		$data ['result'] = SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	/**
+	 * Synch the item information to WordPress database
+	 *
+	 * @param unknown $item        	
+	 * @return boolean Returns TRUE if success.
+	 */
 	private function synchItem($item) {
 		// build data
 		$item_id = $item ['Global_Item_ID'];
 		$item_photo_url = '';
-		if (strlen ( $item ['$first_image_name'] ) > 4) {
-			$item_photo_url = 'http://www.happitail.info/ebayimg/' . $item ['$first_image_name'];
+		if (strlen ( $item ['first_image_name'] ) > 4) {
+			$item_photo_url = 'http://www.happitail.info/ebayimg/' . $item ['userId'] . '/' . $item ['first_image_name'];
 			$postfix = $item ['availability'] == 'NA' ? '-360sold' : '-360';
 			$item_photo_url = substr_replace ( $item_photo_url, $postfix, - 4, 0 );
 		}
@@ -127,25 +128,25 @@ class Item extends CI_Controller {
 				'Item_Date_Created' => $item ['recCreateTime'],
 				'Item_Display_Status' => 'Show' 
 		);
-		$user_num = $this->user_model->get_user ( $item ['userId'] )['userNum'];
 		$newImageRowArray = $this->item_model->get_images ( $item_id );
 		
 		$wp_db = $this->load->database ( 'wp', TRUE );
 		$this->wordPress_model->db = $wp_db;
 		$wp_db->trans_start ();
 		
+		// update WordPress item table
 		if ($this->wordPress_model->get_item ( $item_id )) {
 			$success = $this->wordPress_model->update_item ( $wp_item_data );
 			if ($success)
 				$success = $this->wordPress_model->delete_images ( $item_id );
-			log_message ( 'debug', print_r ( $success, TRUE ) );
 		} else {
 			$success = $this->wordPress_model->insert_item ( $wp_item_data );
 		}
 		if ($success) {
+			// update WordPress item image table
 			foreach ( $newImageRowArray as $newImageRow ) {
 				$item_image_id = $newImageRow ['Global_Item_Image_ID'];
-				$item_image_url = 'http://happitail.dyndns.info/images/' . $user_num . '/' . $newImageRow ['imageName'];
+				$item_image_url = 'http://happitail.dyndns.info/images/' . $item ['userId'] . '/' . $newImageRow ['imageName'];
 				$success = $this->wordPress_model->insert_image ( $item_image_id, $item_id, $item_image_url );
 				if (! $success)
 					break;
