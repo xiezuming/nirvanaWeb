@@ -59,7 +59,6 @@ class Item extends CI_Controller {
 			// insert the item old row into the item history table
 			$this->item_model->insert_item_history ( $oldItem );
 			
-			$input_data ['synchWp'] = 'N';
 			$this->item_model->update_item ( $input_data );
 			$item = $this->item_model->get_item ( $itemId );
 		} else {

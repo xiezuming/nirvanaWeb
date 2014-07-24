@@ -33,11 +33,17 @@ class Catalogue_model extends CI_Model {
 	}
 	public function update_catalogue($catalogue) {
 		$this->db->where ( 'catalogueId', $catalogue ['catalogueId'] );
-		return $this->db->update ( self::TABLE_CATALOGUE, $catalogue );
+		$result = $this->db->update ( self::TABLE_CATALOGUE, $catalogue );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Catalogue_model.insert_catalogue: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $result;
 	}
 	public function delete_catalogue($catalogue) {
 		$this->db->where ( 'catalogueId', $catalogue ['catalogueId'] );
-		$this->db->delete ( self::TABLE_CATALOGUE );
+		$result = $this->db->delete ( self::TABLE_CATALOGUE );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Catalogue_model.insert_catalogue: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $result;
 	}
 	public function insert_user_default_catalogue_item_relation($item) {
 		$userId = $item ['userId'];
@@ -77,24 +83,24 @@ class Catalogue_model extends CI_Model {
 		$query = $this->db->get ( self::TABLE_CATALOGUE_ITEM );
 		return $query->result_array ();
 	}
-	public function get_catalogue_item_relations($globalCatalogueId) {
-		$this->db->where ( 'Global_Catalogue_ID', $globalCatalogueId );
+	public function get_catalogue_item_relations($global_catalogue_id) {
+		$this->db->where ( 'Global_Catalogue_ID', $global_catalogue_id );
 		$query = $this->db->get ( self::TABLE_CATALOGUE_ITEM );
 		return $query->result_array ();
 	}
-	public function insert_catalogue_item_relation($globalCatalogueId, $globalItemId) {
+	public function insert_catalogue_item_relation($global_catalogue_id, $global_item_id) {
 		$result = $this->db->insert ( self::TABLE_CATALOGUE_ITEM, array (
-				'Global_Catalogue_ID' => $globalCatalogueId,
-				'Global_Item_ID' => $globalItemId 
+				'Global_Catalogue_ID' => $global_catalogue_id,
+				'Global_Item_ID' => $global_item_id 
 		) );
 		if ($this->db->_error_number ())
 			log_message ( 'error', 'Catalogue_model.insert_catalogue_item_relation: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 		return $result;
 	}
-	public function delete_catalogue_item_relation($globalCatalogueId, $globalItemId) {
+	public function delete_catalogue_item_relation($global_catalogue_id, $global_item_id) {
 		$this->db->delete ( self::TABLE_CATALOGUE_ITEM, array (
-				'Global_Catalogue_ID' => $globalCatalogueId,
-				'Global_Item_ID' => $globalItemId 
+				'Global_Catalogue_ID' => $global_catalogue_id,
+				'Global_Item_ID' => $global_item_id 
 		) );
 		if ($this->db->_error_number ())
 			log_message ( 'error', 'Catalogue_model.delete_catalogue_item_relation: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );

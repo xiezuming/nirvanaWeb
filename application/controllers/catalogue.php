@@ -7,11 +7,13 @@ const FAILURE = 0;
 /**
  *
  * @property Catalogue_model $catalogue_model
+ * @property Item_model $item_model
  */
 class Catalogue extends CI_Controller {
 	function __construct() {
 		parent::__construct ();
 		$this->load->model ( 'catalogue_model' );
+		$this->load->model ( 'item_model' );
 	}
 	public function test_page() {
 		$this->load->helper ( 'form' );
@@ -22,60 +24,51 @@ class Catalogue extends CI_Controller {
 	}
 	public function update_catalogue() {
 		$input_data = $this->get_input_data ();
-		$catalogueId = $input_data ['catalogueId'];
+		$input_data ['synchWp'] = 'N';
+		$catalgoue_id = $input_data ['catalogueId'];
 		
-		log_message ( 'debug', 'update_catalogue: $catalogueId = ' . $catalogueId );
-		
-		$itemIdsString = $this->input->post ( 'itemIds' );
+		// retrieve the new relations from post
 		$new_releation_itemIds = array ();
+		$old_releation_itemIds = array ();
+		$itemIdsString = $this->input->post ( 'itemIds' );
 		if (! empty ( $itemIdsString )) {
 			foreach ( explode ( ";", $itemIdsString ) as $itemId ) {
-				array_push ( $new_releation_itemIds, $itemId );
+				$item = $this->item_model->get_item($itemId);
+				if ($item) 
+					array_push ( $new_releation_itemIds, $item['Global_Item_ID'] );
 			}
 		}
 		log_message ( 'debug', 'update_catalogue: $new_releation_itemIds = ' . print_r ( $new_releation_itemIds, TRUE ) );
 		
-		$insert_releation_itemIds = array ();
-		$delete_releation_itemIds = array ();
-		
-		$catalgoue = $this->catalogue_model->get_catalogue ( $catalogueId );
 		$this->db->trans_start ();
+		
+		$catalgoue = $this->catalogue_model->get_catalogue ( $catalgoue_id );
 		if ($catalgoue) {
-			// Update mode
-			$this->catalogue_model->update_catalogue ( $input_data );
-			
-			$relations = $this->catalogue_model->get_catalogue_item_relations ( $catalogueId );
+			// fill $old_releation_itemIds
+			$global_catalogue_id = $catalgoue['Global_Catalogue_ID'];
+			$relations = $this->catalogue_model->get_catalogue_item_relations($global_catalogue_id);
 			foreach ( $relations as $relation ) {
-				if (! in_array ( $relation ['itemId'], $new_releation_itemIds, TRUE ))
-					array_push ( $delete_releation_itemIds, $relation ['itemId'] );
+				array_push ( $old_releation_itemIds, $relation ['Global_Item_ID'] );	
 			}
-			foreach ( $new_releation_itemIds as $newItemId ) {
-				$found = FALSE;
-				foreach ( $relations as $relation ) {
-					if ($relation ['itemId'] === $newItemId) {
-						$found = true;
-						break;
-					}
-				}
-				if (! $found)
-					array_push ( $insert_releation_itemIds, $newItemId );
-			}
+
+			$this->catalogue_model->update_catalogue ( $input_data );
 		} else {
 			// Insert mode
 			$this->catalogue_model->insert_catalogue ( $input_data );
-			
-			foreach ( $new_releation_itemIds as $newItemId ) {
-				array_push ( $insert_releation_itemIds, $newItemId );
-			}
 		}
+		$catalgoue = $this->catalogue_model->get_catalogue ( $catalgoue_id );
+		$global_catalogue_id = $catalgoue['Global_Catalogue_ID'];
+		
+		$insert_releation_itemIds = array_diff ( $new_releation_itemIds, $old_releation_itemIds );
+		$delete_releation_itemIds = array_diff ( $old_releation_itemIds, $new_releation_itemIds );
 		log_message ( 'debug', 'update_catalogue: $insert_releation_itemIds = ' . print_r ( $insert_releation_itemIds, TRUE ) );
 		log_message ( 'debug', 'update_catalogue: $delete_releation_itemIds = ' . print_r ( $delete_releation_itemIds, TRUE ) );
 		
-		foreach ( $insert_releation_itemIds as $itemId ) {
-			$this->catalogue_model->insert_catalogue_item_relation ( $catalogueId, $itemId );
+		foreach ( $insert_releation_itemIds as $global_item_id ) {
+			$this->catalogue_model->insert_catalogue_item_relation ( $global_catalogue_id, $global_item_id );
 		}
-		foreach ( $delete_releation_itemIds as $itemId ) {
-			$this->catalogue_model->delete_catalogue_item_relation ( $catalogueId, $itemId );
+		foreach ( $delete_releation_itemIds as $global_item_id ) {
+			$this->catalogue_model->delete_catalogue_item_relation ( $global_catalogue_id, $global_item_id );
 		}
 		$this->db->trans_complete ();
 		
