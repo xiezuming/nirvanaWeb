@@ -3,7 +3,6 @@ class Item_model extends CI_Model {
 	const TABLE_ITEM = 'item';
 	const TABLE_HISTORY = 'item_history';
 	const TABLE_IMAGE = 'item_image';
-	
 	/* ======== ITEM ======== */
 	public function get_item($itemId) {
 		$this->db->where ( 'itemId', $itemId );

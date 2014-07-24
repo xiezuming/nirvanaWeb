@@ -13,7 +13,7 @@ foreach ( $field_names as $field_name ) {
 	array_push ( $editable_field_cells, $input );
 }
 array_push ( $editable_field_cells, '<label class="label_text">itemIds</label>' );
-$input = '<input type="input" name="itemIds" size="45" />';
+$input = '<textarea name="itemIds" cols="41" rows="5" ></textarea>';
 array_push ( $editable_field_cells, $input );
 ?>
 

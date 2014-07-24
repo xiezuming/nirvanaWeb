@@ -71,7 +71,7 @@ $db['happitail']['database'] = 'wetag';
 $db['happitail']['dbdriver'] = 'mysql';
 $db['happitail']['dbprefix'] = '';
 $db['happitail']['pconnect'] = TRUE;
-$db['happitail']['db_debug'] = TRUE;
+$db['happitail']['db_debug'] = FALSE;
 $db['happitail']['cache_on'] = FALSE;
 $db['happitail']['cachedir'] = '';
 $db['happitail']['char_set'] = 'utf8';
@@ -80,8 +80,21 @@ $db['happitail']['swap_pre'] = '';
 $db['happitail']['autoinit'] = TRUE;
 $db['happitail']['stricton'] = FALSE;
 
-$db['wp'] = $db['local'];
-$db['wp']['database']="wp";
+$db['wp']['hostname'] = 'hap1418803381356.db.9606950.hostedresource.com';
+$db['wp']['username'] = 'hap1418803381356';
+$db['wp']['password'] = 'change_me****************************';
+$db['wp']['database'] = 'hap1418803381356';
+$db['wp']['dbdriver'] = 'mysqli';
+$db['wp']['dbprefix'] = '';
+$db['wp']['pconnect'] = TRUE;
+$db['wp']['db_debug'] = FALSE;
+$db['wp']['cache_on'] = FALSE;
+$db['wp']['cachedir'] = '';
+$db['wp']['char_set'] = 'utf8';
+$db['wp']['dbcollat'] = 'utf8_general_ci';
+$db['wp']['swap_pre'] = '';
+$db['wp']['autoinit'] = FALSE;
+$db['wp']['stricton'] = FALSE;
 
 /* End of file database.php */
 /* Location: ./application/config/database.php */

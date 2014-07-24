@@ -85,6 +85,7 @@ class Catalogue_model extends CI_Model {
 	}
 	public function get_catalogue_item_relations($global_catalogue_id) {
 		$this->db->where ( 'Global_Catalogue_ID', $global_catalogue_id );
+		$this->db->order_by("Global_Item_ID", "desc");
 		$query = $this->db->get ( self::TABLE_CATALOGUE_ITEM );
 		return $query->result_array ();
 	}

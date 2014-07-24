@@ -3,6 +3,7 @@ if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
 const SUCCESS = 1;
 const FAILURE = 0;
+const UPLOAD_BASE_PATH = '/var/uploads/wetag_app/';
 
 /**
  *
@@ -51,7 +52,6 @@ class Item extends CI_Controller {
 			// insert the item old row into the item history table
 			$this->item_model->insert_item_history ( $oldItem );
 			
-			$input_data ['synchWp'] = 'N';
 			$this->item_model->update_item ( $input_data );
 			$item = $this->item_model->get_item ( $itemId );
 		} else {
@@ -131,6 +131,11 @@ class Item extends CI_Controller {
 		$newImageRowArray = $this->item_model->get_images ( $item_id );
 		
 		$wp_db = $this->load->database ( 'wp', TRUE );
+		if (! $wp_db->initialize ()) {
+			log_message ( 'error', 'Catalogue.synchCatalogue: Failed to connect the database.' );
+			return FALSE;
+		}
+		
 		$this->wordPress_model->db = $wp_db;
 		$wp_db->trans_start ();
 		
