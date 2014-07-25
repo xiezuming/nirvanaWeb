@@ -54,7 +54,7 @@ try:
     
     queryResult = InvAlgo.queryPriceAllCond(itemInfo)
     # print itemDetails
-    result['category'] = categoryMap.get(queryResult.get('userCat', '').lower(), '')
+    result['category'] = categoryMap.get(queryResult.get('userCat', 'everything else').lower(), 'ELS')
     
     priceGroup = {'NW':{}, 'GD':{}, 'FR':{}, 'PR':{}}
     priceGroup['NW'] = queryResult['new']
@@ -63,6 +63,7 @@ try:
     priceGroup['PR'] = queryResult['used']
     result['priceGroup'] = priceGroup
 
+    print 
     
      
 except Exception, e:

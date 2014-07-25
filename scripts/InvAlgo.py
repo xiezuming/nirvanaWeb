@@ -54,7 +54,7 @@ def queryEPID(barcode):
             # priceResult['marketPriceMax'] = productInfoEbay.get('rangeHigh', 0)
             priceResult['title'] = productInfoEbay['recommendedItem'].get('title', '')
             priceResult['imageUrl'] = productInfoEbay['recommendedItem'].get('imgUrl', '')
-            priceResult['userCat'] = productInfoEbay.get('userCat', '')
+            priceResult['userCat'] = productInfoEbay.get('userCat', 'everything else')
             priceResult['epid']= productInfoEbay.get('epid', '')
             # if 'new' in iteminfo.get('condition', '').lower():
                 # priceresult['resellnew'] = productInfoEbay.get('resellnew', 0)
@@ -81,7 +81,7 @@ def queryPriceAllCond(itemInfo):
         productInfoEbay = ebay.queryPriceAllCond2(itemInfo)
         # print productInfoEbay
         
-        priceResult['userCat'] = productInfoEbay.get('userCat', '')
+        priceResult['userCat'] = productInfoEbay.get('userCat', 'everything else')
         priceResult['new'] = {}
         priceResult['new']['expectedPrice'] = round(productInfoEbay.get('expectationNew', 0), 2)
         priceResult['new']['marketPriceMin'] = round(productInfoEbay.get('rangeLowNew', 0), 2)
@@ -186,7 +186,7 @@ def querySimilarItems(itemInfo):
     
 def listingInfo(sku):
     listingDetails = operation3.ebayListingInfo(sku)
-    listingDetails['userCat'] = categoryMap1.get(listingDetails.get('topCatName', '').lower(), '')
+    listingDetails['userCat'] = categoryMap1.get(listingDetails.get('topCatName', '').lower(), 'everything else')
     
-    return listingDetails
+    return listingDetailsx
     

@@ -26,6 +26,11 @@ itemInfo = {'title': data[0], 'category': data[1]}
 
 try:
     result = InvAlgo.querySimilarItems(itemInfo)
+    if result:
+        result += [{'title': 'None of the above is similar to mine.', 'url': 'na', 'image': 'http://pics.ebaystatic.com/aw/pics/community/myWorld/imgBuddyBig24.gif'}]
+    else:
+        result = [{'title': 'no matched item', 'url': 'na', 'image': ''}]
+    
 
     
 except Exception, e:
