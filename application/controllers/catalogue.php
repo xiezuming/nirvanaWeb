@@ -75,7 +75,7 @@ class Catalogue extends CI_Controller {
 		$this->db->trans_complete ();
 		
 		// synchronize to wp database
-		$success = $this->synch_catalogue ( $catalgoue );
+		$success = $this->synch_catalogue ( $global_catalogue_id );
 		if ($success) {
 			$this->catalogue_model->update_catalogue ( array (
 					'catalogueId' => $catalgoue_id,
