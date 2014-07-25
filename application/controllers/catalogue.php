@@ -75,7 +75,7 @@ class Catalogue extends CI_Controller {
 		$this->db->trans_complete ();
 		
 		// synchronize to wp database
-		$success = $this->synchCatalogue ( $catalgoue );
+		$success = $this->test_synch_catalogue ( $catalgoue );
 		if ($success) {
 			$this->catalogue_model->update_catalogue ( array (
 					'catalogueId' => $catalgoue_id,
@@ -88,23 +88,23 @@ class Catalogue extends CI_Controller {
 	}
 	public function test_synch_catalogue() {
 		$global_catalogue_id = $this->input->post ( 'global_catalogue_id' );
-		if (empty($global_catalogue_id)) {
+		if (empty ( $global_catalogue_id )) {
 			echo 'ERROR: global_catalogue_id is empty.';
 			return;
 		}
-		echo 'Restult: ' . var_export($this->synch_catalogue ( $global_catalogue_id ), TRUE);
+		echo 'Restult: ' . var_export ( $this->synch_catalogue ( $global_catalogue_id ), TRUE );
 	}
 	/**
 	 * Synchronize the catalogue and its relations information to WordPress database
-	 *  
-	 * @param $global_catalogue_id: Global_Catalogue_ID
+	 *
+	 * @param $global_catalogue_id: Global_Catalogue_ID        	
 	 * @return boolean Returns TRUE if success.
 	 */
 	private function synch_catalogue($global_catalogue_id) {
-		log_message('debug', 'Start to synchronize the catalogue to WordPress DB.');
+		log_message ( 'debug', 'Start to synchronize the catalogue to WordPress DB.' );
 		
-		$catalogue = $this->catalogue_model->get_catalogue_by_global_id($global_catalogue_id);
-		if (!$catalogue) {
+		$catalogue = $this->catalogue_model->get_catalogue_by_global_id ( $global_catalogue_id );
+		if (! $catalogue) {
 			log_message ( 'error', 'Catalogue.synch_catalogue: Can not find the catalogue.' . $global_catalogue_id );
 			return FALSE;
 		}
