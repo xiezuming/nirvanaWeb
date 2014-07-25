@@ -82,8 +82,7 @@ class Item extends CI_Controller {
 		}
 		
 		// synchronize to wp database
-		$item ['first_image_name'] = count ( $newImageNameArray ) > 0 ? $newImageNameArray [0] : '';
-		$success = $this->synchItem ( $item );
+		$success = $this->synch_item ( $globalItemId );
 		if ($success) {
 			$this->item_model->update_item ( array (
 					'itemId' => $itemId,
@@ -96,18 +95,36 @@ class Item extends CI_Controller {
 		$data ['result'] = SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	
+	public function test_synch_item() {
+		$global_item_id = $this->input->post ( 'global_item_id' );
+		if (empty($global_item_id)) {
+			echo 'ERROR: global_item_id is empty.';
+			return;
+		}
+		echo 'Restult: ' . var_export($this->synch_item ( $global_item_id ), TRUE);
+	}
+	
 	/**
 	 * Synch the item information to WordPress database
 	 *
-	 * @param unknown $item        	
+	 * @param $global_item_id: Global_Item_ID
 	 * @return boolean Returns TRUE if success.
 	 */
-	private function synchItem($item) {
+	private function synch_item($global_item_id) {
+		log_message('debug', 'Start to synchronize the item to WordPress DB.');
+		
+		$item = $this->item_model->get_item_by_global_id($global_item_id);
+		if (!$item) {
+			log_message ( 'error', 'Item.synch_item: Can not find the item.' . $global_item_id );
+			return FALSE;
+		}
+		
 		// build data
-		$item_id = $item ['Global_Item_ID'];
+		$first_image_row = $this->item_model->get_first_image($global_item_id);
 		$item_photo_url = '';
-		if (strlen ( $item ['first_image_name'] ) > 4) {
-			$item_photo_url = 'http://www.happitail.info/ebayimg/' . $item ['userId'] . '/' . $item ['first_image_name'];
+		if ($first_image_row && strlen ( $first_image_row['imageName'] ) > 4) {
+			$item_photo_url = 'http://www.happitail.info/ebayimg/' . $item ['userId'] . '/' . $first_image_row['imageName'];
 			$postfix = $item ['availability'] == 'NA' ? '-360sold' : '-360';
 			$item_photo_url = substr_replace ( $item_photo_url, $postfix, - 4, 0 );
 		}
@@ -117,7 +134,7 @@ class Item extends CI_Controller {
 		$catagory_id = $category_row ? $category_row ['pos'] : - 1;
 		$catagory_name = $category_row ? $category_row ['value'] : '';
 		$wp_item_data = array (
-				'Item_ID' => $item_id,
+				'Item_ID' => $global_item_id,
 				'Item_Name' => $item ['title'],
 				'Item_Slug' => '',
 				'Item_Description' => $desc_prefix . $item ['desc'],
@@ -128,11 +145,11 @@ class Item extends CI_Controller {
 				'Item_Date_Created' => $item ['recCreateTime'],
 				'Item_Display_Status' => 'Show' 
 		);
-		$newImageRowArray = $this->item_model->get_images ( $item_id );
+		$newImageRowArray = $this->item_model->get_images ( $global_item_id );
 		
 		$wp_db = $this->load->database ( 'wp', TRUE );
 		if (! $wp_db->initialize ()) {
-			log_message ( 'error', 'Catalogue.synchCatalogue: Failed to connect the database.' );
+			log_message ( 'error', 'Item.synch_item: Failed to connect the database.' );
 			return FALSE;
 		}
 		
@@ -140,10 +157,10 @@ class Item extends CI_Controller {
 		$wp_db->trans_start ();
 		
 		// update WordPress item table
-		if ($this->wordpress_model->get_item ( $item_id )) {
+		if ($this->wordpress_model->get_item ( $global_item_id )) {
 			$success = $this->wordpress_model->update_item ( $wp_item_data );
 			if ($success)
-				$success = $this->wordpress_model->delete_images ( $item_id );
+				$success = $this->wordpress_model->delete_images ( $global_item_id );
 		} else {
 			$success = $this->wordpress_model->insert_item ( $wp_item_data );
 		}
@@ -152,7 +169,7 @@ class Item extends CI_Controller {
 			foreach ( $newImageRowArray as $newImageRow ) {
 				$item_image_id = $newImageRow ['Global_Item_Image_ID'];
 				$item_image_url = 'http://happitail.dyndns.info/images/' . $item ['userId'] . '/' . $newImageRow ['imageName'];
-				$success = $this->wordpress_model->insert_image ( $item_image_id, $item_id, $item_image_url );
+				$success = $this->wordpress_model->insert_image ( $item_image_id, $global_item_id, $item_image_url );
 				if (! $success)
 					break;
 			}
@@ -161,8 +178,11 @@ class Item extends CI_Controller {
 		$wp_db->trans_complete ();
 		
 		if ($wp_db->trans_status () === FALSE) {
-			log_message ( 'error', 'Item.synchItem: Failed to update the database.' );
+			log_message ( 'error', 'Item.synch_item: Failed to update the database.' );
 			return FALSE;
+		} else {
+			log_message ( 'debug', 'Item.synch_item: Synchronize to WordPress database successfully.' );
+			return TRUE;
 		}
 		return TRUE;
 	}

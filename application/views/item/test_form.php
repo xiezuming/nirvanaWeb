@@ -1,5 +1,6 @@
 <?php echo validation_errors('<div class="critical">', '</div>'); ?>
 
+<h3>Update the Item</h3>
 <?php echo form_open('item/update_item', 'onsubmit="return confirm(\'Are you sure you want to insert/update?\');"')?>
 
 <?php
@@ -26,6 +27,7 @@ array_push ( $editable_field_cells, $input );
 
 <hr />
 
+<h3>Upload the Image</h3>
 <?php echo form_open_multipart('item/upload');?>
 
 <label>userId</label>
@@ -35,5 +37,15 @@ array_push ( $editable_field_cells, $input );
 <br />
 <br />
 <input type="submit" value="upload" />
+<?php echo '</form>'?>
+
+<hr />
+
+<h3>Synchronize Item to WordPress DB</h3>
+<?php echo form_open('item/test_synch_item')?>
+
+<label>global_item_id</label>
+<input name="global_item_id" /><br/>
+<input type="submit" value="synchronize" />
 
 <?php echo '</form>'?>

@@ -5,6 +5,15 @@ class Catalogue_model extends CI_Model {
 	public function get_catalogue($catalogueId) {
 		$this->db->where ( 'catalogueId', $catalogueId );
 		$query = $this->db->get ( self::TABLE_CATALOGUE );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Catalogue_model.get_catalogue: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $query->row_array ();
+	}
+	public function get_catalogue_by_global_id($global_catalogue_id) {
+		$this->db->where ( 'Global_Catalogue_ID', $global_catalogue_id );
+		$query = $this->db->get ( self::TABLE_CATALOGUE );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Catalogue_model.get_catalogue_by_global_id: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 		return $query->row_array ();
 	}
 	public function get_default_catalogue($userId) {

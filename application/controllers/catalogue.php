@@ -86,24 +86,43 @@ class Catalogue extends CI_Controller {
 		$data ['result'] = SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
-	private function synchCatalogue($catalogue) {
+	public function test_synch_catalogue() {
+		$global_catalogue_id = $this->input->post ( 'global_catalogue_id' );
+		if (empty($global_catalogue_id)) {
+			echo 'ERROR: global_catalogue_id is empty.';
+			return;
+		}
+		echo 'Restult: ' . var_export($this->synch_catalogue ( $global_catalogue_id ), TRUE);
+	}
+	/**
+	 * Synchronize the catalogue and its relations information to WordPress database
+	 *  
+	 * @param $global_catalogue_id: Global_Catalogue_ID
+	 * @return boolean Returns TRUE if success.
+	 */
+	private function synch_catalogue($global_catalogue_id) {
 		log_message('debug', 'Start to synchronize the catalogue to WordPress DB.');
-		// build data
-		$catalogue_id = $catalogue ['Global_Catalogue_ID'];
 		
+		$catalogue = $this->catalogue_model->get_catalogue_by_global_id($global_catalogue_id);
+		if (!$catalogue) {
+			log_message ( 'error', 'Catalogue.synch_catalogue: Can not find the catalogue.' . $global_catalogue_id );
+			return FALSE;
+		}
+		
+		// build data
 		$wp_catalogue_data = array (
-				'Catalogue_ID' => $catalogue_id,
+				'Catalogue_ID' => $global_catalogue_id,
 				'Catalogue_Name' => $catalogue ['catalogueName'],
 				'Catalogue_Description' => '',
 				'Catalogue_Layout_Format' => '',
 				'Catalogue_Custom_CSS' => '',
 				'Catalogue_Date_Created' => $catalogue ['recCreateTime'] 
 		);
-		$newRelationArray = $this->catalogue_model->get_catalogue_item_relations ( $catalogue_id );
+		$newRelationArray = $this->catalogue_model->get_catalogue_item_relations ( $global_catalogue_id );
 		
 		$wp_db = $this->load->database ( 'wp', TRUE );
 		if (! $wp_db->initialize ()) {
-			log_message ( 'error', 'Catalogue.synchCatalogue: Failed to connect the database.' );
+			log_message ( 'error', 'Catalogue.synch_catalogue: Failed to connect the database.' );
 			return FALSE;
 		}
 		
@@ -111,16 +130,16 @@ class Catalogue extends CI_Controller {
 		$wp_db->trans_start ();
 		
 		// update WordPress catalgoue table
-		if ($this->wordpress_model->get_catalogue ( $catalogue_id )) {
+		if ($this->wordpress_model->get_catalogue ( $global_catalogue_id )) {
 			$success = $this->wordpress_model->update_catalogue ( $wp_catalogue_data );
 			if ($success)
-				$success = $this->wordpress_model->delete_catalogue_all_relations ( $catalogue_id );
+				$success = $this->wordpress_model->delete_catalogue_all_relations ( $global_catalogue_id );
 		} else {
 			$success = $this->wordpress_model->insert_catalogue ( $wp_catalogue_data );
 		}
 		if ($success) {
 			// update WordPress catalogue item relation table
-			// TODO postion
+			// TODO current sort the item order by their global itme id. Need think about it.
 			$position = 0;
 			foreach ( $newRelationArray as $newRelation ) {
 				$success = $this->wordpress_model->insert_catalogue_item_relation ( $newRelation ['Global_Catalogue_Item_ID'], $newRelation ['Global_Catalogue_ID'], $newRelation ['Global_Item_ID'], $position );
@@ -133,10 +152,10 @@ class Catalogue extends CI_Controller {
 		$wp_db->trans_complete ();
 		
 		if ($wp_db->trans_status () === FALSE) {
-			log_message ( 'error', 'Catalogue.synchCatalogue: Failed to update the WordPresss database.' );
+			log_message ( 'error', 'Catalogue.synch_catalogue: Failed to update the WordPresss database.' );
 			return FALSE;
 		} else {
-			log_message ( 'debug', 'Catalogue.synchCatalogue: Synchronize to WordPress database successfully.' );
+			log_message ( 'debug', 'Catalogue.synch_catalogue: Synchronize to WordPress database successfully.' );
 			return TRUE;
 		}
 	}

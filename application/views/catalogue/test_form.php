@@ -1,5 +1,6 @@
 <?php echo validation_errors('<div class="critical">', '</div>'); ?>
 
+<h3>Update the Catalogue</h3>
 <?php echo form_open('catalogue/update_catalogue', 'onsubmit="return confirm(\'Are you sure you want to insert/update?\');"')?>
 
 <?php
@@ -25,3 +26,12 @@ array_push ( $editable_field_cells, $input );
 <?php echo '</form>'?>
 
 <hr />
+
+<h3>Synchronize Catalogue to WordPress DB</h3>
+<?php echo form_open('catalogue/test_synch_catalogue')?>
+
+<label>global_catalogue_id</label>
+<input name="global_catalogue_id" /><br/>
+<input type="submit" value="synchronize" />
+
+<?php echo '</form>'?>
