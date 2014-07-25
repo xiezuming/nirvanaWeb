@@ -10,7 +10,7 @@ const UPLOAD_BASE_PATH = '/var/uploads/wetag_app/';
  * @property Item_model $item_model
  * @property Catalogue_model $catalogue_model
  * @property Meta_model $meta_model
- * @property WordPress_model $wordPress_model
+ * @property Wordpress_model $wordpress_model
  */
 class Item extends CI_Controller {
 	function __construct() {
@@ -18,7 +18,7 @@ class Item extends CI_Controller {
 		$this->load->model ( 'item_model' );
 		$this->load->model ( 'catalogue_model' );
 		$this->load->model ( 'meta_model' );
-		$this->load->model ( 'wordPress_model' );
+		$this->load->model ( 'wordpress_model' );
 	}
 	public function test_page() {
 		$this->load->helper ( 'form' );
@@ -136,23 +136,23 @@ class Item extends CI_Controller {
 			return FALSE;
 		}
 		
-		$this->wordPress_model->db = $wp_db;
+		$this->wordpress_model->db = $wp_db;
 		$wp_db->trans_start ();
 		
 		// update WordPress item table
-		if ($this->wordPress_model->get_item ( $item_id )) {
-			$success = $this->wordPress_model->update_item ( $wp_item_data );
+		if ($this->wordpress_model->get_item ( $item_id )) {
+			$success = $this->wordpress_model->update_item ( $wp_item_data );
 			if ($success)
-				$success = $this->wordPress_model->delete_images ( $item_id );
+				$success = $this->wordpress_model->delete_images ( $item_id );
 		} else {
-			$success = $this->wordPress_model->insert_item ( $wp_item_data );
+			$success = $this->wordpress_model->insert_item ( $wp_item_data );
 		}
 		if ($success) {
 			// update WordPress item image table
 			foreach ( $newImageRowArray as $newImageRow ) {
 				$item_image_id = $newImageRow ['Global_Item_Image_ID'];
 				$item_image_url = 'http://happitail.dyndns.info/images/' . $item ['userId'] . '/' . $newImageRow ['imageName'];
-				$success = $this->wordPress_model->insert_image ( $item_image_id, $item_id, $item_image_url );
+				$success = $this->wordpress_model->insert_image ( $item_image_id, $item_id, $item_image_url );
 				if (! $success)
 					break;
 			}

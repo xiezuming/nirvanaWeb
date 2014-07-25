@@ -8,14 +8,14 @@ const FAILURE = 0;
  *
  * @property Catalogue_model $catalogue_model
  * @property Item_model $item_model
- * @property WordPress_model $wordPress_model
+ * @property Wordpress_model $wordpress_model
  */
 class Catalogue extends CI_Controller {
 	function __construct() {
 		parent::__construct ();
 		$this->load->model ( 'catalogue_model' );
 		$this->load->model ( 'item_model' );
-		$this->load->model ( 'wordPress_model' );
+		$this->load->model ( 'wordpress_model' );
 	}
 	public function test_page() {
 		$this->load->helper ( 'form' );
@@ -107,23 +107,23 @@ class Catalogue extends CI_Controller {
 			return FALSE;
 		}
 		
-		$this->wordPress_model->db = $wp_db;
+		$this->wordpress_model->db = $wp_db;
 		$wp_db->trans_start ();
 		
 		// update WordPress catalgoue table
-		if ($this->wordPress_model->get_catalogue ( $catalogue_id )) {
-			$success = $this->wordPress_model->update_catalogue ( $wp_catalogue_data );
+		if ($this->wordpress_model->get_catalogue ( $catalogue_id )) {
+			$success = $this->wordpress_model->update_catalogue ( $wp_catalogue_data );
 			if ($success)
-				$success = $this->wordPress_model->delete_catalogue_all_relations ( $catalogue_id );
+				$success = $this->wordpress_model->delete_catalogue_all_relations ( $catalogue_id );
 		} else {
-			$success = $this->wordPress_model->insert_catalogue ( $wp_catalogue_data );
+			$success = $this->wordpress_model->insert_catalogue ( $wp_catalogue_data );
 		}
 		if ($success) {
 			// update WordPress catalogue item relation table
 			// TODO postion
 			$position = 0;
 			foreach ( $newRelationArray as $newRelation ) {
-				$success = $this->wordPress_model->insert_catalogue_item_relation ( $newRelation ['Global_Catalogue_Item_ID'], $newRelation ['Global_Catalogue_ID'], $newRelation ['Global_Item_ID'], $position );
+				$success = $this->wordpress_model->insert_catalogue_item_relation ( $newRelation ['Global_Catalogue_Item_ID'], $newRelation ['Global_Catalogue_ID'], $newRelation ['Global_Item_ID'], $position );
 				if (! $success)
 					break;
 				$position ++;
