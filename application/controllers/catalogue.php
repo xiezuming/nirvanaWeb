@@ -142,6 +142,9 @@ class Catalogue extends CI_Controller {
 			// TODO current sort the item order by their global itme id. Need think about it.
 			$position = 0;
 			foreach ( $newRelationArray as $newRelation ) {
+				$success = $this->wordpress_model->delete_catalogue_item_relation ( $newRelation ['Global_Catalogue_Item_ID'] );
+				if (! $success)
+					break;
 				$success = $this->wordpress_model->insert_catalogue_item_relation ( $newRelation ['Global_Catalogue_Item_ID'], $newRelation ['Global_Catalogue_ID'], $newRelation ['Global_Item_ID'], $position );
 				if (! $success)
 					break;
@@ -175,6 +178,7 @@ class Catalogue extends CI_Controller {
 		return $field_names;
 	}
 	private function get_input_data() {
+		log_message ( 'debug', 'input: ' . print_r ( $this->input->post (), TRUE ) );
 		$input_data = array ();
 		foreach ( $this->get_field_names () as $field_name ) {
 			$field_value = $this->input->post ( $field_name );

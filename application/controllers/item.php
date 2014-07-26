@@ -241,6 +241,7 @@ class Item extends CI_Controller {
 		return $field_names;
 	}
 	private function get_input_data() {
+		log_message ( 'debug', 'input: ' . print_r ( $this->input->post (), TRUE ) );
 		$input_data = array ();
 		foreach ( $this->get_field_names () as $field_name ) {
 			$field_value = $this->input->post ( $field_name );

@@ -84,6 +84,13 @@ class Wordpress_model extends CI_Model {
 			log_message ( 'error', 'Wordpress_model.insert_catalogue_item_relation: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 		return $result;
 	}
+	public function delete_catalogue_item_relation($catalogue_item_id) {
+		$this->db->where ( 'Catalogue_Item_ID', $catalogue_item_id );
+		$result = $this->db->delete ( self::TABLE_CATALOGUE_ITEM );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Wordpress_model.delete_catalogue_item_relation: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $result;
+	}
 	public function delete_catalogue_all_relations($catalogue_id) {
 		$this->db->where ( 'Catalogue_ID', $catalogue_id );
 		$result = $this->db->delete ( self::TABLE_CATALOGUE_ITEM );
