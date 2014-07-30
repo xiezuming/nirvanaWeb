@@ -60,7 +60,7 @@ class Item extends CI_Controller {
 			$globalItemId = $item ['Global_Item_ID'];
 			
 			// add the new item into the user default catalogue
-			//$this->catalogue_model->insert_user_default_catalogue_item_relation ( $item );
+			// $this->catalogue_model->insert_user_default_catalogue_item_relation ( $item );
 		}
 		
 		// update image names
@@ -90,41 +90,48 @@ class Item extends CI_Controller {
 			) );
 		}
 		
-		// TODO call python script to resize and upload image files
+		// call python script to resize and upload image files
+		$global_image_id_array = array ();
+		$image_row_array = $this->item_model->get_images ( $globalItemId );
+		foreach ( $image_row_array as $image_row ) {
+			if ($image_row ['synchWp'] == 'N')
+				array_push ( $global_image_id_array, $image_row ['Global_Item_Image_ID'] );
+		}
+		if (count ( $global_image_id_array ) > 0)
+			$this->exec_image_generator_script ( $global_image_id_array );
 		
 		$data ['result'] = SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
-	
 	public function test_synch_item() {
 		$global_item_id = $this->input->post ( 'global_item_id' );
-		if (empty($global_item_id)) {
+		if (empty ( $global_item_id )) {
 			echo 'ERROR: global_item_id is empty.';
 			return;
 		}
-		echo 'Restult: ' . var_export($this->synch_item ( $global_item_id ), TRUE);
+		echo 'Restult: ' . var_export ( $this->synch_item ( $global_item_id ), TRUE );
 	}
 	
 	/**
 	 * Synch the item information to WordPress database
 	 *
-	 * @param $global_item_id: Global_Item_ID
+	 * @param $global_item_id: Global_Item_ID        	
 	 * @return boolean Returns TRUE if success.
 	 */
 	private function synch_item($global_item_id) {
-		log_message('debug', 'Start to synchronize the item to WordPress DB.');
+		log_message ( 'debug', 'Start to synchronize the item to WordPress DB.' );
 		
-		$item = $this->item_model->get_item_by_global_id($global_item_id);
-		if (!$item) {
+		$item = $this->item_model->get_item_by_global_id ( $global_item_id );
+		if (! $item) {
 			log_message ( 'error', 'Item.synch_item: Can not find the item.' . $global_item_id );
 			return FALSE;
 		}
 		
 		// build data
-		$first_image_row = $this->item_model->get_first_image($global_item_id);
+		$first_image_row = $this->item_model->get_first_image ( $global_item_id );
 		$item_photo_url = '';
-		if ($first_image_row && strlen ( $first_image_row['imageName'] ) > 4) {
-			$item_photo_url = 'http://www.happitail.info/ebayimg/' . $item ['userId'] . '/' . $first_image_row['imageName'];
+		if ($first_image_row && strlen ( $first_image_row ['imageName'] ) > 4) {
+			$item_photo_url = 'http://happitail.info/wetagimg/' . $item ['userId'] . '/' . $first_image_row ['imageName'];
 			$postfix = $item ['availability'] == 'NA' ? '-360sold' : '-360';
 			$item_photo_url = substr_replace ( $item_photo_url, $postfix, - 4, 0 );
 		}
@@ -168,7 +175,8 @@ class Item extends CI_Controller {
 			// update WordPress item image table
 			foreach ( $newImageRowArray as $newImageRow ) {
 				$item_image_id = $newImageRow ['Global_Item_Image_ID'];
-				$item_image_url = 'http://happitail.dyndns.info/images/' . $item ['userId'] . '/' . $newImageRow ['imageName'];
+				$item_image_url = 'http://happitail.info/wetagimg/' . $item ['userId'] . '/' . $newImageRow ['imageName'];
+				$item_photo_url = substr_replace ( $item_image_url, '-800', - 4, 0 );
 				$success = $this->wordpress_model->insert_image ( $item_image_id, $global_item_id, $item_image_url );
 				if (! $success)
 					break;
@@ -185,6 +193,24 @@ class Item extends CI_Controller {
 			return TRUE;
 		}
 		return TRUE;
+	}
+	public function test_image_generator() {
+		$global_image_ids = $this->input->post ( 'global_image_ids' );
+		if (empty ( $global_image_ids )) {
+			echo 'ERROR: global_image_ids is empty.';
+			return;
+		}
+		echo 'Restult: <pre>' . $this->exec_image_generator_script ( explode ( ";", $global_image_ids ), TRUE ) . '</pre>';
+	}
+	private function exec_image_generator_script($global_image_id_array, $wait_until_done = FALSE) {
+		$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'imageGenerator.py' . ' ' . escapeshellarg ( json_encode ( $global_image_id_array ) );
+		if (! $wait_until_done)
+			$cmd = $cmd . ' > /dev/null 2>/dev/null &';
+		log_message ( 'debug', $cmd );
+		
+		$result = shell_exec ( 'python ' . $cmd );
+		if ($wait_until_done)
+			return $result;
 	}
 	private function delete_file($file_path) {
 		if (file_exists ( $file_path )) {

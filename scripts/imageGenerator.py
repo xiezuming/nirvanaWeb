@@ -11,6 +11,8 @@ import MySQLdb
 import os
 import urllib
 import ftplib
+import json
+import os
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
 FONT = 'arial.ttf'
@@ -71,12 +73,21 @@ imageList = [1047,1048,1049]
 #imageTuple = cursor.fetchall()
 #for item in imageTuple:
 #    imageList.append(item[0])
-#print imageList
+try:
+    imageList = json.loads(sys.argv[1])
+except:
+    print "ERROR: Falied to parse input argument. argv[1] = " + sys.argv[1]
+    sys.exit(1)
+
 ######################
 
 #hard code image url path
-filepath = "/var/uploads/wetag_app/"
+if os.name == 'nt':
+    filepath = "D:/temp/uploads/wetag_app/"
+else:
+    filepath = "/var/uploads/wetag_app/"
 
+print 'The image id list = ' + str(imageList)
 
 for image in imageList:
   try:

@@ -49,3 +49,14 @@ array_push ( $editable_field_cells, $input );
 <input type="submit" value="synchronize" />
 
 <?php echo '</form>'?>
+
+<hr />
+
+<h3>Resize and Upload Item</h3>
+<?php echo form_open('item/test_image_generator')?>
+
+<label>global_image_ids</label>
+<input name="global_image_ids" /><br/>
+<input type="submit" value="synchronize" />
+
+<?php echo '</form>'?>
