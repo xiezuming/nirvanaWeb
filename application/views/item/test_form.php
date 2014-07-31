@@ -45,7 +45,8 @@ array_push ( $editable_field_cells, $input );
 <?php echo form_open('item/test_synch_item')?>
 
 <label>global_item_id</label>
-<input name="global_item_id" /><br/>
+<input name="global_item_id" />
+<br />
 <input type="submit" value="synchronize" />
 
 <?php echo '</form>'?>
@@ -56,7 +57,11 @@ array_push ( $editable_field_cells, $input );
 <?php echo form_open('item/test_image_generator')?>
 
 <label>global_image_ids</label>
-<input name="global_image_ids" /><br/>
+<input name="global_image_ids" />
+<br />
+<label>wait_until_done</label>
+<?php echo form_checkbox('wait_until_done', 'TRUE', TRUE) ?><br />
 <input type="submit" value="synchronize" />
 
 <?php echo '</form>'?>
+

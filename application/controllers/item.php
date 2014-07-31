@@ -4,6 +4,7 @@ if (! defined ( 'BASEPATH' ))
 const SUCCESS = 1;
 const FAILURE = 0;
 const UPLOAD_BASE_PATH = '/var/uploads/wetag_app/';
+const LOG_BASE_PATH = '/var/log/wetag/';
 
 /**
  *
@@ -196,16 +197,26 @@ class Item extends CI_Controller {
 	}
 	public function test_image_generator() {
 		$global_image_ids = $this->input->post ( 'global_image_ids' );
+		$wait_until_done = $this->input->post ( 'wait_until_done' );
 		if (empty ( $global_image_ids )) {
 			echo 'ERROR: global_image_ids is empty.';
 			return;
 		}
-		echo 'Restult: <pre>' . $this->exec_image_generator_script ( explode ( ";", $global_image_ids ), TRUE ) . '</pre>';
+		echo 'Restult: <pre>' . $this->exec_image_generator_script ( explode ( ";", $global_image_ids ), $wait_until_done ) . '</pre>';
 	}
+	/**
+	 * Call image generator script to resize & upload the image files.
+	 *
+	 * @param array $global_image_id_array        	
+	 * @param boolean $wait_until_done
+	 * @return The shell result if $wait_until_done = TRUE
+	 */
 	private function exec_image_generator_script($global_image_id_array, $wait_until_done = FALSE) {
 		$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'imageGenerator.py' . ' ' . escapeshellarg ( json_encode ( $global_image_id_array ) );
-		if (! $wait_until_done)
-			$cmd = $cmd . ' > /dev/null 2>/dev/null &';
+		if (! $wait_until_done) {
+			$log_file = LOG_BASE_PATH . 'imageGenerator-' . date ( 'Y-m-d' ) . '.log';
+			$cmd = $cmd . ' > ' . $log_file . ' 2>' . $log_file . ' &';
+		}
 		log_message ( 'debug', $cmd );
 		
 		$result = shell_exec ( 'python ' . $cmd );
