@@ -176,7 +176,7 @@ class Item extends CI_Controller {
 			foreach ( $newImageRowArray as $newImageRow ) {
 				$item_image_id = $newImageRow ['Global_Item_Image_ID'];
 				$item_image_url = 'http://happitail.info/wetagimg/' . $item ['userId'] . '/' . $newImageRow ['imageName'];
-				$item_photo_url = substr_replace ( $item_image_url, '-800', - 4, 0 );
+				$item_image_url = substr_replace ( $item_image_url, '-800', - 4, 0 );
 				$success = $this->wordpress_model->insert_image ( $item_image_id, $global_item_id, $item_image_url );
 				if (! $success)
 					break;
