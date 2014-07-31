@@ -1,6 +1,7 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
+
 const SUCCESS = 1;
 const FAILURE = 0;
 
@@ -83,6 +84,10 @@ class Catalogue extends CI_Controller {
 			) );
 		}
 		
+		// post the catalogue
+		$result = $this->post_catalogue ( $global_catalogue_id );
+		log_message ( 'debug', 'update_catalogue.post_catalogue: ' . $result );
+		
 		$data ['result'] = SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
@@ -160,6 +165,132 @@ class Catalogue extends CI_Controller {
 		} else {
 			log_message ( 'debug', 'Catalogue.synch_catalogue: Synchronize to WordPress database successfully.' );
 			return TRUE;
+		}
+	}
+	public function test_post_catalogue() {
+		$global_catalogue_id = $this->input->post ( 'global_catalogue_id' );
+		if (empty ( $global_catalogue_id )) {
+			echo 'ERROR: global_catalogue_id is empty.';
+			return;
+		}
+		echo 'Restult: ' . var_export ( $this->post_catalogue ( $global_catalogue_id ), TRUE );
+	}
+	private function post_catalogue($global_catalogue_id) {
+		log_message ( 'debug', 'Start to post the catalogue to WordPress.' );
+		
+		$catalogue = $this->catalogue_model->get_catalogue_by_global_id ( $global_catalogue_id );
+		if (! $catalogue) {
+			log_message ( 'error', 'Catalogue.synch_catalogue: Can not find the catalogue.' . $global_catalogue_id );
+			return FALSE;
+		}
+		
+		$this->load->library ( 'xmlrpc' );
+		$this->xmlrpc->server ( $this->config->config ['wp_rpc'] ['url'] );
+		
+		$title = $catalogue ['catalogueName'];
+		$post_content = $catalogue ['postContent'] . "[product-catalogue id='" . $global_catalogue_id . "']";
+		
+		if ($catalogue ['wpPostId']) {
+			$response = $this->edit_post ( $this->xmlrpc, $catalogue ['wpPostId'], $title, $post_content );
+		} else {
+			$response = $this->new_post ( $this->xmlrpc, $title, $post_content );
+			if ($response) {
+				$catalogue ['wpPostId'] = $response;
+				$post_info = $this->get_post ( $this->xmlrpc, $catalogue ['wpPostId'] );
+				if ($post_info)
+					$catalogue ['wpPostUrl'] = $post_info ['link'];
+				else
+					$catalogue ['wpPostUrl'] = 'http://happitail.info/catalog/?p=' . $catalogue ['wpPostId'];
+			}
+		}
+		if ($response) {
+			$catalogue ['synchPost'] = 'Y';
+			if ($this->catalogue_model->update_catalogue ( $catalogue ))
+				return 'New/Edit post successfully.';
+			else
+				return 'Falied to update the catalogue table.';
+		}
+	}
+	/**
+	 * Create a post.
+	 *
+	 * @param CI_Xmlrpc $client        	
+	 * @param string $title        	
+	 * @param string $post_content        	
+	 * @return integer post_id if OK, otherwise FALSE.
+	 */
+	private function new_post($client, $title, $post_content) {
+		$client->method ( 'wp.newPost' );
+		log_message ( 'debug', $client->method . ': ' . $title );
+		$client->request ( array (
+				0, // blog_id
+				$this->config->config ['wp_rpc'] ['user'],
+				$this->config->config ['wp_rpc'] ['password'],
+				array (
+						array (
+								'post_title' => $title,
+								'post_content' => $post_content,
+								'post_status' => 'publish',
+								'post_type' => 'post' 
+						),
+						'struct' 
+				) 
+		) );
+		return $this->xmlrpc_send_request ( $client );
+	}
+	/**
+	 * Edit the post.
+	 *
+	 * @param CI_Xmlrpc $client        	
+	 * @param inetger $post_id        	
+	 * @param string $title        	
+	 * @param string $post_content        	
+	 * @return bool True if OK, otherwise FALSE.
+	 */
+	private function edit_post($client, $post_id, $title, $post_content) {
+		$client->method ( 'wp.editPost' );
+		log_message ( 'debug', $client->method . ': ' . $post_id );
+		$client->request ( array (
+				0, // blog_id
+				$this->config->config ['wp_rpc'] ['user'],
+				$this->config->config ['wp_rpc'] ['password'],
+				$post_id,
+				array (
+						array (
+								'post_title' => $title,
+								'post_content' => $post_content 
+						),
+						'struct' 
+				) 
+		) );
+		return $this->xmlrpc_send_request ( $client );
+	}
+	/**
+	 * Get the post
+	 *
+	 * @param CI_Xmlrpc $client        	
+	 * @param integer $post_id        	
+	 * @return The array of post information if OK, otherwise False.
+	 */
+	private function get_post($client, $post_id) {
+		$client->method ( 'wp.getPost' );
+		log_message ( 'debug', $client->method . ': ' . $post_id );
+		$client->request ( array (
+				0, // blog_id
+				$this->config->config ['wp_rpc'] ['user'],
+				$this->config->config ['wp_rpc'] ['password'],
+				$post_id 
+		) );
+		return $this->xmlrpc_send_request ( $client );
+	}
+	private function xmlrpc_send_request($client) {
+		if ($client->send_request ()) {
+			$response = $client->display_response ();
+			log_message ( 'debug', $client->method . ': response = ' . print_r ( $response, TRUE ) );
+			return $response;
+		} else {
+			log_message ( 'error', $client->method . ': ' . $client->display_error () );
+			return FALSE;
 		}
 	}
 	private function delete_file($file_path) {

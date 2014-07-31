@@ -35,3 +35,14 @@ array_push ( $editable_field_cells, $input );
 <input type="submit" value="synchronize" />
 
 <?php echo '</form>'?>
+
+<hr />
+
+<h3>Post the Catalogue to WordPress</h3>
+<?php echo form_open('catalogue/test_post_catalogue')?>
+
+<label>global_catalogue_id</label>
+<input name="global_catalogue_id" /><br/>
+<input type="submit" value="post" />
+
+<?php echo '</form>'?>
