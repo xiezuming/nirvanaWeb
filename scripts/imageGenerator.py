@@ -15,7 +15,7 @@ import json
 import os
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
-FONT = 'arial.ttf'
+FONT = os.path.dirname(os.path.realpath(__file__)) + '/arial.ttf'
 
 def add_watermark(in_file, text, out_file, angle=23, opacity=0.8):
     img = Image.open(in_file).convert('RGB')
@@ -101,18 +101,25 @@ for image in imageList:
     bigpicture = filename.split('.')[0]+'-800.jpg' 
     watermark = filename.split('.')[0]+'-360sold.jpg'
     
+    print "  Start to create image files for " + filename
+
     im = Image.open(filepath+userid+'/'+filename)
     size = im.size
     sizetext = str(max(size))+","+str(min(size))
-    print "Current size", sizetext
+    print "  Current size", sizetext
+
     im1 = resize(im,360)
     im1.save(filepath+userid+'/'+thumnail)
+    print "  Create thumnial image file successfully. " + filepath+userid+'/'+thumnail
+    
     im2 = resize(im,800)
     im2.save(filepath+userid+'/'+bigpicture)
+    print "  Create big image file successfully. " + filepath+userid+'/'+bigpicture
+    
     add_watermark(filepath+userid+'/'+thumnail,'SOLD!',filepath+userid+'/'+watermark)
     size = im1.size
     sizetext = str(max(size))+","+str(min(size))
-    print "New size", sizetext
+    print "  Create watermark file successfully. New size", sizetext
     
     #upload to godaddy
     #establish ftp connection
