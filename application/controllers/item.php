@@ -215,7 +215,7 @@ class Item extends CI_Controller {
 		$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'imageGenerator.py' . ' ' . escapeshellarg ( json_encode ( $global_image_id_array ) );
 		if (! $wait_until_done) {
 			$log_file = LOG_BASE_PATH . 'imageGenerator-' . date ( 'Y-m-d' ) . '.log';
-			$cmd = $cmd . ' > ' . $log_file . ' 2>' . $log_file . ' &';
+			$cmd = $cmd . ' >> ' . $log_file . ' 2>>' . $log_file . ' &';
 		}
 		log_message ( 'debug', $cmd );
 		
