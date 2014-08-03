@@ -12,6 +12,14 @@ class Item_model extends CI_Model {
 		$result = $query->row_array ();
 		return $result;
 	}
+	public function get_items_by_user_id($userId) {
+		$this->db->where ( 'userId', $userId );
+		$query = $this->db->get ( self::TABLE_ITEM );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Item_model.get_items_by_userId: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		$result = $query->result_array ();
+		return $result;
+	}
 	public function get_item_by_global_id($global_item_id) {
 		$this->db->where ( 'Global_Item_ID', $global_item_id );
 		$query = $this->db->get ( self::TABLE_ITEM );

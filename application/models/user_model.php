@@ -1,19 +1,25 @@
 <?php
 class User_model extends CI_Model {
 	const TABLE_USER = 'user';
-	public function create_user($userName, $password) {
-		$userId = $this->gen_uuid ();
-		$data = array (
-				'userId' => $userId,
-				'userName' => $userName,
-				'password' => md5 ( $password ) 
+	public function create_user($data) {
+		$user = array (
+				'userId' => $this->gen_uuid (),
+				'userName' => $data ['userName'],
+				'password' => md5 ( $data ['password'] ),
+				'firstName' => $data ['firstName'],
+				'lastName' => $data ['lastName'] 
 		);
-		$this->db->insert ( self::TABLE_USER, $data );
-		return $userId;
+		$this->db->insert ( self::TABLE_USER, $user );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'User_model.create_user: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return FALSE;
+		} else {
+			return TRUE;
+		}
 	}
 	public function get_user($userId) {
 		$where = array (
-				'userId' => $userId
+				'userId' => $userId 
 		);
 		$query = $this->db->get_where ( self::TABLE_USER, $where );
 		$user = $query->row_array ();

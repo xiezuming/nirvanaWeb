@@ -1,7 +1,6 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
-
 const SUCCESS = 1;
 const FAILURE = 0;
 
@@ -24,6 +23,41 @@ class Catalogue extends CI_Controller {
 		
 		$data ['field_names'] = $this->get_field_names ();
 		$this->load->view ( 'catalogue/test_form', $data );
+	}
+	public function get_catalogue_ids($userId) {
+		$catalogue_id_array = array ();
+		$catalogues_row = $this->catalogue_model->get_catalogues_by_user_id ( $userId );
+		foreach ( $catalogues_row as $catalogue ) {
+			array_push ( $catalogue_id_array, $catalogue ['catalogueId'] );
+		}
+		
+		$data ['result'] = SUCCESS;
+		$data ['data'] = array (
+				'catalogue_ids' => $catalogue_id_array 
+		);
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function get_catalogue($catalogueId) {
+		$catalogue = $this->catalogue_model->get_catalogue ( $catalogueId );
+		if ($catalogue) {
+			$item_ids = array ();
+			$catalogue_items_row = $this->catalogue_model->get_catalogue_item_relations ( $catalogue ['Global_Catalogue_ID'] );
+			foreach ( $catalogue_items_row as $catalogue_item ) {
+				$item = $this->item_model->get_item_by_global_id ( $catalogue_item ['Global_Item_ID'] );
+				array_push ( $item_ids, $item ['itemId'] );
+			}
+			$catalogue ['itemIds'] = implode ( ";", $item_ids );
+			
+			$data ['result'] = SUCCESS;
+			$data ['data'] = array (
+					'catalogue' => $catalogue 
+			);
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Can not find the catalogue: ' . $catalogueId;
+		}
+		
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function update_catalogue() {
 		$input_data = $this->get_input_data ();
@@ -75,6 +109,14 @@ class Catalogue extends CI_Controller {
 		}
 		$this->db->trans_complete ();
 		
+		if ($this->db->trans_status () === FALSE) {
+			log_message ( 'error', 'Catalogue.update_catalogue: Failed to update the database.' );
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Failed to update the database.';
+			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+			return;
+		}
+		
 		// synchronize to wp database
 		$success = $this->synch_catalogue ( $global_catalogue_id );
 		if ($success) {
@@ -85,10 +127,26 @@ class Catalogue extends CI_Controller {
 		}
 		
 		// post the catalogue
-		$result = $this->post_catalogue ( $global_catalogue_id );
-		log_message ( 'debug', 'update_catalogue.post_catalogue: ' . $result );
+		$success = $this->post_catalogue ( $global_catalogue_id );
 		
 		$data ['result'] = SUCCESS;
+		$data ['data'] = $this->catalogue_model->get_catalogue_by_global_id ( $global_catalogue_id );
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function get_catalogue_post_url($catalogueId) {
+		if (empty ( $catalogueId )) {
+			echo 'ERROR: catalogueId is empty.';
+			return;
+		}
+		$post_url = '';
+		$catalogue = $this->catalogue_model->get_catalogue ( $catalogueId );
+		if ($catalogue && ! empty ( $catalogue ['wpPostUrl'] )) {
+			$post_url = $catalogue ['wpPostUrl'];
+		}
+		$data ['result'] = SUCCESS;
+		$data ['data'] = array (
+				'post_url' => $post_url 
+		);
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function test_synch_catalogue() {
@@ -206,10 +264,13 @@ class Catalogue extends CI_Controller {
 		if ($response) {
 			$catalogue ['synchPost'] = 'Y';
 			if ($this->catalogue_model->update_catalogue ( $catalogue ))
-				return 'New/Edit post successfully.';
-			else
-				return 'Falied to update the catalogue table.';
+				return TRUE;
+			else {
+				log_message ( 'error', 'catalogue.post_catalogue: Falied to update the catalogue table.' );
+				return FALSE;
+			}
 		}
+		return FALSE;
 	}
 	/**
 	 * Create a post.

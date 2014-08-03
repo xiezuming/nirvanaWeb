@@ -28,6 +28,49 @@ class Item extends CI_Controller {
 		$data ['field_names'] = $this->get_field_names ();
 		$this->load->view ( 'item/test_form', $data );
 	}
+	public function get_item_ids($userId) {
+		$item_id_array = array ();
+		$items_row = $this->item_model->get_items_by_user_id ( $userId );
+		foreach ( $items_row as $item ) {
+			array_push ( $item_id_array, $item ['itemId'] );
+		}
+		
+		$data ['result'] = SUCCESS;
+		$data ['data'] = array (
+				'item_ids' => $item_id_array 
+		);
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function get_item($itemId) {
+		$item = $this->item_model->get_item ( $itemId );
+		if ($item) {
+			// convert date to timestamp
+			foreach ( $item as $field_name => $field_value ) {
+				if ($this->endsWith ( $field_name, 'Time' )) {
+					$field_value = strtotime ( $field_value );
+					$item [$field_name] = $field_value;
+				}
+			}
+			// image names
+			$images = $this->item_model->get_images ( $item ['Global_Item_ID'] );
+			$image_names = array ();
+			foreach ( $images as $image )
+				array_push ( $image_names, $image ['imageName'] );
+			$item ['photoNames'] = implode ( ";", $image_names );
+			if (count($image_names) > 0)
+				$item['defaultPhotoName'] = $image_names[0];
+			
+			$data ['result'] = SUCCESS;
+			$data ['data'] = array (
+					'item' => $item 
+			);
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Can not find the item: ' . $itemId;
+		}
+		
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 	public function update_item() {
 		$input_data = $this->get_input_data ();
 		$input_data ['synchWp'] = 'N';
@@ -102,6 +145,24 @@ class Item extends CI_Controller {
 			$this->exec_image_generator_script ( $global_image_id_array );
 		
 		$data ['result'] = SUCCESS;
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function get_item_current_images_name($itemId) {
+		if (empty ( $itemId )) {
+			echo 'ERROR: itemId is empty.';
+			return;
+		}
+		$image_name_array = array ();
+		$item = $this->item_model->get_item ( $itemId );
+		if ($item) {
+			$image_row_array = $this->item_model->get_images ( $item ['Global_Item_ID'] );
+			foreach ( $image_row_array as $image_row )
+				array_push ( $image_name_array, $image_row ['imageName'] );
+		}
+		$data ['result'] = SUCCESS;
+		$data ['data'] = array (
+				'images_name' => $image_name_array 
+		);
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function test_synch_item() {
@@ -208,7 +269,7 @@ class Item extends CI_Controller {
 	 * Call image generator script to resize & upload the image files.
 	 *
 	 * @param array $global_image_id_array        	
-	 * @param boolean $wait_until_done
+	 * @param boolean $wait_until_done        	
 	 * @return The shell result if $wait_until_done = TRUE
 	 */
 	private function exec_image_generator_script($global_image_id_array, $wait_until_done = FALSE) {
@@ -272,6 +333,9 @@ class Item extends CI_Controller {
 				"salesChannel" => "salesChannel",
 				"availability" => "availability",
 				"desc" => "desc",
+				"priceGroup" => "priceGroup",
+				"catNum" => "catNum",
+				"similarItemUrl" => "similarItemUrl",
 				"recCreateTime" => "recCreateTime",
 				"recUpdateTime" => "recUpdateTime" 
 		);

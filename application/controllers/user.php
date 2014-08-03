@@ -17,6 +17,34 @@ class User extends CI_Controller {
 		$this->load->helper ( 'form' );
 		$this->load->view ( 'user/user_form' );
 	}
+	public function sign_up() {
+		$this->load->helper ( 'form' );
+		$this->load->library ( 'form_validation' );
+		
+		$this->form_validation->set_rules ( 'userName', 'User Name', 'required|valid_email|max_length[45]|is_unique[user.userName]' );
+		$this->form_validation->set_rules ( 'firstName', 'First Name', 'required||max_length[45]' );
+		$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
+		$this->form_validation->set_rules ( 'password', 'Password', 'required|matches[password_confirm]' );
+		$this->form_validation->set_rules ( 'password_confirm', 'Password Confirmation', 'required' );
+		
+		if ($this->input->post () && $this->form_validation->run ()) {
+			if ($this->user_model->create_user ( $this->input->post () )) {
+				$this->load->view ( 'user/jump_sign_up_success' );
+				return;
+			} else {
+				echo "DB ERROR.";
+				return;
+			}
+		}
+		$data = $this->input->post ();
+		$data ['title'] = 'Sign Up';
+		$this->load->view ( 'templates/header_app', $data );
+		$this->load->view ( 'user/sign_up', $data );
+		$this->load->view ( 'templates/footer_app' );
+	}
+	public function sign_up_success() {
+		echo "SUCCESS";
+	}
 	public function create_user() {
 		$userName = $this->input->post ( 'userName' );
 		$password = $this->input->post ( 'password' );

@@ -2,6 +2,13 @@
 class Catalogue_model extends CI_Model {
 	const TABLE_CATALOGUE = 'catalogue';
 	const TABLE_CATALOGUE_ITEM = 'catalogue_item';
+	public function get_catalogues_by_user_id($userId) {
+		$this->db->where ( 'userId', $userId );
+		$query = $this->db->get ( self::TABLE_CATALOGUE );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Catalogue_model.get_catalogues_by_user_id: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $query->result_array ();
+	}
 	public function get_catalogue($catalogueId) {
 		$this->db->where ( 'catalogueId', $catalogueId );
 		$query = $this->db->get ( self::TABLE_CATALOGUE );
@@ -94,7 +101,7 @@ class Catalogue_model extends CI_Model {
 	}
 	public function get_catalogue_item_relations($global_catalogue_id) {
 		$this->db->where ( 'Global_Catalogue_ID', $global_catalogue_id );
-		$this->db->order_by("Global_Item_ID", "desc");
+		$this->db->order_by ( "Global_Item_ID", "desc" );
 		$query = $this->db->get ( self::TABLE_CATALOGUE_ITEM );
 		return $query->result_array ();
 	}
