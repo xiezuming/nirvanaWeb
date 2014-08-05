@@ -147,7 +147,7 @@ class Item extends CI_Controller {
 		$data ['result'] = SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
-	public function get_item_current_images_name($itemId) {
+	public function get_item_image_names($itemId) {
 		if (empty ( $itemId )) {
 			echo 'ERROR: itemId is empty.';
 			return;
@@ -161,7 +161,7 @@ class Item extends CI_Controller {
 		}
 		$data ['result'] = SUCCESS;
 		$data ['data'] = array (
-				'images_name' => $image_name_array 
+				'image_names' => $image_name_array 
 		);
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
