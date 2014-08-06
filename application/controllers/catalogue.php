@@ -363,6 +363,7 @@ class Catalogue extends CI_Controller {
 		$field_names = array (
 				"catalogueId" => "catalogueId",
 				"catalogueName" => "catalogueName",
+				"postContent" => "postContent",
 				"userId" => "userId",
 				"recCreateTime" => "recCreateTime",
 				"recUpdateTime" => "recUpdateTime" 
