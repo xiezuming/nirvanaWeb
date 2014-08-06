@@ -1,3 +1,7 @@
+html {
+	width: 100%;
+}
+
 body {
 	margin: 0;
 	padding: 0;
@@ -5,6 +9,7 @@ body {
 	font-size: 14px;
 	color: #333;
 	background-color: #fff;
+	width: 100%;
 }
 
 a {
@@ -495,6 +500,29 @@ textarea.value_text {
 label.value_text {
 	color: #050;
 	font: bold 84% 'trebuchet ms', helvetica, sans-serif;
+}
+
+#signup table {
+	margin: 0 auto;
+}
+
+#signup td {
+	padding: 3px;
+}
+
+#signup label {
+	font-family: sans-serif;
+	font-size: 16px;
+}
+
+#signup input {
+	font-family: sans-serif;
+	font-size: 14px;
+	border:1px solid #BBBBBB;
+}
+
+#signup input[type=submit] {
+	font-size: 18px;
 }
 
 label.label_text {

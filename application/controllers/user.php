@@ -22,10 +22,12 @@ class User extends CI_Controller {
 		$this->load->library ( 'form_validation' );
 		
 		$this->form_validation->set_rules ( 'userName', 'User Name', 'required|valid_email|max_length[45]|is_unique[user.userName]' );
-		$this->form_validation->set_rules ( 'firstName', 'First Name', 'required||max_length[45]' );
+		$this->form_validation->set_rules ( 'firstName', 'First Name', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'password', 'Password', 'required|matches[password_confirm]' );
 		$this->form_validation->set_rules ( 'password_confirm', 'Password Confirmation', 'required' );
+		$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
+		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
 		
 		if ($this->input->post () && $this->form_validation->run ()) {
 			if ($this->user_model->create_user ( $this->input->post () )) {

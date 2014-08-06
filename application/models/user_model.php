@@ -7,7 +7,9 @@ class User_model extends CI_Model {
 				'userName' => $data ['userName'],
 				'password' => md5 ( $data ['password'] ),
 				'firstName' => $data ['firstName'],
-				'lastName' => $data ['lastName'] 
+				'lastName' => $data ['lastName'],
+				'phoneNumber' => $data ['phoneNumber'],
+				'wechatId' => $data ['wechatId'] 
 		);
 		$this->db->insert ( self::TABLE_USER, $user );
 		if ($this->db->_error_number ()) {
