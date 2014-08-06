@@ -194,7 +194,7 @@ class Item extends CI_Controller {
 		$item_photo_url = '';
 		if ($first_image_row && strlen ( $first_image_row ['imageName'] ) > 4) {
 			$item_photo_url = 'http://happitail.info/wetagimg/' . $item ['userId'] . '/' . $first_image_row ['imageName'];
-			$postfix = $item ['availability'] == 'NA' ? '-360sold' : '-360';
+			$postfix = $item ['availability'] == 'AB' ? '-360' : '-360sold';
 			$item_photo_url = substr_replace ( $item_photo_url, $postfix, - 4, 0 );
 		}
 		$condition_row = $this->meta_model->get_meta_code ( 2, $item ['condition'] );
