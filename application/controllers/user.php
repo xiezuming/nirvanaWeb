@@ -80,9 +80,8 @@ class User extends CI_Controller {
 			if ($user) {
 				if ($user ['password'] == md5 ( $password )) {
 					$data ['result'] = SUCCESS;
-					$data ['data'] = array (
-							'userId' => $user ['userId'] 
-					);
+					$user ['password'] = '';
+					$data ['data'] = $user;
 				} else {
 					$data ['result'] = FAILURE;
 					$data ['message'] = 'That password is incorrect. Be sure you\'re using the password for your WeTag account.';

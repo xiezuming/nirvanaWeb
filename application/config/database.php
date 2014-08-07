@@ -79,7 +79,7 @@ $db['happitail']['dbcollat'] = 'utf8_general_ci';
 $db['happitail']['swap_pre'] = '';
 $db['happitail']['autoinit'] = TRUE;
 $db['happitail']['stricton'] = FALSE;
-
+/*
 $db['wp']['hostname'] = 'hap1418803381356.db.9606950.hostedresource.com';
 $db['wp']['username'] = 'hap1418803381356';
 $db['wp']['password'] = 'change_me****************************';
@@ -95,6 +95,9 @@ $db['wp']['dbcollat'] = 'utf8_general_ci';
 $db['wp']['swap_pre'] = '';
 $db['wp']['autoinit'] = FALSE;
 $db['wp']['stricton'] = FALSE;
+*/
+$db['wp'] = $db['local'];
+$db['wp']['database'] = 'wp';
 
 /* End of file database.php */
 /* Location: ./application/config/database.php */

@@ -22,7 +22,7 @@ $config['base_url'] = $base_url_arr[$active_item];
 
 $config['wp_rpc']['url'] = 'http://happitail.info/catalog/xmlrpc.php';
 $config['wp_rpc']['user'] = 'xiezuming';
-$config['wp_rpc']['password'] = 'test1234';
+$config['wp_rpc']['password'] = 'test12345';
 
 /*
 |--------------------------------------------------------------------------
