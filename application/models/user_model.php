@@ -11,7 +11,7 @@ class User_model extends CI_Model {
 				'lastName' => $data ['lastName'],
 				'phoneNumber' => $data ['phoneNumber'],
 				'wechatId' => $data ['wechatId'],
-				'zipcode' => $data ['zipcode']
+				'zipcode' => $data ['zipcode'] 
 		);
 		$this->db->insert ( self::TABLE_USER, $user );
 		if ($this->db->_error_number ()) {
@@ -57,6 +57,18 @@ class User_model extends CI_Model {
 		) );
 		if ($this->db->_error_number ()) {
 			log_message ( 'error', 'User_model.reset_password: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return FALSE;
+		} else {
+			return TRUE;
+		}
+	}
+	public function update_wish_list($user_id, $wish_list) {
+		$this->db->where ( 'userId', $user_id );
+		$this->db->update ( self::TABLE_USER, array (
+				'wishList' => $wish_list 
+		) );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'User_model.update_wish_list: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 			return FALSE;
 		} else {
 			return TRUE;

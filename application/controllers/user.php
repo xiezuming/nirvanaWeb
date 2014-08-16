@@ -191,6 +191,22 @@ class User extends CI_Controller {
 		$this->load->view ( 'user/reset_password', $data );
 		$this->load->view ( 'templates/footer' );
 	}
+	public function update_wish_list() {
+		$user_id = $this->input->post ( 'userId' );
+		$wish_list = $this->input->post ( 'wishList' );
+		if (empty ( $user_id )) {
+			$data ['result'] = FAILURE;
+			$data ['userId'] = 'Internal Error: userId is empty.';
+		} else {
+			if ($this->user_model->update_wish_list ( $user_id, $wish_list )) {
+				$data ['result'] = SUCCESS;
+			} else {
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'Failed to update DB.';
+			}
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 }
 
 ?>
