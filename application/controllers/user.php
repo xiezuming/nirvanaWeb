@@ -21,13 +21,14 @@ class User extends CI_Controller {
 		$this->load->helper ( 'form' );
 		$this->load->library ( 'form_validation' );
 		
-		$this->form_validation->set_rules ( 'userName', 'User Name', 'required|valid_email|max_length[45]|is_unique[user.userName]' );
+		$this->form_validation->set_rules ( 'userName', 'Email Address', 'required|valid_email|max_length[45]|is_unique[user.userName]' );
 		$this->form_validation->set_rules ( 'firstName', 'First Name', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'password', 'Password', 'required|matches[password_confirm]' );
 		$this->form_validation->set_rules ( 'password_confirm', 'Password Confirmation', 'required' );
 		$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
 		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
+		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'max_length[10]' );
 		
 		if ($this->input->post () && $this->form_validation->run ()) {
 			if ($this->user_model->create_user ( $this->input->post () )) {
@@ -93,17 +94,102 @@ class User extends CI_Controller {
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
-	private function check_token() {
-		// TODO add token check
-		return NULL;
-		$userId = $this->input->post ( 'userId' );
-		$token = $this->input->post ( 'token' );
-		$check = $this->inv_user_model->check_user ( $userId, $token );
-		if ($check) {
+	public function reset_password_mail() {
+		$this->load->helper ( 'url' );
+		
+		if (! isset ( $_POST ['email_address'] )) {
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'Token Error.';
-			return $data;
+			$data ['message'] = 'The email is empty';
+		} else {
+			$email_address = $this->input->post ( 'email_address', true );
+			log_message ( 'debug', 'User.reset_password_mail: $email_address = ' . $email_address );
+			
+			$user = $this->user_model->query_user ( $email_address );
+			
+			if ($user) {
+				$user_id = $user ['userId'];
+				$reset_key = $this->user_model->create_reset_key ( $user_id );
+				if ($reset_key) {
+					// load email library
+					$this->load->library ( 'email' );
+					// construct email
+					$this->email->from ( 'noreply@wetagapp.com', "WeTag" );
+					$this->email->to ( $email_address );
+					$this->email->subject ( "[WeTag] How to reset your password" );
+					$link = site_url ( 'user/reset_password/' . $user_id . '/' . $reset_key );
+					$this->email->message ( $this->load->view ( 'user/reset_password_mail', array (
+							'link' => $link 
+					), TRUE ) );
+					if ($this->email->send ()) {
+						$data ['result'] = SUCCESS;
+						$data ['message'] = 'Instructions on how to reset your password have been sent to ' . $email_address . '.';
+					} else {
+						log_message ( 'error', 'Can not send the email: ' . $this->email->print_debugger () );
+						$data ['result'] = FAILURE;
+						$data ['message'] = 'Internal Error: Can not send the email.';
+					}
+				} else {
+					$data ['result'] = FAILURE;
+					$data ['message'] = 'Internal Error';
+				}
+			} else {
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'The email is invalid';
+			}
 		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function reset_password($user_id = '', $reset_key = '') {
+		if (empty ( $user_id ))
+			$user_id = $this->input->post ( 'user_id' );
+		if (empty ( $reset_key ))
+			$reset_key = $this->input->post ( 'reset_key' );
+		
+		if (empty ( $user_id ) || empty ( $reset_key )) {
+			show_error ( 'Error URL.' );
+		}
+		
+		$reset_row = $this->user_model->get_reset_row ( $reset_key );
+		if (! $reset_row || $reset_row ['userId'] != $user_id) {
+			show_error ( 'Error URL.' );
+		}
+		
+		$key_used = $reset_row ['key_used'];
+		if ($key_used != 'N') {
+			show_error ( 'Used key. Send reset request again.' );
+		}
+		
+		$request_time = $reset_row ['request_time'];
+		if (time () - strtotime ( $request_time ) > 3600) { // 1 Hour
+			show_error ( 'Invalid key. Send reset request again.' );
+		}
+		
+		$this->load->helper ( 'form' );
+		$this->load->library ( 'form_validation' );
+		
+		$this->form_validation->set_rules ( 'password', 'Password', 'required|matches[password_confirm]' );
+		$this->form_validation->set_rules ( 'password_confirm', 'Password Confirmation', 'required' );
+		
+		if ($this->input->post () && $this->form_validation->run ()) {
+			if ($this->user_model->reset_password ( $user_id, $this->input->post ( 'password' ) )) {
+				$this->user_model->clear_reset_key ( $reset_key );
+				$data ['title'] = 'Reset Password';
+				$this->load->view ( 'templates/header', $data );
+				$this->load->view ( 'user/reset_password_success', $data );
+				$this->load->view ( 'templates/footer' );
+				return;
+			} else {
+				show_error ( 'DB Error.' );
+			}
+		}
+		
+		$data ['title'] = 'Reset Password';
+		$data ['user_id'] = $user_id;
+		$data ['reset_key'] = $reset_key;
+		
+		$this->load->view ( 'templates/header', $data );
+		$this->load->view ( 'user/reset_password', $data );
+		$this->load->view ( 'templates/footer' );
 	}
 }
 

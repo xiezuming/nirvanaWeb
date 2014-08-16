@@ -27,3 +27,11 @@
 <?php echo '</form>'?>
 <hr />
 
+<p>Send Reset Password Mail</p>
+<?php echo form_open('user/reset_password_mail')?>
+<label>email_address</label>
+<input name="email_address" />
+<br />
+<input type="submit" value="Send" />
+<?php echo '</form>'?>
+<hr />

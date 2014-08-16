@@ -6,7 +6,7 @@
 <div id='signup'>
 	<table>
 		<tr>
-			<td><label><?php echo $red_star?>User Name:</label></td>
+			<td><label><?php echo $red_star?>Email Address:</label></td>
 		</tr>
 		<tr>
 			<td><input type='email' name='userName'
@@ -40,6 +40,12 @@
 		</tr>
 		<tr>
 			<td><?php echo form_input('wechatId', set_value('wechatId'), 'size="25"');?></td>
+		</tr>
+		<tr>
+			<td><label>ZIP Code:</label></td>
+		</tr>
+		<tr>
+			<td><?php echo form_input('zipcode', set_value('zipcode'), 'size="25"');?></td>
 		</tr>
 		<tr>
 			<td colspan='2' align='center'><input type="submit" value="Create" /></td>

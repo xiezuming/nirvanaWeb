@@ -1,6 +1,7 @@
 <?php
 class User_model extends CI_Model {
 	const TABLE_USER = 'user';
+	const TABLE_RESET = 'user_reset';
 	public function create_user($data) {
 		$user = array (
 				'userId' => $this->gen_uuid (),
@@ -9,7 +10,8 @@ class User_model extends CI_Model {
 				'firstName' => $data ['firstName'],
 				'lastName' => $data ['lastName'],
 				'phoneNumber' => $data ['phoneNumber'],
-				'wechatId' => $data ['wechatId'] 
+				'wechatId' => $data ['wechatId'],
+				'zipcode' => $data ['zipcode']
 		);
 		$this->db->insert ( self::TABLE_USER, $user );
 		if ($this->db->_error_number ()) {
@@ -48,21 +50,50 @@ class User_model extends CI_Model {
 		}
 		return NULL;
 	}
-	public function logout($userId) {
-		$data = array (
-				'token' => NULL 
-		);
-		$this->db->where ( 'userId', $userId );
-		$this->db->update ( self::TABLE_USER, $data );
+	public function reset_password($user_id, $password) {
+		$this->db->where ( 'userId', $user_id );
+		$this->db->update ( self::TABLE_USER, array (
+				'password' => md5 ( $password ) 
+		) );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'User_model.reset_password: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return FALSE;
+		} else {
+			return TRUE;
+		}
 	}
-	public function check_user($userId, $token) {
-		$where = array (
+	public function create_reset_key($userId) {
+		$reset_key = $this->gen_uuid ();
+		$date = array (
 				'userId' => $userId,
-				'token' => $token 
+				'reset_key' => $reset_key 
 		);
-		$query = $this->db->get_where ( self::TABLE_USER, $where );
-		
-		return ($query->row_array () == NULL);
+		$this->db->insert ( self::TABLE_RESET, $date );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'User_model.create_reset: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return FALSE;
+		} else {
+			return $reset_key;
+		}
+	}
+	public function get_reset_row($reset_key) {
+		$query = $this->db->get_where ( self::TABLE_RESET, array (
+				'reset_key' => $reset_key 
+		) );
+		$reset_row = $query->row_array ();
+		return $reset_row;
+	}
+	public function clear_reset_key($reset_key) {
+		$this->db->where ( 'reset_key', $reset_key );
+		$this->db->update ( self::TABLE_RESET, array (
+				'key_used' => 'Y' 
+		) );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'User_model.clear_reset_key: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return FALSE;
+		} else {
+			return TRUE;
+		}
 	}
 	function rand_string($length) {
 		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
