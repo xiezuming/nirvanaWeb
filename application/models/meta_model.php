@@ -34,5 +34,12 @@ class Meta_model extends CI_Model {
 		);
 		return $this->db->get_where ( self::TABLE_CODE, $where )->row_array ();
 	}
+	public function get_meta_codes($type_id) {
+		$this->db->select ( 'key, value' );
+		$this->db->order_by ( 'pos', 'asc' );
+		return $this->db->get_where ( self::TABLE_CODE, array (
+				'typeId' => $type_id 
+		) )->result_array ();
+	}
 }
 ?>

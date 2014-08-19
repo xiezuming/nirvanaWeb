@@ -1,7 +1,9 @@
 <font color='red'>
 <?php echo validation_errors(); ?>
 </font>
-<?php $red_star = '<font color="red">*</font>'?>
+<?php
+$red_star = '<font color="red">*</font>';
+?>
 <?php echo form_open('user/sign_up')?>
 <div id='signup'>
 	<table>
@@ -47,6 +49,14 @@
 		<tr>
 			<td><?php echo form_input('zipcode', set_value('zipcode'), 'size="25"');?></td>
 		</tr>
+		<tr>
+			<td><label>Group:</label></td>
+		</tr>
+		<?php foreach ($group_array as $group) {?>
+		<tr>
+			<td><?php echo '<label>' . form_checkbox('user_groups[]', $group['key'], set_checkbox('user_groups', $group['key'])) . $group['value'] . '</label>' ?></td>
+		</tr>
+		<?php }?>
 		<tr>
 			<td colspan='2' align='center'><input type="submit" value="Create" /></td>
 		</tr>

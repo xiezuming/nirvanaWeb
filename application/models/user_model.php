@@ -1,10 +1,12 @@
 <?php
 class User_model extends CI_Model {
 	const TABLE_USER = 'user';
+	const TABLE_GROUP = 'user_group';
 	const TABLE_RESET = 'user_reset';
 	public function create_user($data) {
+		$user_id = $this->gen_uuid ();
 		$user = array (
-				'userId' => $this->gen_uuid (),
+				'userId' => $user_id,
 				'userName' => $data ['userName'],
 				'password' => md5 ( $data ['password'] ),
 				'firstName' => $data ['firstName'],
@@ -16,6 +18,26 @@ class User_model extends CI_Model {
 		$this->db->insert ( self::TABLE_USER, $user );
 		if ($this->db->_error_number ()) {
 			log_message ( 'error', 'User_model.create_user: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return FALSE;
+		} else {
+			return $user_id;
+		}
+	}
+	public function update_user($user_id, $data) {
+		$user = array (
+				'userName' => $data ['userName'],
+				'password' => md5 ( $data ['password'] ),
+				'firstName' => $data ['firstName'],
+				'lastName' => $data ['lastName'],
+				'phoneNumber' => $data ['phoneNumber'],
+				'wechatId' => $data ['wechatId'],
+				'zipcode' => $data ['zipcode'] 
+		);
+		log_message ( 'debug', 'User_model.update_user: ' . $user_id );
+		$this->db->where ( 'userId', $user_id );
+		$this->db->update ( self::TABLE_USER, $user );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'User_model.update_user: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 			return FALSE;
 		} else {
 			return TRUE;
@@ -62,6 +84,7 @@ class User_model extends CI_Model {
 			return TRUE;
 		}
 	}
+	/* ** Wish List *************** */
 	public function update_wish_list($user_id, $wish_list) {
 		$this->db->where ( 'userId', $user_id );
 		$this->db->update ( self::TABLE_USER, array (
@@ -74,6 +97,7 @@ class User_model extends CI_Model {
 			return TRUE;
 		}
 	}
+	/* ** Password Reset *************** */
 	public function create_reset_key($userId) {
 		$reset_key = $this->gen_uuid ();
 		$date = array (
@@ -107,7 +131,42 @@ class User_model extends CI_Model {
 			return TRUE;
 		}
 	}
-	function rand_string($length) {
+	/* ** User Group *************** */
+	public function get_user_groups($user_id) {
+		return $this->db->get_where ( self::TABLE_GROUP, array (
+				'user_id' => $user_id 
+		) )->result_array ();
+	}
+	public function update_user_group($user_id, $user_groups) {
+		$this->db->delete ( self::TABLE_GROUP, array (
+				'user_id' => $user_id 
+		) );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'User_model.update_user_group: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return FALSE;
+		}
+		
+		if (! $user_groups)
+			return TRUE;
+		
+		$user_group_rows = array ();
+		foreach ( $user_groups as $user_group ) {
+			array_push ( $user_group_rows, array (
+					'user_id' => $user_id,
+					'group_key' => $user_group 
+			) );
+		}
+		
+		$this->db->insert_batch ( self::TABLE_GROUP, $user_group_rows );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'User_model.update_user_group: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return FALSE;
+		} else {
+			return TRUE;
+		}
+	}
+	/* ** Private Functions *************** */
+	private function rand_string($length) {
 		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		
 		$size = strlen ( $chars );

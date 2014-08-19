@@ -3,9 +3,11 @@ if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
 const SUCCESS = 1;
 const FAILURE = 0;
+const GROUP_TYPE_ID = 5;
 
 /**
  *
+ * @property Meta_model $meta_model
  * @property User_model $user_model
  */
 class User extends CI_Controller {
@@ -20,7 +22,6 @@ class User extends CI_Controller {
 	public function sign_up() {
 		$this->load->helper ( 'form' );
 		$this->load->library ( 'form_validation' );
-		
 		$this->form_validation->set_rules ( 'userName', 'Email Address', 'required|valid_email|max_length[45]|is_unique[user.userName]' );
 		$this->form_validation->set_rules ( 'firstName', 'First Name', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
@@ -29,9 +30,18 @@ class User extends CI_Controller {
 		$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
 		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
 		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'max_length[10]' );
+		$this->form_validation->set_rules ( 'user_groups', 'Group', '' );
 		
-		if ($this->input->post () && $this->form_validation->run ()) {
-			if ($this->user_model->create_user ( $this->input->post () )) {
+		if ($this->form_validation->run ()) {
+			if ($is_update) {
+				$success = $this->user_model->update_user ( $user_id, $this->input->post () );
+			} else {
+				$success = $this->user_model->create_user ( $this->input->post () );
+				$user_id = $success;
+			}
+			
+			$user_groups = $this->input->post ( 'user_groups' );
+			if ($success && $this->user_model->update_user_group ( $user_id, $user_groups )) {
 				$this->load->view ( 'user/jump_sign_up_success' );
 				return;
 			} else {
@@ -39,35 +49,69 @@ class User extends CI_Controller {
 				return;
 			}
 		}
-		$data = $this->input->post ();
+		
+		$data ['group_array'] = $this->get_all_group_array ();
 		$data ['title'] = 'Sign Up';
 		$this->load->view ( 'templates/header_app', $data );
 		$this->load->view ( 'user/sign_up', $data );
 		$this->load->view ( 'templates/footer_app' );
 	}
+	public function edit_profile($user_id = '') {
+		$this->load->helper ( 'form' );
+		
+		if (! $user_id) {
+			$user_id = $this->input->post ( 'userId' );
+		}
+		
+		// init load
+		$data ['user'] = $this->user_model->get_user ( $user_id );
+		if (! $data) {
+			show_error ( 'Invalid user.' );
+		}
+		$data ['user'] ['user_groups'] = $this->get_user_group_key_array ( $user_id );
+		
+		if ($this->input->post ()) {
+			$this->load->library ( 'form_validation' );
+			$this->form_validation->set_rules ( 'userName', 'Email Address', 'required' );
+			$this->form_validation->set_rules ( 'firstName', 'First Name', 'required|max_length[45]' );
+			$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
+			$this->form_validation->set_rules ( 'password', 'Password', 'matches[password_confirm]' );
+			$this->form_validation->set_rules ( 'password_confirm', 'Password Confirmation', '' );
+			$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
+			$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
+			$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'max_length[10]' );
+			$this->form_validation->set_rules ( 'user_groups', 'Group', '' );
+			
+			if ($this->form_validation->run ()) {
+				$input = $this->input->post ();
+				if (empty ( $input ['password'] )) {
+					$input ['password'] = $data ['user'] ['password'];
+				}
+				$success = $this->user_model->update_user ( $user_id, $input );
+				
+				$user_groups = $this->input->post ( 'user_groups' );
+				if ($success && $this->user_model->update_user_group ( $user_id, $user_groups )) {
+					$this->session->set_flashdata ( 'falshmsg', array (
+							'type' => 'message',
+							'content' => 'Update successfully.' 
+					) );
+					redirect ( site_url ( "/user/edit_profile/" . $user_id ), 'refresh' );
+				} else {
+					echo "DB ERROR.";
+					return;
+				}
+			}
+			$data ['userId'] = $user_id;
+		}
+		
+		$data ['group_array'] = $this->get_all_group_array ();
+		$data ['title'] = 'Edit Profile';
+		$this->load->view ( 'templates/header_app', $data );
+		$this->load->view ( 'user/edit_profile', $data );
+		$this->load->view ( 'templates/footer_app' );
+	}
 	public function sign_up_success() {
 		echo "SUCCESS";
-	}
-	public function create_user() {
-		$userName = $this->input->post ( 'userName' );
-		$password = $this->input->post ( 'password' );
-		if (empty ( $userName ) || empty ( $password )) {
-			$data ['result'] = FAILURE;
-			$data ['message'] = 'Internal Error: UserName or password is empty.';
-		} else {
-			$user = $this->user_model->query_user ( $userName );
-			if ($user) {
-				$data ['result'] = FAILURE;
-				$data ['message'] = 'The user exists.';
-			} else {
-				$userId = $this->user_model->create_user ( $userName, $password );
-				$data ['result'] = SUCCESS;
-				$data ['data'] = array (
-						'userId' => $userId 
-				);
-			}
-		}
-		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function sign_in() {
 		$userName = $this->input->post ( 'userName' );
@@ -206,6 +250,16 @@ class User extends CI_Controller {
 			}
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	private function get_user_group_key_array($user_id) {
+		$user_group_key_array = array ();
+		foreach ( $this->user_model->get_user_groups ( $user_id ) as $user_group_row )
+			array_push ( $user_group_key_array, $user_group_row ['group_key'] );
+		return $user_group_key_array;
+	}
+	private function get_all_group_array() {
+		$this->load->model ( 'meta_model' );
+		return $this->meta_model->get_meta_codes ( GROUP_TYPE_ID );
 	}
 }
 

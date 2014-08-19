@@ -597,11 +597,12 @@ div.main {
 
 .message {
 	border: 1px solid #CCCCCC;
-	width: 500px;
+	width: 250px;
 	border: 1px solid #c93;
 	background: #ffc;
 	padding: 5px;
 	color: #333333;
+	margin:0 auto;
 	margin-bottom: 10px;
 }
 
