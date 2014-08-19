@@ -18,7 +18,12 @@
  * NOTE: If you change these, also change the error_reporting() code below
  *
  */
+if ($_SERVER['SERVER_NAME'] == 'happitail.dyndns.info') {
+	define('ENVIRONMENT', 'production');
+} else {
 	define('ENVIRONMENT', 'development');
+}
+
 /*
  *---------------------------------------------------------------
  * ERROR REPORTING
