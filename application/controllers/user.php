@@ -61,11 +61,13 @@ class User extends CI_Controller {
 		
 		if (! $user_id) {
 			$user_id = $this->input->post ( 'userId' );
+			if ($user_id)
+				show_error ( 'Invalid user id.' );
 		}
 		
 		// init load
 		$data ['user'] = $this->user_model->get_user ( $user_id );
-		if (! $data) {
+		if (! $data ['user']) {
 			show_error ( 'Invalid user.' );
 		}
 		$data ['user'] ['user_groups'] = $this->get_user_group_key_array ( $user_id );
