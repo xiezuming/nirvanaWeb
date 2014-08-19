@@ -61,7 +61,7 @@ class User extends CI_Controller {
 		
 		if (! $user_id) {
 			$user_id = $this->input->post ( 'userId' );
-			if ($user_id)
+			if (! $user_id)
 				show_error ( 'Invalid user id.' );
 		}
 		
