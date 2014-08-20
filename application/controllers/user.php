@@ -7,7 +7,6 @@ const GROUP_TYPE_ID = 5;
 
 /**
  *
- * @property Meta_model $meta_model
  * @property User_model $user_model
  */
 class User extends CI_Controller {
@@ -86,10 +85,8 @@ class User extends CI_Controller {
 			
 			if ($this->form_validation->run ()) {
 				$input = $this->input->post ();
-				if (empty ( $input ['password'] )) {
-					$input ['password'] = $data ['user'] ['password'];
-				}
-				$success = $this->user_model->update_user ( $user_id, $input );
+				$update_password = ! empty ( $input ['password'] );
+				$success = $this->user_model->update_user ( $user_id, $input, $update_password );
 				
 				$user_groups = $this->input->post ( 'user_groups' );
 				if ($success && $this->user_model->update_user_group ( $user_id, $user_groups )) {

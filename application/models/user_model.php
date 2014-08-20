@@ -23,16 +23,18 @@ class User_model extends CI_Model {
 			return $user_id;
 		}
 	}
-	public function update_user($user_id, $data) {
+	public function update_user($user_id, $data, $update_password = TRUE) {
 		$user = array (
 				'userName' => $data ['userName'],
-				'password' => md5 ( $data ['password'] ),
 				'firstName' => $data ['firstName'],
 				'lastName' => $data ['lastName'],
 				'phoneNumber' => $data ['phoneNumber'],
 				'wechatId' => $data ['wechatId'],
 				'zipcode' => $data ['zipcode'] 
 		);
+		if ($update_password) {
+			$user ['password'] = md5 ( $data ['password'] );
+		}
 		log_message ( 'debug', 'User_model.update_user: ' . $user_id );
 		$this->db->where ( 'userId', $user_id );
 		$this->db->update ( self::TABLE_USER, $user );
@@ -84,7 +86,7 @@ class User_model extends CI_Model {
 			return TRUE;
 		}
 	}
-	/* ** Wish List *************** */
+	/* Wish List *************** */
 	public function update_wish_list($user_id, $wish_list) {
 		$this->db->where ( 'userId', $user_id );
 		$this->db->update ( self::TABLE_USER, array (
@@ -97,7 +99,7 @@ class User_model extends CI_Model {
 			return TRUE;
 		}
 	}
-	/* ** Password Reset *************** */
+	/* Password Reset *************** */
 	public function create_reset_key($userId) {
 		$reset_key = $this->gen_uuid ();
 		$date = array (
@@ -131,7 +133,7 @@ class User_model extends CI_Model {
 			return TRUE;
 		}
 	}
-	/* ** User Group *************** */
+	/* User Group *************** */
 	public function get_user_groups($user_id) {
 		return $this->db->get_where ( self::TABLE_GROUP, array (
 				'user_id' => $user_id 
@@ -165,7 +167,7 @@ class User_model extends CI_Model {
 			return TRUE;
 		}
 	}
-	/* ** Private Functions *************** */
+	/* Private Functions *************** */
 	private function rand_string($length) {
 		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		
