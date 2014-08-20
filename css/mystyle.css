@@ -162,166 +162,6 @@ a:hover {
 	text-align: center;
 }
 
-#content {
-	margin: 10px 5px 0px 5px;
-	padding: 0;
-}
-
-#content p {
-	margin: 12px 20px 12px 0;
-}
-
-#content h1 {
-	color: #e13300;
-	border-bottom: 1px solid #666;
-	background-color: transparent;
-	font-weight: normal;
-	font-size: 24px;
-	margin: 0 0 20px 0;
-	padding: 3px 0 7px 3px;
-}
-
-#content h2 {
-	background-color: transparent;
-	border-bottom: 0px solid #999;
-	color: #000;
-	font-size: 18px;
-	font-weight: bold;
-	margin: 28px 0 16px 0;
-	padding: 5px 0 6px 0;
-}
-
-#content h3 {
-	background-color: transparent;
-	color: #333;
-	font-size: 16px;
-	font-weight: bold;
-	margin: 16px 0 15px 0;
-	padding: 0 0 0 0;
-}
-
-#content h4 {
-	background-color: transparent;
-	color: #444;
-	font-size: 14px;
-	font-weight: bold;
-	margin: 22px 0 0 0;
-	padding: 0 0 0 0;
-}
-
-#content img {
-	margin: auto;
-	padding: 0;
-}
-
-#content code {
-	font-family: Monaco, Verdana, Sans-serif;
-	font-size: 12px;
-	background-color: #f9f9f9;
-	border: 1px solid #D0D0D0;
-	color: #002166;
-	display: block;
-	margin: 14px 0 14px 0;
-	padding: 12px 10px 12px 10px;
-}
-
-#content pre {
-	font-family: Monaco, Verdana, Sans-serif;
-	font-size: 12px;
-	background-color: #f9f9f9;
-	border: 1px solid #D0D0D0;
-	color: #002166;
-	display: block;
-	margin: 14px 0 14px 0;
-	padding: 12px 10px 12px 10px;
-}
-
-#content .path {
-	background-color: #EBF3EC;
-	border: 1px solid #99BC99;
-	color: #005702;
-	text-align: center;
-	margin: 0 0 14px 0;
-	padding: 5px 10px 5px 8px;
-}
-
-#content dfn {
-	font-family: Lucida Grande, Verdana, Geneva, Sans-serif;
-	color: #00620C;
-	font-weight: bold;
-	font-style: normal;
-}
-
-#content var {
-	font-family: Lucida Grande, Verdana, Geneva, Sans-serif;
-	color: #8F5B00;
-	font-weight: bold;
-	font-style: normal;
-}
-
-#content samp {
-	font-family: Lucida Grande, Verdana, Geneva, Sans-serif;
-	color: #480091;
-	font-weight: bold;
-	font-style: normal;
-}
-
-#content kbd {
-	font-family: Lucida Grande, Verdana, Geneva, Sans-serif;
-	color: #A70000;
-	font-weight: bold;
-	font-style: normal;
-}
-
-#content ul {
-	list-style-image: url(images/arrow.gif);
-}
-
-li.reactor {
-	list-style-image: url(images/reactor-bullet.png);
-}
-
-#content li p {
-	margin-left: 0;
-	margin-right: 0;
-}
-
-#content .tdpackage {
-	font-weight: normal;
-	font-size: 12px;
-}
-
-#content .important {
-	background: #FFF5B5;
-	border: 1px solid #FFE842;
-	color: #333;
-	margin: 10px 0 5px 0;
-	padding: 10px;
-}
-
-#content .important p {
-	margin: 6px 0 8px 0;
-	padding: 0;
-}
-
-#content .important .leftpad {
-	margin: 6px 0 8px 0;
-	padding-left: 20px;
-}
-
-#content .critical {
-	background: #FBE6F2;
-	border: 1px solid #E68F8F;
-	color: #333;
-	margin: 10px 0 5px 0;
-	padding: 10px;
-}
-
-#content .critical p {
-	margin: 5px 0 6px 0;
-	padding: 0;
-}
-
 #footer {
 	background-color: transparent;
 	font-size: 10px;
@@ -359,17 +199,6 @@ img {
 form {
 	margin: 0;
 	padding: 0;
-}
-
-.textarea {
-	font-family: Lucida Grande, Verdana, Geneva, Sans-serif;
-	font-size: 14px;
-	color: #143270;
-	background-color: #f9f9f9;
-	border: 1px solid #B3B4BD;
-	width: 100%;
-	padding: 6px;
-	margin: 0;
 }
 
 .select {
@@ -469,6 +298,10 @@ div.error {
 	height: 350px;
 }
 
+input,select,textarea {
+	font-family: sans-serif;
+}
+
 input[type=submit] {
 	background: -webkit-gradient(linear, 0 0, 0 100%, from(#0078E7), to(#0078E7)); /** Chrome Safari **/
 	background: -moz-linear-gradient(top, #0078E7, #0078E7); /** FireFox **/
@@ -486,42 +319,35 @@ select {
 	background-color: #fed;
 }
 
-textarea {
-	color: #050;
-	font: bold 84% 'trebuchet ms', helvetica, sans-serif;
-	background-color: #fed;
-}
-
-textarea.value_text {
-	background-color: #f3f3f3;
-	readonly: true;
-}
-
 label.value_text {
 	color: #050;
 	font: bold 84% 'trebuchet ms', helvetica, sans-serif;
 }
 
-#signup table {
+#content table {
 	margin: 0 auto;
 }
 
-#signup td {
+#content	td {
 	padding: 3px;
 }
 
-#signup label {
-	font-family: sans-serif;
+#content label {
+	font-family: 'trebuchet ms', helvetica, sans-serif;
 	font-size: 16px;
 }
 
-#signup input {
-	font-family: sans-serif;
+#content input {
 	font-size: 14px;
 	border:1px solid #BBBBBB;
 }
 
-#signup input[type=submit] {
+#content textarea {
+	font-size: 14px;
+	border:1px solid #BBBBBB;
+}
+
+#content input[type=submit] {
 	font-size: 18px;
 }
 

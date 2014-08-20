@@ -32,15 +32,9 @@ class User extends CI_Controller {
 		$this->form_validation->set_rules ( 'user_groups', 'Group', '' );
 		
 		if ($this->form_validation->run ()) {
-			if ($is_update) {
-				$success = $this->user_model->update_user ( $user_id, $this->input->post () );
-			} else {
-				$success = $this->user_model->create_user ( $this->input->post () );
-				$user_id = $success;
-			}
-			
+			$user_id = $this->user_model->create_user ( $this->input->post () );
 			$user_groups = $this->input->post ( 'user_groups' );
-			if ($success && $this->user_model->update_user_group ( $user_id, $user_groups )) {
+			if ($user_id && $this->user_model->update_user_group ( $user_id, $user_groups )) {
 				$this->load->view ( 'user/jump_sign_up_success' );
 				return;
 			} else {

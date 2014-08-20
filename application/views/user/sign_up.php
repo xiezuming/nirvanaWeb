@@ -5,7 +5,7 @@
 $red_star = '<font color="red">*</font>';
 ?>
 <?php echo form_open('user/sign_up')?>
-<div id='signup'>
+<div id='content'>
 	<table>
 		<tr>
 			<td><label><?php echo $red_star?>Email Address:</label></td>

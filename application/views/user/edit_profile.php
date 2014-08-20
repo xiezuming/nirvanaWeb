@@ -21,7 +21,7 @@ $hidden = array (
 ?>
 
 <?php echo form_open('user/edit_profile','', $hidden)?>
-<div id='signup'>
+<div id='content'>
 	<table>
 		<tr>
 			<td><label><?php echo  $user['firstName'] . ' ' . $user['lastName']?></label></td>

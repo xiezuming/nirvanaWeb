@@ -1,0 +1,145 @@
+<?php
+if (! defined ( 'BASEPATH' ))
+	exit ( 'No direct script access allowed' );
+const SUCCESS = 1;
+const FAILURE = 0;
+
+/**
+ *
+ * @property Event_model $event_model
+ */
+class Event extends CI_Controller {
+	function __construct() {
+		parent::__construct ();
+		$this->load->model ( 'event_model' );
+	}
+	public function test_page() {
+		$this->load->helper ( 'form' );
+		$this->load->library ( 'form_validation' );
+		$data ['field_names'] = $this->get_field_names ();
+		$this->load->view ( 'event/test_form', $data );
+	}
+	public function contact($user_id = '') {
+		if (empty ( $user_id )) {
+			$user_id = $this->input->post ( 'user_id' );
+			if (empty ( $user_id ))
+				show_error ( 'Invalid user.' );
+		}
+		
+		$this->load->helper ( 'form' );
+		$data ['title'] = 'Contact Us';
+		if ($this->input->post ()) {
+			$this->load->library ( 'form_validation' );
+			$this->form_validation->set_rules ( 'event_sub_type', 'Subject', 'required|max_length[45]' );
+			$this->form_validation->set_rules ( 'event_sub_type', 'Body', 'required' );
+			
+			if ($this->form_validation->run ()) {
+				$success = $this->event_model->add_event ( $this->get_input_data () );
+				if ($success) {
+					$this->load->view ( 'templates/header_app', $data );
+					echo '<h2>Thanks!</h2><p>Thanks for getting in touch with us. We\'ll get back to you shortly.</p>';
+					$this->load->view ( 'templates/footer_app' );
+					return;
+				} else {
+					show_error ( 'DB Error.' );
+				}
+			}
+		}
+		
+		$data ['user_id'] = $user_id;
+		$this->load->view ( 'templates/header_app', $data );
+		$this->load->view ( 'event/contact', $data );
+		$this->load->view ( 'templates/footer_app' );
+	}
+	public function add_event() {
+		$success = $this->event_model->add_event ( $this->get_input_data () );
+		if ($success) {
+			$data ['result'] = SUCCESS;
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'DB Error';
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function sell_to_wetag() {
+		$input = $this->get_input_data ();
+		$user_id = $input ['user_id'];
+		$events = $this->event_model->get_events_where ( array (
+				'user_id' => $user_id,
+				'event_type' => 'sell_to_wetag' 
+		) );
+		if (count ( $events ) > 0) {
+			if (time () - strtotime ( $events [0] ['event_create_time'] ) < 3600 * 24 * 30) { // 30 days
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'You can send the request only once a month.';
+				$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+			}
+		}
+		$input ['event_type'] = 'sell_to_wetag';
+		$success = $this->event_model->add_event ( $input );
+		if ($success) {
+			$data ['result'] = SUCCESS;
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'DB Error';
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function donate() {
+		$input = $this->get_input_data ();
+		$user_id = $input ['user_id'];
+		$events = $this->event_model->get_events_where ( array (
+				'user_id' => $user_id,
+				'event_type' => 'donate' 
+		) );
+		if (count ( $events ) > 0) {
+			if (time () - strtotime ( $events [0] ['event_create_time'] ) < 3600 * 24 * 30) { // 30 days
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'You can send the request only once a month.';
+				$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+			}
+		}
+		$input ['event_type'] = 'donate';
+		$success = $this->event_model->add_event ( $input );
+		if ($success) {
+			$data ['result'] = SUCCESS;
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'DB Error';
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	private function get_field_names() {
+		$field_names = array (
+				"user_id" => "user_id",
+				"event_type" => "event_type",
+				"event_sub_type" => "event_sub_type",
+				"event_text" => "event_text" 
+		);
+		return $field_names;
+	}
+	private function get_input_data() {
+		log_message ( 'debug', 'input: ' . print_r ( $this->input->post (), TRUE ) );
+		$input_data = array ();
+		foreach ( $this->get_field_names () as $field_name ) {
+			$field_value = $this->input->post ( $field_name );
+			if (empty ( $field_value )) {
+				$input_data [$field_name] = NULL;
+			} else {
+				// change
+				if ($this->endsWith ( $field_name, 'Time' )) {
+					$field_value = date ( 'Y-m-d H:i:s', $field_value );
+				}
+				$input_data [$field_name] = $field_value;
+			}
+		}
+		return $input_data;
+	}
+	private function map_item_to_wpitem($item) {
+	}
+	private function endsWith($haystack, $needle) {
+		return $needle === "" || substr ( $haystack, - strlen ( $needle ) ) === $needle;
+	}
+}
+
+?>
