@@ -97,12 +97,14 @@ class Event extends CI_Controller {
 				$data ['result'] = FAILURE;
 				$data ['message'] = 'You can send the request only once a month.';
 				$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+				return;
 			}
 		}
 		$input ['event_type'] = 'donate';
 		$success = $this->event_model->add_event ( $input );
 		if ($success) {
 			$data ['result'] = SUCCESS;
+			$data ['message'] = 'We have received your donation request. We will connect you later.';
 		} else {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'DB Error';
