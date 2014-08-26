@@ -7,11 +7,13 @@ const FAILURE = 0;
 /**
  *
  * @property Event_model $event_model
+ * @property User_model $user_model
  */
 class Event extends CI_Controller {
 	function __construct() {
 		parent::__construct ();
 		$this->load->model ( 'event_model' );
+		$this->load->model ( 'user_model' );
 	}
 	public function test_page() {
 		$this->load->helper ( 'form' );
@@ -31,13 +33,13 @@ class Event extends CI_Controller {
 		if ($this->input->post ()) {
 			$this->load->library ( 'form_validation' );
 			$this->form_validation->set_rules ( 'event_sub_type', 'Subject', 'required|max_length[45]' );
-			$this->form_validation->set_rules ( 'event_sub_type', 'Body', 'required' );
+			$this->form_validation->set_rules ( 'event_text', 'Body', 'required' );
 			
 			if ($this->form_validation->run ()) {
 				$success = $this->event_model->add_event ( $this->get_input_data () );
 				if ($success) {
 					$this->load->view ( 'templates/header_app', $data );
-					echo '<h2>Thanks!</h2><p>Thanks for getting in touch with us. We\'ll get back to you shortly.</p>';
+					$this->load->view ( 'event/contact_success' );
 					$this->load->view ( 'templates/footer_app' );
 					return;
 				} else {
@@ -69,16 +71,19 @@ class Event extends CI_Controller {
 				'event_type' => 'sell_to_wetag' 
 		) );
 		if (count ( $events ) > 0) {
-			if (time () - strtotime ( $events [0] ['event_create_time'] ) < 3600 * 24 * 30) { // 30 days
+			if (time () - strtotime ( $events [0] ['event_create_time'] ) < 3600 * 24 * 7) { // 7 days
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'You can send the request only once a month.';
+				$data ['message'] = 'You can send the request only once a week.';
 				$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+				return;
 			}
 		}
 		$input ['event_type'] = 'sell_to_wetag';
 		$success = $this->event_model->add_event ( $input );
 		if ($success) {
+			$user = $this->user_model->get_user ( $user_id );
 			$data ['result'] = SUCCESS;
+			$data ['message'] = 'We will email you our offer to your email at ' . $user ['userName'] . ' within 24 hours';
 		} else {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'DB Error';

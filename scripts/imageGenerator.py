@@ -127,7 +127,13 @@ for image in imageList:
     sftp = ftplib.FTP()
     sftp.connect(ftp['host'],'21')
     print sftp.getwelcome()
-    sftp.login(ftp['username'],ftp['password'])
+
+    try:
+        sftp.login(ftp['username'],ftp['password'])
+    except Exception,e:
+        print 'Failed to login, try again. e = ' + str(e)
+        sftp.login(ftp['username'],ftp['password'])
+
     sftp.cwd("wetagimg")
     #check if userid folder exist or not
     if userid not in sftp.nlst():

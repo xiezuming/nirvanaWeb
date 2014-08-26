@@ -14,7 +14,7 @@ $message_data = array (
 		'id' => 'event_text',
 		'value' => set_value ( 'event_text' ),
 		'rows' => '10',
-		'cols' => '28' 
+		'cols' => '30' 
 );
 
 ?>
@@ -34,7 +34,7 @@ $message_data = array (
 			<td><?php echo form_textarea($message_data)?></td>
 		</tr>
 		<tr>
-			<td align='center'><input type="submit" value="Send request" /></td>
+			<td align='center'><input type="submit" width="30" value="Send" /></td>
 		</tr>
 	</table>
 </div>
