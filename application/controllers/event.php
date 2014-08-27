@@ -37,7 +37,7 @@ class Event extends CI_Controller {
 				$success = $this->event_model->add_event ( $this->get_input_data () );
 				if ($success) {
 					$this->load->view ( 'templates/header_app', $data );
-					echo '<h2>Thanks!</h2><p>Thanks for getting in touch with us. We\'ll get back to you shortly.</p>';
+					$this->load->view ( 'event/contact_success' );
 					$this->load->view ( 'templates/footer_app' );
 					return;
 				} else {
