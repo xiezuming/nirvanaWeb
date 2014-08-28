@@ -248,7 +248,7 @@ class Catalogue extends CI_Controller {
 		} else {
 			log_message ( 'debug', 'Catalogue.synch_catalogue: Synchronize to WordPress database successfully.' );
 			$this->catalogue_model->update_catalogue ( array (
-					'catalogueId' => $catalgoue_id,
+					'catalogueId' => $catalogue ['catalogueId'],
 					'synchWp' => 'Y' 
 			) );
 			return TRUE;
