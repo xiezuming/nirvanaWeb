@@ -118,16 +118,10 @@ class Catalogue extends CI_Controller {
 		}
 		
 		// synchronize to wp database
-		$success = $this->synch_catalogue ( $global_catalogue_id );
-		if ($success) {
-			$this->catalogue_model->update_catalogue ( array (
-					'catalogueId' => $catalgoue_id,
-					'synchWp' => 'Y' 
-			) );
-		}
+		$this->synch_catalogue ( $global_catalogue_id );
 		
 		// post the catalogue
-		$success = $this->post_catalogue ( $global_catalogue_id );
+		$this->post_catalogue ( $global_catalogue_id );
 		
 		$data ['result'] = SUCCESS;
 		$data ['data'] = $this->catalogue_model->get_catalogue_by_global_id ( $global_catalogue_id );
@@ -147,6 +141,37 @@ class Catalogue extends CI_Controller {
 		$data ['data'] = array (
 				'post_url' => $post_url 
 		);
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function sync_all_catalogues() {
+		$catalogues = $this->catalogue_model->query_all_items ( "synchWp='N' OR synchPost='N'" );
+		$success_count = 0;
+		$failure_count = 0;
+		$failure_array = array ();
+		foreach ( $catalogues as $catalogue ) {
+			$global_catalogue_id = $catalogue ['Global_Catalogue_ID'];
+			log_message ( 'debug', 'sync_all_catalogues: ' . $global_item_id . '...' );
+			
+			$success_db = TRUE;
+			$success_post = TRUE;
+			if ($catalogue ['synchWp'] == 'N')
+				$success_db = $this->synch_catalogue ( $global_catalogue_id );
+			if ($catalogue ['synchWp'] == 'N')
+				$success_post = $this->post_catalogue ( $global_catalogue_id );
+			
+			if ($success_db && $success_post) {
+				$failure_count ++;
+				array_push ( $failure_array, $global_item_id );
+			} else {
+				$failure_count ++;
+				array_push ( $failure_array, $global_item_id );
+			}
+		}
+		
+		$data ['success_count'] = $success_count;
+		$data ['failure_count'] = $failure_count;
+		$data ['failure_array'] = $failure_array;
+		$data ['result'] = $failure_count ? FAILURE : SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function test_synch_catalogue() {
@@ -222,6 +247,10 @@ class Catalogue extends CI_Controller {
 			return FALSE;
 		} else {
 			log_message ( 'debug', 'Catalogue.synch_catalogue: Synchronize to WordPress database successfully.' );
+			$this->catalogue_model->update_catalogue ( array (
+					'catalogueId' => $catalgoue_id,
+					'synchWp' => 'Y' 
+			) );
 			return TRUE;
 		}
 	}
@@ -233,7 +262,7 @@ class Catalogue extends CI_Controller {
 		$this->xmlrpc->request ( array (
 				0, // blog_id
 				$this->config->config ['wp_rpc'] ['user'],
-				$this->config->config ['wp_rpc'] ['password'],
+				$this->config->config ['wp_rpc'] ['password'] 
 		) );
 		print_r ( $this->xmlrpc_send_request ( $this->xmlrpc ) );
 	}
@@ -250,7 +279,7 @@ class Catalogue extends CI_Controller {
 		
 		$catalogue = $this->catalogue_model->get_catalogue_by_global_id ( $global_catalogue_id );
 		if (! $catalogue) {
-			log_message ( 'error', 'Catalogue.synch_catalogue: Can not find the catalogue.' . $global_catalogue_id );
+			log_message ( 'error', 'Catalogue.post_catalogue: Can not find the catalogue.' . $global_catalogue_id );
 			return FALSE;
 		}
 		
