@@ -444,6 +444,8 @@ class Item extends CI_Controller {
 				"expectedPrice" => "expectedPrice",
 				"condition" => "condition",
 				"salesChannel" => "salesChannel",
+				"latitude" => "latitude",
+				"longitude" => "longitude",
 				"availability" => "availability",
 				"desc" => "desc",
 				"priceGroup" => "priceGroup",
