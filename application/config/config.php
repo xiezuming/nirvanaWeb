@@ -19,11 +19,14 @@ $base_url_arr['local'] = 'http://127.0.0.1/wetag_app/';
 $base_url_arr['happitail'] = 'http://happitail.dyndns.info/wetag_app/';
 
 $config['base_url'] = $base_url_arr[$active_item];
-
+/*
 $config['wp_rpc']['url'] = 'http://happitail.info/catalog/xmlrpc.php';
 $config['wp_rpc']['user'] = 'xiezuming';
 $config['wp_rpc']['password'] = 'test12345';
-
+*/
+$config['wp_rpc']['url'] = 'http://wetagapp.com/productpage/xmlrpc.php';
+$config['wp_rpc']['user'] = 'wetag';
+$config['wp_rpc']['password'] = 'Weare777!';
 /*
 |--------------------------------------------------------------------------
 | Index File
