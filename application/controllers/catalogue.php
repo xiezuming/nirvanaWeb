@@ -160,8 +160,7 @@ class Catalogue extends CI_Controller {
 				$success_post = $this->post_catalogue ( $global_catalogue_id );
 			
 			if ($success_db && $success_post) {
-				$failure_count ++;
-				array_push ( $failure_array, $global_catalogue_id );
+				$success_count ++;
 			} else {
 				$failure_count ++;
 				array_push ( $failure_array, $global_catalogue_id );
