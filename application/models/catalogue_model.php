@@ -41,12 +41,12 @@ class Catalogue_model extends CI_Model {
 			return $this->get_catalogue ( $catalogueId );
 		}
 	}
-	public function query_all_items($where) {
+	public function query_all_catalogues($where) {
 		if ($where)
 			$this->db->where ( $where );
 		$query = $this->db->get ( self::TABLE_CATALOGUE );
 		if ($this->db->_error_number ())
-			log_message ( 'error', 'Catalogue_model.query_all_items: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			log_message ( 'error', 'Catalogue_model.query_all_catalogues: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 		$result = $query->result_array ();
 		return $result;
 	}

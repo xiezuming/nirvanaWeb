@@ -150,7 +150,7 @@ class Catalogue extends CI_Controller {
 		$failure_array = array ();
 		foreach ( $catalogues as $catalogue ) {
 			$global_catalogue_id = $catalogue ['Global_Catalogue_ID'];
-			log_message ( 'debug', 'sync_all_catalogues: ' . $global_item_id . '...' );
+			log_message ( 'debug', 'sync_all_catalogues: ' . $global_catalogue_id . '...' );
 			
 			$success_db = TRUE;
 			$success_post = TRUE;
@@ -161,10 +161,10 @@ class Catalogue extends CI_Controller {
 			
 			if ($success_db && $success_post) {
 				$failure_count ++;
-				array_push ( $failure_array, $global_item_id );
+				array_push ( $failure_array, $global_catalogue_id );
 			} else {
 				$failure_count ++;
-				array_push ( $failure_array, $global_item_id );
+				array_push ( $failure_array, $global_catalogue_id );
 			}
 		}
 		

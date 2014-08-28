@@ -245,7 +245,7 @@ class Item extends CI_Controller {
 		echo 'Restult: ' . var_export ( $this->synch_item ( $global_item_id ), TRUE );
 	}
 	public function sync_all_items() {
-		$items = $this->item_model->query_all_items ( "synchWp='N'" );
+		$items = $this->item_model->query_all_items ( "synchWp = 'N'" );
 		$success_count = 0;
 		$failure_count = 0;
 		$failure_array = array ();
@@ -268,7 +268,7 @@ class Item extends CI_Controller {
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function sync_all_images() {
-		$images = $this->item_model->query_all_items ( "synchWp='N'" );
+		$images = $this->item_model->query_all_items ( "synchWp = 'N'" );
 		$image_count = count ( $images );
 		$global_image_id_array = array ();
 		foreach ( $images as $image ) {
@@ -277,7 +277,7 @@ class Item extends CI_Controller {
 		$wait_until_done = TRUE;
 		$this->exec_image_generator_script ( $global_image_id_array, $wait_until_done );
 		
-		$images = $this->item_model->query_all_items ( "synchWp='N'" );
+		$images = $this->item_model->query_all_items ( "synchWp = 'N'" );
 		$global_image_id_array = array ();
 		foreach ( $images as $image ) {
 			array_push ( $global_image_id_array, $image ['Global_Item_Image_ID'] );
