@@ -33,6 +33,15 @@ class Item_model extends CI_Model {
 		$result = $query->row_array ();
 		return $result;
 	}
+	public function query_all_items($where) {
+		if ($where)
+			$this->db->where ( $where );
+		$query = $this->db->get ( self::TABLE_ITEM );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Item_model.query_all_items: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		$result = $query->result_array ();
+		return $result;
+	}
 	public function count_items($key_word) {
 		$this->db->from ( self::TABLE_ITEM );
 		if ($key_word) {

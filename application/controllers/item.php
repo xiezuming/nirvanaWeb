@@ -250,7 +250,23 @@ class Item extends CI_Controller {
 		}
 		echo 'Restult: ' . var_export ( $this->synch_item ( $global_item_id ), TRUE );
 	}
-	
+	public function synch_all_items() {
+		$items = $this->item_model->query_all_items ( array (
+				'synchWp' => 'N' 
+		) );
+		foreach ( $items as $item ) {
+			$global_item_id = $item ['Global_Item_ID'];
+			log_message ( 'debug', 'Sync ' . $global_item_id . '...' );
+			$success = $this->synch_item ( $global_item_id );
+			if ($success) {
+				$this->item_model->update_item ( array (
+						'itemId' => $item['itemId'],
+						'synchWp' => 'Y' 
+				) );
+			}
+			log_message ( 'debug', 'Restult: ' . $global_item_id . var_export ( $success, TRUE ) );
+		}
+	}
 	/**
 	 * Synch the item information to WordPress database
 	 *

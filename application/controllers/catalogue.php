@@ -225,6 +225,18 @@ class Catalogue extends CI_Controller {
 			return TRUE;
 		}
 	}
+	public function get_wp_posts() {
+		$this->load->library ( 'xmlrpc' );
+		$this->xmlrpc->server ( $this->config->config ['wp_rpc'] ['url'] );
+		
+		$this->xmlrpc->method ( 'wp.getPosts' );
+		$this->xmlrpc->request ( array (
+				0, // blog_id
+				$this->config->config ['wp_rpc'] ['user'],
+				$this->config->config ['wp_rpc'] ['password'],
+		) );
+		print_r ( $this->xmlrpc_send_request ( $this->xmlrpc ) );
+	}
 	public function test_post_catalogue() {
 		$global_catalogue_id = $this->input->post ( 'global_catalogue_id' );
 		if (empty ( $global_catalogue_id )) {
