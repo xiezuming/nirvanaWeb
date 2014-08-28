@@ -98,6 +98,15 @@ class Item_model extends CI_Model {
 		return $result;
 	}
 	/* ======== ITEM IMAGE ======== */
+	public function query_all_images($where) {
+		if ($where)
+			$this->db->where ( $where );
+		$query = $this->db->get ( self::TABLE_IMAGE );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Item_model.query_all_images: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		$result = $query->result_array ();
+		return $result;
+	}
 	public function get_images($globalItemId) {
 		$this->db->where ( 'Global_Item_ID', $globalItemId );
 		$query = $this->db->get ( self::TABLE_IMAGE );

@@ -171,13 +171,7 @@ class Item extends CI_Controller {
 		}
 		
 		// synchronize to wp database
-		$success = $this->synch_item ( $globalItemId );
-		if ($success) {
-			$this->item_model->update_item ( array (
-					'itemId' => $itemId,
-					'synchWp' => 'Y' 
-			) );
-		}
+		$this->synch_item ( $globalItemId );
 		
 		// call python script to resize and upload image files
 		$global_image_id_array = array ();
@@ -250,22 +244,50 @@ class Item extends CI_Controller {
 		}
 		echo 'Restult: ' . var_export ( $this->synch_item ( $global_item_id ), TRUE );
 	}
-	public function synch_all_items() {
-		$items = $this->item_model->query_all_items ( array (
-				'synchWp' => 'N' 
-		) );
+	public function sync_all_items() {
+		$items = $this->item_model->query_all_items ( "synchWp='N'" );
+		$success_count = 0;
+		$failure_count = 0;
+		$failure_array = array ();
 		foreach ( $items as $item ) {
 			$global_item_id = $item ['Global_Item_ID'];
-			log_message ( 'debug', 'Sync ' . $global_item_id . '...' );
+			log_message ( 'debug', 'sync_all_items: ' . $global_item_id . '...' );
 			$success = $this->synch_item ( $global_item_id );
 			if ($success) {
-				$this->item_model->update_item ( array (
-						'itemId' => $item['itemId'],
-						'synchWp' => 'Y' 
-				) );
+				$success_count ++;
+			} else {
+				$failure_count ++;
+				array_push ( $failure_array, $global_item_id );
 			}
 			log_message ( 'debug', 'Restult: ' . $global_item_id . var_export ( $success, TRUE ) );
 		}
+		$data ['success_count'] = $success_count;
+		$data ['failure_count'] = $failure_count;
+		$data ['failure_array'] = $failure_array;
+		$data ['result'] = $failure_count ? FAILURE : SUCCESS;
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function sync_all_images() {
+		$images = $this->item_model->query_all_items ( "synchWp='N'" );
+		$image_count = count ( $images );
+		$global_image_id_array = array ();
+		foreach ( $images as $image ) {
+			array_push ( $global_image_id_array, $image ['Global_Item_Image_ID'] );
+		}
+		$wait_until_done = TRUE;
+		$this->exec_image_generator_script ( $global_image_id_array, $wait_until_done );
+		
+		$images = $this->item_model->query_all_items ( "synchWp='N'" );
+		$global_image_id_array = array ();
+		foreach ( $images as $image ) {
+			array_push ( $global_image_id_array, $image ['Global_Item_Image_ID'] );
+		}
+		$current_image_count = count ( $images );
+		$data ['success_count'] = $image_count - $current_image_count;
+		$data ['failure_count'] = $current_image_count;
+		$data ['failure_array'] = $global_image_id_array;
+		$data ['result'] = $current_image_count ? FAILURE : SUCCESS;
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	/**
 	 * Synch the item information to WordPress database
@@ -346,6 +368,10 @@ class Item extends CI_Controller {
 			return FALSE;
 		} else {
 			log_message ( 'debug', 'Item.synch_item: Synchronize to WordPress database successfully.' );
+			$this->item_model->update_item ( array (
+					'itemId' => $item ['itemId'],
+					'synchWp' => 'Y' 
+			) );
 			return TRUE;
 		}
 		return TRUE;
