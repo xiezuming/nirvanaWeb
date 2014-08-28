@@ -18,6 +18,7 @@ class Item_model extends CI_Model {
 	}
 	public function get_items_by_user_id($userId) {
 		$this->db->where ( 'userId', $userId );
+		$this->db->where ( "availability != 'XX'" );
 		$query = $this->db->get ( self::TABLE_ITEM );
 		if ($this->db->_error_number ())
 			log_message ( 'error', 'Item_model.get_items_by_userId: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
@@ -38,7 +39,8 @@ class Item_model extends CI_Model {
 			$this->db->like ( 'LOWER(item.title)', strtolower ( $key_word ) );
 			$this->db->or_like ( 'LOWER(item.desc)', strtolower ( $key_word ) );
 		}
-		return $this->db->count_all_results();
+		$this->db->where ( "availability != 'XX'" );
+		return $this->db->count_all_results ();
 	}
 	public function query_items($key_word, $limit, $offset = null) {
 		$this->db->select ( 'item.*, min(item_image.imageName) as \'defaultImage\'' );
@@ -48,6 +50,7 @@ class Item_model extends CI_Model {
 			$this->db->like ( 'LOWER(item.title)', strtolower ( $key_word ) );
 			$this->db->or_like ( 'LOWER(item.desc)', strtolower ( $key_word ) );
 		}
+		$this->db->where ( "availability != 'XX'" );
 		$this->db->group_by ( "item_image.Global_Item_ID" );
 		$this->db->order_by ( "recCreateTime", "desc" );
 		$this->db->limit ( $limit, $offset );

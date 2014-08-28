@@ -93,7 +93,7 @@ class Item extends CI_Controller {
 	}
 	/**
 	 * Query the items.
-	 * 
+	 *
 	 * @param string $key_word        	
 	 * @param integer $limit        	
 	 * @param string $offset        	
@@ -192,7 +192,32 @@ class Item extends CI_Controller {
 		$data ['result'] = SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
-	
+	/**
+	 * Mark the status of the item as 'XX' and the item will not be find in the query API.
+	 *
+	 * @param string $itemId
+	 *        	Item's UUID
+	 */
+	public function delete_item($itemId) {
+		$item = $this->item_model->get_item ( $itemId );
+		if ($item) {
+			$result = $this->item_model->update_item ( array (
+					'availability' => 'XX' 
+			) );
+			if ($result) {
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'Failed to update the database.';
+			} else {
+				$this->item_model->insert_item_history ( $item );
+				$data ['result'] = SUCCESS;
+			}
+		} else {
+			// May be the item didn't be upload to the server. It's OK to return SUCCESS.
+			$data ['result'] = SUCCESS;
+		}
+		
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 	/**
 	 * Get the item's all image names.
 	 *
