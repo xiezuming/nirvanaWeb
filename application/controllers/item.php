@@ -21,6 +21,7 @@ class Item extends CI_Controller {
 		$this->load->model ( 'meta_model' );
 		$this->load->model ( 'wordpress_model' );
 	}
+	/* ---------------- page entry ---------------- */
 	public function test_page() {
 		$this->load->helper ( 'form' );
 		$this->load->library ( 'form_validation' );
@@ -28,6 +29,19 @@ class Item extends CI_Controller {
 		$data ['field_names'] = $this->get_field_names ();
 		$this->load->view ( 'item/test_form', $data );
 	}
+	public function upload_page() {
+		$this->load->helper ( 'form' );
+		
+		$this->load->view ( 'inv/upload_form', array (
+				'error' => ' ' 
+		) );
+	}
+	/**
+	 * Return all item's ids belong the user
+	 *
+	 * @param string $userId
+	 *        	User's UUID
+	 */
 	public function get_item_ids($userId) {
 		$item_id_array = array ();
 		$items_row = $this->item_model->get_items_by_user_id ( $userId );
@@ -41,6 +55,12 @@ class Item extends CI_Controller {
 		);
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	/**
+	 * Get the item by item UUID
+	 *
+	 * @param string $itemId
+	 *        	Item's UUID
+	 */
 	public function get_item($itemId) {
 		$item = $this->item_model->get_item ( $itemId );
 		if ($item) {
@@ -57,8 +77,8 @@ class Item extends CI_Controller {
 			foreach ( $images as $image )
 				array_push ( $image_names, $image ['imageName'] );
 			$item ['photoNames'] = implode ( ";", $image_names );
-			if (count($image_names) > 0)
-				$item['defaultPhotoName'] = $image_names[0];
+			if (count ( $image_names ) > 0)
+				$item ['defaultPhotoName'] = $image_names [0];
 			
 			$data ['result'] = SUCCESS;
 			$data ['data'] = array (
@@ -71,6 +91,31 @@ class Item extends CI_Controller {
 		
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	/**
+	 * Query the items.
+	 *
+	 * @param string $key_word        	
+	 * @param integer $limit        	
+	 * @param string $offset        	
+	 */
+	public function query_items($key_word = null, $limit = 15, $offset = 0) {
+		$items = $this->item_model->query_items ( $key_word, $limit, $offset );
+		$count = $this->item_model->count_items ( $key_word );
+		$data ['result'] = SUCCESS;
+		$data ['data'] = array (
+				'count' => $count,
+				'items' => $items 
+		);
+		
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	
+	/**
+	 * Update the item from the post data.
+	 * 1. Insert or Update the item into the DB.
+	 * 2. Sync the item to the WordPress's DB.
+	 * 3. Start a asynchronous process to resize & upload the images to the WordPress server.
+	 */
 	public function update_item() {
 		$input_data = $this->get_input_data ();
 		$input_data ['synchWp'] = 'N';
@@ -126,13 +171,7 @@ class Item extends CI_Controller {
 		}
 		
 		// synchronize to wp database
-		$success = $this->synch_item ( $globalItemId );
-		if ($success) {
-			$this->item_model->update_item ( array (
-					'itemId' => $itemId,
-					'synchWp' => 'Y' 
-			) );
-		}
+		$this->synch_item ( $globalItemId );
 		
 		// call python script to resize and upload image files
 		$global_image_id_array = array ();
@@ -147,6 +186,38 @@ class Item extends CI_Controller {
 		$data ['result'] = SUCCESS;
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	/**
+	 * Mark the status of the item as 'XX' and the item will not be find in the query API.
+	 *
+	 * @param string $itemId
+	 *        	Item's UUID
+	 */
+	public function delete_item($itemId) {
+		$item = $this->item_model->get_item ( $itemId );
+		if ($item) {
+			$result = $this->item_model->update_item ( array (
+					'availability' => 'XX' 
+			) );
+			if ($result) {
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'Failed to update the database.';
+			} else {
+				$this->item_model->insert_item_history ( $item );
+				$data ['result'] = SUCCESS;
+			}
+		} else {
+			// May be the item didn't be upload to the server. It's OK to return SUCCESS.
+			$data ['result'] = SUCCESS;
+		}
+		
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	/**
+	 * Get the item's all image names.
+	 *
+	 * @param string $itemId
+	 *        	Item's UUID
+	 */
 	public function get_item_image_names($itemId) {
 		if (empty ( $itemId )) {
 			echo 'ERROR: itemId is empty.';
@@ -173,11 +244,56 @@ class Item extends CI_Controller {
 		}
 		echo 'Restult: ' . var_export ( $this->synch_item ( $global_item_id ), TRUE );
 	}
-	
+	public function sync_all_items() {
+		$items = $this->item_model->query_all_items ( "synchWp = 'N'" );
+		$success_count = 0;
+		$failure_count = 0;
+		$failure_array = array ();
+		foreach ( $items as $item ) {
+			$global_item_id = $item ['Global_Item_ID'];
+			log_message ( 'debug', 'sync_all_items: ' . $global_item_id . '...' );
+			$success = $this->synch_item ( $global_item_id );
+			if ($success) {
+				$success_count ++;
+			} else {
+				$failure_count ++;
+				array_push ( $failure_array, $global_item_id );
+			}
+			log_message ( 'debug', 'Restult: ' . $global_item_id . var_export ( $success, TRUE ) );
+		}
+		$data ['success_count'] = $success_count;
+		$data ['failure_count'] = $failure_count;
+		$data ['failure_array'] = $failure_array;
+		$data ['result'] = $failure_count ? FAILURE : SUCCESS;
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function sync_all_images() {
+		$images = $this->item_model->query_all_items ( "synchWp = 'N'" );
+		$image_count = count ( $images );
+		$global_image_id_array = array ();
+		foreach ( $images as $image ) {
+			array_push ( $global_image_id_array, $image ['Global_Item_Image_ID'] );
+		}
+		$wait_until_done = TRUE;
+		$this->exec_image_generator_script ( $global_image_id_array, $wait_until_done );
+		
+		$images = $this->item_model->query_all_items ( "synchWp = 'N'" );
+		$global_image_id_array = array ();
+		foreach ( $images as $image ) {
+			array_push ( $global_image_id_array, $image ['Global_Item_Image_ID'] );
+		}
+		$current_image_count = count ( $images );
+		$data ['success_count'] = $image_count - $current_image_count;
+		$data ['failure_count'] = $current_image_count;
+		$data ['failure_array'] = $global_image_id_array;
+		$data ['result'] = $current_image_count ? FAILURE : SUCCESS;
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 	/**
 	 * Synch the item information to WordPress database
 	 *
-	 * @param $global_item_id: Global_Item_ID        	
+	 * @param string $global_item_id:
+	 *        	Item's global ID
 	 * @return boolean Returns TRUE if success.
 	 */
 	private function synch_item($global_item_id) {
@@ -252,6 +368,10 @@ class Item extends CI_Controller {
 			return FALSE;
 		} else {
 			log_message ( 'debug', 'Item.synch_item: Synchronize to WordPress database successfully.' );
+			$this->item_model->update_item ( array (
+					'itemId' => $item ['itemId'],
+					'synchWp' => 'Y' 
+			) );
 			return TRUE;
 		}
 		return TRUE;
@@ -311,13 +431,6 @@ class Item extends CI_Controller {
 		}
 		
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
-	}
-	public function upload_page() {
-		$this->load->helper ( 'form' );
-		
-		$this->load->view ( 'inv/upload_form', array (
-				'error' => ' ' 
-		) );
 	}
 	private function get_field_names() {
 		$field_names = array (

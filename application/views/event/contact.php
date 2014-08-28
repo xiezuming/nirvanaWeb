@@ -34,7 +34,7 @@ $message_data = array (
 			<td><?php echo form_textarea($message_data)?></td>
 		</tr>
 		<tr>
-			<td align='center'><input type="submit" width="30" value="Send" /></td>
+			<td align='center'><input type="submit" value="Send" /></td>
 		</tr>
 	</table>
 </div>
