@@ -144,7 +144,7 @@ class Catalogue extends CI_Controller {
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function sync_all_catalogues() {
-		$catalogues = $this->catalogue_model->query_all_catalogues ( "synchWp='N' OR synchPost='N'" );
+		$catalogues = $this->catalogue_model->query_all_catalogues ( "synchWp = 'N' OR synchPost = 'N'" );
 		$success_count = 0;
 		$failure_count = 0;
 		$failure_array = array ();
