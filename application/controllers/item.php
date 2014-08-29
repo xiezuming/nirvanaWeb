@@ -318,11 +318,14 @@ class Item extends CI_Controller {
 		$category_row = $this->meta_model->get_meta_code ( 1, $item ['category'] );
 		$catagory_id = $category_row ? $category_row ['pos'] : - 1;
 		$catagory_name = $category_row ? $category_row ['value'] : '';
+		$keyword = empty ( $item ['barcode'] ) ? $item ['title'] : $item ['barcode'];
+		$amazon_link = 'http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&tag=happitailcom-20&field-keywords=' . urlencode ( $keyword );
+		$amazon_link = '<br/><a href="' . htmlspecialchars ( $amazon_link ) . '">View Similar items on Amazon</a>';
 		$wp_item_data = array (
 				'Item_ID' => $global_item_id,
 				'Item_Name' => $item ['title'],
 				'Item_Slug' => '',
-				'Item_Description' => $desc_prefix . $item ['desc'],
+				'Item_Description' => $desc_prefix . $item ['desc'] . $amazon_link,
 				'Item_Price' => '$' . $item ['expectedPrice'],
 				'Item_Photo_URL' => $item_photo_url,
 				'Category_ID' => $catagory_id,
