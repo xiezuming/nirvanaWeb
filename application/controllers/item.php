@@ -96,9 +96,12 @@ class Item extends CI_Controller {
 	 *
 	 * @param string $key_word        	
 	 * @param integer $limit        	
-	 * @param string $offset        	
+	 * @param integer $offset        	
 	 */
-	public function query_items($key_word = null, $limit = 15, $offset = 0) {
+	public function query_items() {
+		$key_word = $this->input->post ( 'key_word' );
+		$limit = $this->input->post ( 'limit' ) ? $this->input->post ( 'limit' ) : 5;
+		$offset = $this->input->post ( 'offset' ) ? $this->input->post ( 'offset' ) : 0;
 		$items = $this->item_model->query_items ( $key_word, $limit, $offset );
 		$count = $this->item_model->count_items ( $key_word );
 		$data ['result'] = SUCCESS;
