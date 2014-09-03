@@ -99,11 +99,21 @@ class Item extends CI_Controller {
 	 * @param integer $offset        	
 	 */
 	public function query_items() {
+		$where['availability !='] = 'XX';
 		$key_word = $this->input->post ( 'key_word' );
+		if ($key_word) {
+			$key_word_where = "(LOWER(item.title) LIKE '%" . strtolower ( $key_word ) . "%'
+					OR LOWER(item.desc) LIKE '%" . strtolower ( $key_word ) . "%')";
+			$where[$key_word_where] = NULL;
+		}
+		$category = $this->input->post ( 'category' );
+		if ($category) {
+			$where ['category'] = $category;
+		}
 		$limit = $this->input->post ( 'limit' ) ? $this->input->post ( 'limit' ) : 5;
 		$offset = $this->input->post ( 'offset' ) ? $this->input->post ( 'offset' ) : 0;
-		$items = $this->item_model->query_items ( $key_word, $limit, $offset );
-		$count = $this->item_model->count_items ( $key_word );
+		$items = $this->item_model->query_items ( $where, $limit, $offset );
+		$count = $this->item_model->count_items ( $where );
 		$data ['result'] = SUCCESS;
 		$data ['data'] = array (
 				'count' => $count,

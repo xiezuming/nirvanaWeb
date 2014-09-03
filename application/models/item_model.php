@@ -42,30 +42,31 @@ class Item_model extends CI_Model {
 		$result = $query->result_array ();
 		return $result;
 	}
-	public function count_items($key_word) {
+	public function count_items($where) {
+		log_message ( 'debug', "Item_model.count_items" );
 		$this->db->from ( self::TABLE_ITEM );
-		if ($key_word) {
-			$this->db->like ( 'LOWER(item.title)', strtolower ( $key_word ) );
-			$this->db->or_like ( 'LOWER(item.desc)', strtolower ( $key_word ) );
+		if ($where) {
+			$this->db->where ( $where );
 		}
-		$this->db->where ( "availability != 'XX'" );
-		return $this->db->count_all_results ();
+		$result = $this->db->count_all_results ();
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'Item_model.count_items: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		}
+		return $result;
 	}
-	public function query_items($key_word, $limit, $offset = null) {
+	public function query_items($where, $limit, $offset = null) {
 		$this->db->select ( 'item.Global_Item_ID, item.itemId, item.userId, item.title, item.expectedPrice, min(item_image.imageName) as \'defaultImage\', wpPostId' );
 		$this->db->from ( self::TABLE_ITEM );
 		$this->db->join ( self::TABLE_IMAGE, 'item.Global_Item_ID = item_image.Global_Item_ID' );
 		$this->db->join ( 'catalogue', 'item.userId = catalogue.catalogueId' );
-		if ($key_word) {
-			$this->db->like ( 'LOWER(item.title)', strtolower ( $key_word ) );
-			$this->db->or_like ( 'LOWER(item.desc)', strtolower ( $key_word ) );
+		if ($where) {
+			$this->db->where ( $where );
 		}
-		$this->db->where ( "availability != 'XX' AND wpPostId is not NULL" );
 		$this->db->group_by ( "item_image.Global_Item_ID" );
 		$this->db->order_by ( "item.recCreateTime", "desc" );
 		$this->db->limit ( $limit, $offset );
 		$query = $this->db->get ();
-		log_message ( 'debug', 'Item_model.query_items: SQL = \n' . $this->db->last_query () );
+		log_message ( 'debug', "Item_model.query_items: SQL = \n" . $this->db->last_query () );
 		if ($this->db->_error_number ()) {
 			log_message ( 'error', 'Item_model.query_items: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 		}
