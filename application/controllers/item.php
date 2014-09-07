@@ -99,12 +99,12 @@ class Item extends CI_Controller {
 	 * @param integer $offset        	
 	 */
 	public function query_items() {
-		$where['availability !='] = 'XX';
+		$where ['availability !='] = 'XX';
 		$key_word = $this->input->post ( 'key_word' );
 		if ($key_word) {
 			$key_word_where = "(LOWER(item.title) LIKE '%" . strtolower ( $key_word ) . "%'
 					OR LOWER(item.desc) LIKE '%" . strtolower ( $key_word ) . "%')";
-			$where[$key_word_where] = NULL;
+			$where [$key_word_where] = NULL;
 		}
 		$category = $this->input->post ( 'category' );
 		if ($category) {
@@ -209,14 +209,15 @@ class Item extends CI_Controller {
 		$item = $this->item_model->get_item ( $itemId );
 		if ($item) {
 			$result = $this->item_model->update_item ( array (
+					'itemId' => $itemId,
 					'availability' => 'XX' 
 			) );
 			if ($result) {
-				$data ['result'] = FAILURE;
-				$data ['message'] = 'Failed to update the database.';
-			} else {
 				$this->item_model->insert_item_history ( $item );
 				$data ['result'] = SUCCESS;
+			} else {
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'Failed to update the database.';
 			}
 		} else {
 			// May be the item didn't be upload to the server. It's OK to return SUCCESS.
