@@ -8,18 +8,18 @@ $red_star = '<font color="red">*</font>';
 <div id='content'>
 	<table>
 		<tr>
-			<td><label><?php echo $red_star?>Email Address:</label></td>
-		</tr>
-		<tr>
-			<td><input type='email' name='userName'
-				value='<?php echo set_value('userName')?>' size='25'
-				placeholder='someone@example.com' /></td>
-		</tr>
-		<tr>
 			<td><label><?php echo $red_star?>Name:</label></td>
 		</tr>
 		<tr>
-			<td><?php echo form_input('firstName', set_value('firstName'), 'size="11" placeholder="First"');?>&nbsp;<?php echo form_input('lastName', set_value('lastName'), 'size="11" placeholder="Last"');?></td>
+			<td><?php echo form_input('firstName', set_value('firstName'), 'size="11" placeholder="First"');?>&nbsp;<?php echo form_input('lastName', set_value('lastName'), 'id="lastName" size="11" placeholder="Last" onblur="fill_user_name()"');?></td>
+		</tr>
+		<tr>
+			<td><label><?php echo $red_star?>Email Address:</label></td>
+		</tr>
+		<tr>
+			<td><input type='email' name='email'
+				value='<?php echo set_value('email')?>' size='25'
+				placeholder='someone@example.com' /></td>
 		</tr>
 		<tr>
 			<td><label><?php echo $red_star?>Password:</label></td>
@@ -64,4 +64,13 @@ $red_star = '<font color="red">*</font>';
 </div>
 <?php echo '</form>'?>
 
+<script type="text/javascript">
+function fill_user_name(x)
+{
+	var alias = document.getElementById("alias").value;
+	if (!alias) {
+		document.getElementById("alias").value = document.getElementById("lastName").value;
+	}
+}
+</script>
 

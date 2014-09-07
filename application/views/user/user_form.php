@@ -6,11 +6,33 @@
 
 <p>Sign In</p>
 <?php echo form_open('user/sign_in')?>
-<label>userName</label>
-<input name="userName" />
+<label>email</label>
+<input name="email" />
 <br />
 <label>password</label>
 <input name="password" type="password" />
+<br />
+<br />
+<input type="submit" value="Sign In" />
+<?php echo '</form>'?>
+<hr />
+
+<p>Sign In with Facebook id</p>
+<?php echo form_open('user/sign_in_fb')?>
+<label>fbUserId</label>
+<input name="fbUserId" />
+<br />
+<label>firstName</label>
+<input name="firstName" />
+<br />
+<label>lastName</label>
+<input name="lastName" />
+<br />
+<label>alias</label>
+<input name="alias" />
+<br />
+<label>email</label>
+<input name="email" />
 <br />
 <br />
 <input type="submit" value="Sign In" />

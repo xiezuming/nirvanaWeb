@@ -7,13 +7,16 @@ class User_model extends CI_Model {
 		$user_id = $this->gen_uuid ();
 		$user = array (
 				'userId' => $user_id,
-				'userName' => $data ['userName'],
-				'password' => md5 ( $data ['password'] ),
+				'userType' => $data ['userType'],
+				'password' => empty ( $data ['password'] ) ? '' : md5 ( $data ['password'] ),
+				'alias' => $data ['alias'],
 				'firstName' => $data ['firstName'],
 				'lastName' => $data ['lastName'],
-				'phoneNumber' => $data ['phoneNumber'],
-				'wechatId' => $data ['wechatId'],
-				'zipcode' => $data ['zipcode'] 
+				'email' => $data ['email'],
+				'fbUserId' => empty ( $data ['fbUserId'] ) ? '' : $data ['fbUserId'],
+				'phoneNumber' => empty ( $data ['phoneNumber'] ) ? '' : $data ['phoneNumber'],
+				'wechatId' => empty ( $data ['wechatId'] ) ? '' : $data ['wechatId'],
+				'zipcode' => empty ( $data ['zipcode'] ) ? '' : $data ['zipcode'] 
 		);
 		$this->db->insert ( self::TABLE_USER, $user );
 		if ($this->db->_error_number ()) {
@@ -23,21 +26,10 @@ class User_model extends CI_Model {
 			return $user_id;
 		}
 	}
-	public function update_user($user_id, $data, $update_password = TRUE) {
-		$user = array (
-				'userName' => $data ['userName'],
-				'firstName' => $data ['firstName'],
-				'lastName' => $data ['lastName'],
-				'phoneNumber' => $data ['phoneNumber'],
-				'wechatId' => $data ['wechatId'],
-				'zipcode' => $data ['zipcode'] 
-		);
-		if ($update_password) {
-			$user ['password'] = md5 ( $data ['password'] );
-		}
+	public function update_user($user_id, $data) {
 		log_message ( 'debug', 'User_model.update_user: ' . $user_id );
 		$this->db->where ( 'userId', $user_id );
-		$this->db->update ( self::TABLE_USER, $user );
+		$this->db->update ( self::TABLE_USER, $data );
 		if ($this->db->_error_number ()) {
 			log_message ( 'error', 'User_model.update_user: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 			return FALSE;
@@ -53,26 +45,18 @@ class User_model extends CI_Model {
 		$user = $query->row_array ();
 		return $user;
 	}
-	public function query_user($userName) {
+	public function query_user_by_email($email) {
 		$where = array (
-				'userName' => $userName 
+				'email' => $email 
 		);
 		$query = $this->db->get_where ( self::TABLE_USER, $where );
 		$user = $query->row_array ();
 		return $user;
 	}
-	public function login($userName, $password) {
-		$where = array (
-				'userName' => $userName,
-				'password' => md5 ( $password ) 
-		);
+	public function query_user($where) {
 		$query = $this->db->get_where ( self::TABLE_USER, $where );
 		$user = $query->row_array ();
-		if ($user) {
-			$data ['userId'] = $user ['userId'];
-			return $data;
-		}
-		return NULL;
+		return $user;
 	}
 	public function reset_password($user_id, $password) {
 		$this->db->where ( 'userId', $user_id );

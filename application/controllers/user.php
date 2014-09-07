@@ -4,7 +4,8 @@ if (! defined ( 'BASEPATH' ))
 const SUCCESS = 1;
 const FAILURE = 0;
 const GROUP_TYPE_ID = 5;
-
+const USER_TYPE_WETAG = 'WE';
+const USER_TYPE_FACEBOOK = 'FB';
 /**
  *
  * @property User_model $user_model
@@ -21,18 +22,21 @@ class User extends CI_Controller {
 	public function sign_up() {
 		$this->load->helper ( 'form' );
 		$this->load->library ( 'form_validation' );
-		$this->form_validation->set_rules ( 'userName', 'Email Address', 'required|valid_email|max_length[45]|is_unique[user.userName]' );
 		$this->form_validation->set_rules ( 'firstName', 'First Name', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
+		$this->form_validation->set_rules ( 'email', 'Email Address', 'required|valid_email|max_length[45]|callback_email_check' );
 		$this->form_validation->set_rules ( 'password', 'Password', 'required|matches[password_confirm]' );
 		$this->form_validation->set_rules ( 'password_confirm', 'Password Confirmation', 'required' );
+		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'required|max_length[10]' );
 		$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
 		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
-		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'max_length[10]' );
 		$this->form_validation->set_rules ( 'user_groups', 'Group', '' );
 		
 		if ($this->form_validation->run ()) {
-			$user_id = $this->user_model->create_user ( $this->input->post () );
+			$input_data = $this->input->post ();
+			$input_data ['userType'] = USER_TYPE_WETAG;
+			$input_data ['alias'] = $input_data ['firstName'];
+			$user_id = $this->user_model->create_user ( $input_data );
 			$user_groups = $this->input->post ( 'user_groups' );
 			if ($user_id && $this->user_model->update_user_group ( $user_id, $user_groups )) {
 				$this->load->view ( 'user/jump_sign_up_success' );
@@ -67,20 +71,32 @@ class User extends CI_Controller {
 		
 		if ($this->input->post ()) {
 			$this->load->library ( 'form_validation' );
-			$this->form_validation->set_rules ( 'userName', 'Email Address', 'required' );
 			$this->form_validation->set_rules ( 'firstName', 'First Name', 'required|max_length[45]' );
 			$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
+			$this->form_validation->set_rules ( 'alias', 'Alias', 'required|max_length[45]' );
+			$this->form_validation->set_rules ( 'email', 'Email Address', 'required|valid_email|max_length[45]|callback_email_check[' . $data ['user'] ['userId'] . ',' . $data ['user'] ['userType'] . ']' );
 			$this->form_validation->set_rules ( 'password', 'Password', 'matches[password_confirm]' );
 			$this->form_validation->set_rules ( 'password_confirm', 'Password Confirmation', '' );
+			$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'required|max_length[10]' );
 			$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
 			$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
-			$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'max_length[10]' );
 			$this->form_validation->set_rules ( 'user_groups', 'Group', '' );
 			
 			if ($this->form_validation->run ()) {
 				$input = $this->input->post ();
-				$update_password = ! empty ( $input ['password'] );
-				$success = $this->user_model->update_user ( $user_id, $input, $update_password );
+				$update_data = array (
+						'firstName' => $input ['firstName'],
+						'lastName' => $input ['lastName'],
+						'alias' => $input ['alias'],
+						'email' => $input ['email'],
+						'phoneNumber' => $input ['phoneNumber'],
+						'wechatId' => $input ['wechatId'],
+						'zipcode' => $input ['zipcode'] 
+				);
+				if (! empty ( $input ['password'] )) {
+					$update_data ['password'] = md5 ( $input ['password'] );
+				}
+				$success = $this->user_model->update_user ( $user_id, $update_data );
 				
 				$user_groups = $this->input->post ( 'user_groups' );
 				if ($success && $this->user_model->update_user_group ( $user_id, $user_groups )) {
@@ -107,14 +123,17 @@ class User extends CI_Controller {
 		echo "SUCCESS";
 	}
 	public function sign_in() {
-		$userName = $this->input->post ( 'userName' );
+		$email = $this->input->post ( 'email' );
 		$password = $this->input->post ( 'password' );
 		$user = NULL;
-		if (empty ( $userName ) || empty ( $password )) {
+		if (empty ( $email ) || empty ( $password )) {
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'Internal Error: UserName or password is empty.';
+			$data ['message'] = 'Internal Error: email or password is empty.';
 		} else {
-			$user = $this->user_model->query_user ( $userName );
+			$user = $this->user_model->query_user ( array (
+					'email' => $email,
+					'userType' => USER_TYPE_WETAG 
+			) );
 			if ($user) {
 				if ($user ['password'] == md5 ( $password )) {
 					$data ['result'] = SUCCESS;
@@ -131,6 +150,35 @@ class User extends CI_Controller {
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	public function sign_in_fb() {
+		$input_data = $this->input->post ();
+		$fbUserId = $input_data ['fbUserId'];
+		if (empty ( $fbUserId )) {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Internal Error: Facebook user id is empty.';
+		} else {
+			$user = $this->user_model->query_user ( array (
+					'fbUserId' => $fbUserId 
+			) );
+			if ($user) {
+				$user_id = $user ['userId'];
+			} else {
+				$input_data ['userType'] = USER_TYPE_FACEBOOK;
+				$input_data ['alias'] = $input_data ['firstName'];
+				$user_id = $this->user_model->create_user ( $input_data );
+				if (! $user_id) {
+					$data ['result'] = FAILURE;
+					$data ['message'] = 'Internal Error: Falied to crate the user.';
+				}
+			}
+			if ($user_id) {
+				$data ['result'] = SUCCESS;
+				$user ['password'] = '';
+				$data ['data'] = $this->user_model->get_user ( $user_id );
+			}
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 	public function reset_password_mail() {
 		$this->load->helper ( 'url' );
 		
@@ -141,7 +189,10 @@ class User extends CI_Controller {
 			$email_address = $this->input->post ( 'email_address', true );
 			log_message ( 'debug', 'User.reset_password_mail: $email_address = ' . $email_address );
 			
-			$user = $this->user_model->query_user ( $email_address );
+			$user = $this->user_model->query_user ( $where = array (
+					'email' => $email_address,
+					'userType' => USER_TYPE_WETAG 
+			) );
 			
 			if ($user) {
 				$user_id = $user ['userId'];
@@ -243,6 +294,22 @@ class User extends CI_Controller {
 			}
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function email_check($email, $params = '') {
+		$params = explode ( ',', $params );
+		$user_id = empty ( $params [0] ) ? '' : $params [0];
+		$user_type = empty ( $params [1] ) ? USER_TYPE_WETAG : $params [1];
+		log_message ( 'debug', '------------' . $email . ',' . $user_id . ',' . $user_type );
+		$user = $this->user_model->query_user ( array (
+				'email' => $email,
+				'userType' => $user_type,
+				'userId !=' => $user_id 
+		) );
+		if ($user) {
+			$this->form_validation->set_message ( 'email_check', 'Email Address is registered by another account.' );
+			return FALSE;
+		}
+		return TRUE;
 	}
 	private function get_user_group_key_array($user_id) {
 		$user_group_key_array = array ();

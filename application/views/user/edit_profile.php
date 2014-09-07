@@ -12,11 +12,9 @@
 <?php echo validation_errors(); ?>
 </font>
 <?php
+$red_star = '<font color="red">*</font>';
 $hidden = array (
-		'userId' => $user ['userId'],
-		'userName' => $user ['userName'],
-		'firstName' => $user ['firstName'],
-		'lastName' => $user ['lastName'] 
+		'userId' => $user ['userId'] 
 );
 ?>
 
@@ -24,10 +22,24 @@ $hidden = array (
 <div id='content'>
 	<table>
 		<tr>
-			<td><label><?php echo  $user['firstName'] . ' ' . $user['lastName']?></label></td>
+			<td><label><?php echo $red_star?>Name:</label></td>
 		</tr>
 		<tr>
-			<td><label><?php echo $user['userName']?></label></td>
+			<td><?php echo form_input('firstName', set_value('firstName', $user['firstName']), 'size="11" placeholder="First"');?>&nbsp;<?php echo form_input('lastName', set_value('lastName', $user['lastName']), 'id="lastName" size="11" placeholder="Last"');?></td>
+		</tr>
+		<tr>
+			<td><label><?php echo $red_star?>Alias:</label></td>
+		</tr>
+		<tr>
+			<td><?php echo form_input('alias', set_value('alias', $user['alias']), 'id="alias" size="25" placeholder="First"');?></td>
+		</tr>
+		<tr>
+			<td><label><?php echo $red_star?>Email Address:</label></td>
+		</tr>
+		<tr>
+			<td><input type='email' name='email'
+				value='<?php echo set_value('email', $user['email'])?>' size='25'
+				placeholder='someone@example.com' /></td>
 		</tr>
 		<tr>
 			<td><label>Password:</label></td>
