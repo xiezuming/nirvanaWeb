@@ -99,7 +99,7 @@ class Item extends CI_Controller {
 	 * @param integer $offset        	
 	 */
 	public function query_items() {
-		$where ['availability !='] = 'XX';
+		$where ['availability'] = 'AB';
 		$key_word = $this->input->post ( 'key_word' );
 		if ($key_word) {
 			$key_word_where = "(LOWER(item.title) LIKE '%" . strtolower ( $key_word ) . "%'
@@ -109,6 +109,10 @@ class Item extends CI_Controller {
 		$category = $this->input->post ( 'category' );
 		if ($category) {
 			$where ['category'] = $category;
+		}
+		$group = $this->input->post ( 'group_key' );
+		if ($group) {
+			$where ['group_key'] = $group;
 		}
 		$limit = $this->input->post ( 'limit' ) ? $this->input->post ( 'limit' ) : 5;
 		$offset = $this->input->post ( 'offset' ) ? $this->input->post ( 'offset' ) : 0;
