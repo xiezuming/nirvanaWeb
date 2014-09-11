@@ -131,6 +131,17 @@ class Catalogue_model extends CI_Model {
 		if ($this->db->_error_number ())
 			log_message ( 'error', 'Catalogue_model.delete_catalogue_item_relation: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 	}
+	public function query_all_group_catalogues() {
+		$this->db->select ( 'user_group.group_key as Catalogue_Group_ID, catalogue.Global_Catalogue_ID as Sub_Catalogue_ID' );
+		$this->db->from ( self::TABLE_CATALOGUE );
+		$this->db->join ( 'user_group', 'catalogue.catalogueId = user_group.user_id' );
+		$query = $this->db->get ();
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'Catalogue_model.query_all_group_catalogues: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		}
+		$result = $query->result_array ();
+		return $result;
+	}
 	private function gen_uuid() {
 		return sprintf ( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x', 
 				// 32 bits for "time_low"

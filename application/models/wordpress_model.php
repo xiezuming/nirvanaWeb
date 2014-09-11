@@ -4,6 +4,7 @@ class Wordpress_model extends CI_Model {
 	const TABLE_IMAGE = 'wp_UPCP_Item_Images';
 	const TABLE_CATALOGUE = 'wp_UPCP_Catalogues';
 	const TABLE_CATALOGUE_ITEM = 'wp_UPCP_Catalogue_Items';
+	const TABLE_CATALOGUE_GROUP = 'wp_UPCP_Catalogue_Groups';
 	/* ======== ITEM ======== */
 	public function get_item($item_id) {
 		$this->db->where ( 'Item_ID', $item_id );
@@ -97,6 +98,23 @@ class Wordpress_model extends CI_Model {
 		if ($this->db->_error_number ())
 			log_message ( 'error', 'Wordpress_model.delete_catalogue_all_relations: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 		return $result;
+	}
+	/* ======== CATALOGUE GROUP ======== */
+	public function fresh_group_catalogues($group_catalogues) {
+		$this->db->trans_start ();
+		
+		$this->db->empty_table ( self::TABLE_CATALOGUE_GROUP );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'Wordpress_model.fresh_group_catalogues: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		}
+		$this->db->insert_batch ( self::TABLE_CATALOGUE_GROUP, $group_catalogues );
+		if ($this->db->_error_number ()) {
+			log_message ( 'error', 'Wordpress_model.fresh_group_catalogues: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		}
+		
+		$this->db->trans_complete ();
+		
+		return $this->db->trans_status ();
 	}
 }
 ?>

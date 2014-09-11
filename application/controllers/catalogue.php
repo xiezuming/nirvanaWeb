@@ -273,6 +273,20 @@ class Catalogue extends CI_Controller {
 		}
 		echo 'Restult: ' . var_export ( $this->post_catalogue ( $global_catalogue_id ), TRUE );
 	}
+	public function sync_all_group_catalgues() {
+		$group_catalogues = $this->catalogue_model->query_all_group_catalogues ();
+		
+		$wp_db = $this->load->database ( 'wp', TRUE );
+		if (! $wp_db->initialize ()) {
+			log_message ( 'error', 'Catalogue.sync_all_group_catalgue: Failed to connect the WordPress database.' );
+			echo 'Failed to connect the WordPress database.';
+			return;
+		}
+		
+		$this->wordpress_model->db = $wp_db;
+		$success = $this->wordpress_model->fresh_group_catalogues ( $group_catalogues );
+		echo $success ? "SUCCESS:" . count ( $group_catalogues ) . " row(s)" : "Failed to update the WordPress database.";
+	}
 	private function post_catalogue($global_catalogue_id) {
 		log_message ( 'debug', 'Start to post the catalogue to WordPress.' );
 		
