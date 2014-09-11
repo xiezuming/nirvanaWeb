@@ -51,6 +51,12 @@ $hidden = array (
 			<td><?php echo form_password('password_confirm', '', 'size="25" placeholder="Reenter password"');?></td>
 		</tr>
 		<tr>
+			<td><label><?php echo $red_star?>ZIP Code:</label></td>
+		</tr>
+		<tr>
+			<td><?php echo form_input('zipcode', set_value('zipcode',  $user['zipcode']), 'size="25"');?></td>
+		</tr>
+		<tr>
 			<td><label>Phone Number:</label></td>
 		</tr>
 		<tr>
@@ -63,12 +69,6 @@ $hidden = array (
 		</tr>
 		<tr>
 			<td><?php echo form_input('wechatId', set_value('wechatId', $user['wechatId']), 'size="25"');?></td>
-		</tr>
-		<tr>
-			<td><label>ZIP Code:</label></td>
-		</tr>
-		<tr>
-			<td><?php echo form_input('zipcode', set_value('zipcode',  $user['zipcode']), 'size="25"');?></td>
 		</tr>
 		<tr>
 			<td><label>Group:</label></td>
