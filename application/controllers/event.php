@@ -63,6 +63,21 @@ class Event extends CI_Controller {
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	public function contact_home() {
+		$input['user_id'] = $this->input->post('name');
+		$input['event_type'] = 'contact_home';
+		$input['event_sub_type'] = $this->input->post('email');
+		$input['event_text'] = $this->input->post('message');
+		$success = $this->event_model->add_event ( $input );
+		if ($success) {
+			$data ['result'] = SUCCESS;
+			$data ['message'] = 'SUCCESS';
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'DB Error';
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 	public function sell_to_wetag() {
 		$input = $this->get_input_data ();
 		$user_id = $input ['user_id'];
