@@ -76,6 +76,7 @@ class Event extends CI_Controller {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'DB Error';
 		}
+		$this->output->set_header('Access-Control-Allow-origin: *');
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function sell_to_wetag() {
