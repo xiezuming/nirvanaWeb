@@ -47,6 +47,8 @@ class Catalogue extends CI_Controller {
 				array_push ( $item_ids, $item ['itemId'] );
 			}
 			$catalogue ['itemIds'] = implode ( ";", $item_ids );
+			$catalogue ['recCreateTime'] = strtotime ( $catalogue ['recCreateTime'] );
+			$catalogue ['recUpdateTime'] = strtotime ( $catalogue ['recUpdateTime'] );
 			
 			$data ['result'] = SUCCESS;
 			$data ['data'] = array (

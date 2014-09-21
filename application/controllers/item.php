@@ -56,6 +56,25 @@ class Item extends CI_Controller {
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	/**
+	 * Return all item's last update time
+	 *
+	 * @param string $userId
+	 *        	User's UUID
+	 */
+	public function get_item_update_times($userId) {
+		$item_id_array = array ();
+		$items_row = $this->item_model->get_items_by_user_id ( $userId );
+		foreach ( $items_row as $item ) {
+			$item_id_array [$item ['itemId']] = strtotime ( $item ['recUpdateTime'] );
+		}
+		
+		$data ['result'] = SUCCESS;
+		$data ['data'] = array (
+				'item_update_times' => $item_id_array 
+		);
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	/**
 	 * Get the item by item UUID
 	 *
 	 * @param string $itemId
