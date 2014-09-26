@@ -70,33 +70,7 @@ class Catalogue_model extends CI_Model {
 			log_message ( 'error', 'Catalogue_model.insert_catalogue: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 		return $result;
 	}
-	public function insert_user_default_catalogue_item_relation($item) {
-		$userId = $item ['userId'];
-		$globalItemId = $item ['Global_Item_ID'];
-		$catalogueName = 'All Available Items';
-		
-		// Get the user default catalogue. If not exist, create it.
-		$this->db->where ( 'userId', $userId );
-		$this->db->where ( 'catalogueName', $catalogueName );
-		$query = $this->db->get ( self::TABLE_CATALOGUE );
-		$catalogue = $query->row_array ();
-		if (! $catalogue) {
-			$catalogueId = $this->gen_uuid ();
-			$currentTime = date ( 'Y-m-d H:i:s' );
-			$data = array (
-					'catalogueId' => $catalogueId,
-					'catalogueName' => 'All Available Items',
-					'userId' => $userId,
-					'recCreateTime' => $currentTime,
-					'recUpdateTime' => $currentTime,
-					'synchWp' => 'N' 
-			);
-			if (! $this->insert_catalogue ( $data ))
-				return FALSE;
-			$catalogue = $this->get_catalogue ( $catalogueId );
-		}
-		$globalCatalogueId = $catalogue ['Global_Catalogue_ID'];
-		
+	public function insert_user_default_catalogue_item_relation($globalCatalogueId, $globalItemId) {
 		if (! $this->get_catalogue_item_relation ( $globalCatalogueId, $globalItemId )) {
 			return $this->insert_catalogue_item_relation ( $globalCatalogueId, $globalItemId );
 		}

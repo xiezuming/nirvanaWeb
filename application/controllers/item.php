@@ -5,6 +5,8 @@ const SUCCESS = 1;
 const FAILURE = 0;
 const UPLOAD_BASE_PATH = '/var/uploads/wetag_app/';
 const LOG_BASE_PATH = '/var/log/wetag/';
+const DEFAULT_SHARE_USER_ID = 'fd3142d3-167b-48c5-8208-2762e2db2fb2';
+const DEFAULT_CATALOGUE_GLOBAL_ID = '1051';
 
 /**
  *
@@ -183,9 +185,6 @@ class Item extends CI_Controller {
 			$this->item_model->insert_item ( $input_data );
 			$item = $this->item_model->get_item ( $itemId );
 			$globalItemId = $item ['Global_Item_ID'];
-			
-			// add the new item into the user default catalogue
-			// $this->catalogue_model->insert_user_default_catalogue_item_relation ( $item );
 		}
 		
 		// update image names
@@ -305,7 +304,7 @@ class Item extends CI_Controller {
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function sync_all_images() {
-		$images = $this->item_model->query_all_items ( "synchWp = 'N'" );
+		$images = $this->item_model->query_all_images ( "synchWp = 'N'" );
 		$image_count = count ( $images );
 		$global_image_id_array = array ();
 		foreach ( $images as $image ) {
@@ -314,7 +313,7 @@ class Item extends CI_Controller {
 		$wait_until_done = TRUE;
 		$this->exec_image_generator_script ( $global_image_id_array, $wait_until_done );
 		
-		$images = $this->item_model->query_all_items ( "synchWp = 'N'" );
+		$images = $this->item_model->query_all_images ( "synchWp = 'N'" );
 		$global_image_id_array = array ();
 		foreach ( $images as $image ) {
 			array_push ( $global_image_id_array, $image ['Global_Item_Image_ID'] );
@@ -449,7 +448,7 @@ class Item extends CI_Controller {
 			unlink ( $file_path );
 		}
 	}
-	function upload() {
+	function upload_test() {
 		$userId = $this->input->post ( 'userId' );
 		$upload_path = UPLOAD_BASE_PATH . $userId;
 		if (! file_exists ( $upload_path )) {
@@ -471,6 +470,167 @@ class Item extends CI_Controller {
 		}
 		
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	function upload() {
+		$data ['title'] = 'Upload';
+		$data ['error'] = '';
+		
+		$this->load->helper ( 'form' );
+		$this->load->library ( 'form_validation' );
+		$this->form_validation->set_rules ( 'email', 'Email Address', 'required||max_length[45]|valid_email' );
+		$this->form_validation->set_rules ( 'title', 'Title', 'required' );
+		$this->form_validation->set_rules ( 'price', 'Price', 'required|integer' );
+		$this->form_validation->set_rules ( 'description', 'Description', 'required' );
+		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', '' );
+		
+		if ($this->form_validation->run ()) {
+			// upload image file
+			$upload_path = UPLOAD_BASE_PATH . DEFAULT_SHARE_USER_ID;
+			if (! file_exists ( $upload_path )) {
+				mkdir ( $upload_path, 0777, true );
+			}
+			
+			$image_name = time () . '.jpg';
+			$config ['upload_path'] = $upload_path;
+			$config ['allowed_types'] = 'gif|jpg|png';
+			$config ['max_size'] = '5120';
+			$config ['overwrite'] = TRUE;
+			$config ['file_name'] = $image_name;
+			
+			$this->load->library ( 'upload', $config );
+			if ($this->upload->do_upload ()) {
+				$itemId = $this->gen_uuid ();
+				$date_now = date ( 'Y-m-d H:i:s' );
+				
+				$input_data ['itemId'] = $itemId;
+				$input_data ['userId'] = DEFAULT_SHARE_USER_ID;
+				$input_data ['title'] = $this->input->post ( 'title' );
+				$input_data ['category'] = '';
+				$input_data ['expectedPrice'] = $this->input->post ( 'price' );
+				$input_data ['condition'] = '';
+				$input_data ['availability'] = 'AB';
+				$input_data ['desc'] = $this->input->post ( 'description' );
+				$input_data ['recCreateTime'] = $date_now;
+				$input_data ['recUpdateTime'] = $date_now;
+				$input_data ['synchWp'] = 'N';
+				
+				$this->db->trans_start ();
+				
+				// insert the itme into item table
+				$this->item_model->insert_item ( $input_data );
+				$item = $this->item_model->get_item ( $itemId );
+				$globalItemId = $item ['Global_Item_ID'];
+				
+				// add the new item into the user default catalogue
+				$this->catalogue_model->insert_user_default_catalogue_item_relation ( DEFAULT_CATALOGUE_GLOBAL_ID, $globalItemId );
+				
+				// insert image names into item_image table
+				$this->item_model->insert_image ( $globalItemId, $image_name );
+				
+				$this->db->trans_complete ();
+				
+				if ($this->db->trans_status () === FALSE) {
+					log_message ( 'error', 'Item.upload: Failed to update the database.' );
+					$data ['error'] = 'Failed to update the database.';
+					$this->load->view ( 'share/upload_form', $data );
+					return;
+				}
+				// synchronize to wp database
+				$this->synch_item ( $globalItemId );
+				$this->synch_catalogue(DEFAULT_CATALOGUE_GLOBAL_ID);
+				
+				// call python script to resize and upload image files
+				$global_image_id_array = array ();
+				$image_row_array = $this->item_model->get_images ( $globalItemId );
+				foreach ( $image_row_array as $image_row ) {
+					if ($image_row ['synchWp'] == 'N')
+						array_push ( $global_image_id_array, $image_row ['Global_Item_Image_ID'] );
+				}
+				if (count ( $global_image_id_array ) > 0)
+					$this->exec_image_generator_script ( $global_image_id_array );
+				
+				$data ['result'] = SUCCESS;
+				$this->load->view ( 'share/upload_success', $data );
+				return;
+			} else {
+				$data ['error'] = $this->upload->display_errors ();
+				$this->load->view ( 'share/upload_form', $data );
+				return;
+			}
+		}
+		$this->load->view ( 'share/upload_form', $data );
+	}
+	/**
+	 * Synchronize the catalogue and its relations information to WordPress database
+	 *
+	 * @param $global_catalogue_id: Global_Catalogue_ID        	
+	 * @return boolean Returns TRUE if success.
+	 */
+	private function synch_catalogue($global_catalogue_id) {
+		log_message ( 'debug', 'Start to synchronize the catalogue to WordPress DB.' );
+		
+		$catalogue = $this->catalogue_model->get_catalogue_by_global_id ( $global_catalogue_id );
+		if (! $catalogue) {
+			log_message ( 'error', 'Catalogue.synch_catalogue: Can not find the catalogue.' . $global_catalogue_id );
+			return FALSE;
+		}
+		
+		// build data
+		$wp_catalogue_data = array (
+				'Catalogue_ID' => $global_catalogue_id,
+				'Catalogue_Name' => $catalogue ['catalogueName'],
+				'Catalogue_Description' => '',
+				'Catalogue_Layout_Format' => '',
+				'Catalogue_Custom_CSS' => '',
+				'Catalogue_Date_Created' => $catalogue ['recCreateTime'] 
+		);
+		$newRelationArray = $this->catalogue_model->get_catalogue_item_relations ( $global_catalogue_id );
+		
+		$wp_db = $this->load->database ( 'wp', TRUE );
+		if (! $wp_db->initialize ()) {
+			log_message ( 'error', 'Catalogue.synch_catalogue: Failed to connect the database.' );
+			return FALSE;
+		}
+		
+		$this->wordpress_model->db = $wp_db;
+		$wp_db->trans_start ();
+		
+		// update WordPress catalgoue table
+		if ($this->wordpress_model->get_catalogue ( $global_catalogue_id )) {
+			$success = $this->wordpress_model->update_catalogue ( $wp_catalogue_data );
+			if ($success)
+				$success = $this->wordpress_model->delete_catalogue_all_relations ( $global_catalogue_id );
+		} else {
+			$success = $this->wordpress_model->insert_catalogue ( $wp_catalogue_data );
+		}
+		if ($success) {
+			// update WordPress catalogue item relation table
+			// TODO current sort the item order by their global itme id. Need think about it.
+			$position = 0;
+			foreach ( $newRelationArray as $newRelation ) {
+				$success = $this->wordpress_model->delete_catalogue_item_relation ( $newRelation ['Global_Catalogue_Item_ID'] );
+				if (! $success)
+					break;
+				$success = $this->wordpress_model->insert_catalogue_item_relation ( $newRelation ['Global_Catalogue_Item_ID'], $newRelation ['Global_Catalogue_ID'], $newRelation ['Global_Item_ID'], $position );
+				if (! $success)
+					break;
+				$position ++;
+			}
+		}
+		
+		$wp_db->trans_complete ();
+		
+		if ($wp_db->trans_status () === FALSE) {
+			log_message ( 'error', 'Catalogue.synch_catalogue: Failed to update the WordPresss database.' );
+			return FALSE;
+		} else {
+			log_message ( 'debug', 'Catalogue.synch_catalogue: Synchronize to WordPress database successfully.' );
+			$this->catalogue_model->update_catalogue ( array (
+					'catalogueId' => $catalogue ['catalogueId'],
+					'synchWp' => 'Y' 
+			) );
+			return TRUE;
+		}
 	}
 	private function get_field_names() {
 		$field_names = array (
@@ -517,6 +677,26 @@ class Item extends CI_Controller {
 	}
 	private function endsWith($haystack, $needle) {
 		return $needle === "" || substr ( $haystack, - strlen ( $needle ) ) === $needle;
+	}
+	private function gen_uuid() {
+		return sprintf ( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x', 
+				// 32 bits for "time_low"
+				mt_rand ( 0, 0xffff ), mt_rand ( 0, 0xffff ), 
+				
+				// 16 bits for "time_mid"
+				mt_rand ( 0, 0xffff ), 
+				
+				// 16 bits for "time_hi_and_version",
+				// four most significant bits holds version number 4
+				mt_rand ( 0, 0x0fff ) | 0x4000, 
+				
+				// 16 bits, 8 bits for "clk_seq_hi_res",
+				// 8 bits for "clk_seq_low",
+				// two most significant bits holds zero and one for variant DCE1.1
+				mt_rand ( 0, 0x3fff ) | 0x8000, 
+				
+				// 48 bits for "node"
+				mt_rand ( 0, 0xffff ), mt_rand ( 0, 0xffff ), mt_rand ( 0, 0xffff ) );
 	}
 }
 
