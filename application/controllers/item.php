@@ -501,15 +501,19 @@ class Item extends CI_Controller {
 			if ($this->upload->do_upload ()) {
 				$itemId = $this->gen_uuid ();
 				$date_now = date ( 'Y-m-d H:i:s' );
+				$description = $this->input->post ( 'description' );
+				$description .= 'Email: ' . $this->input->post ( 'email' ) . "\n";
+				if ($this->input->post ( 'wechatId' ))
+					$description .= 'WeChat ID: ' . $this->input->post ( 'wechatId' ) . "\n";
 				
 				$input_data ['itemId'] = $itemId;
 				$input_data ['userId'] = DEFAULT_SHARE_USER_ID;
 				$input_data ['title'] = $this->input->post ( 'title' );
-				$input_data ['category'] = '';
+				$input_data ['category'] = 'CLO';
 				$input_data ['expectedPrice'] = $this->input->post ( 'price' );
-				$input_data ['condition'] = '';
+				$input_data ['condition'] = 'GD';
 				$input_data ['availability'] = 'AB';
-				$input_data ['desc'] = $this->input->post ( 'description' );
+				$input_data ['desc'] = $description;
 				$input_data ['recCreateTime'] = $date_now;
 				$input_data ['recUpdateTime'] = $date_now;
 				$input_data ['synchWp'] = 'N';
@@ -537,7 +541,7 @@ class Item extends CI_Controller {
 				}
 				// synchronize to wp database
 				$this->synch_item ( $globalItemId );
-				$this->synch_catalogue(DEFAULT_CATALOGUE_GLOBAL_ID);
+				$this->synch_catalogue ( DEFAULT_CATALOGUE_GLOBAL_ID );
 				
 				// call python script to resize and upload image files
 				$global_image_id_array = array ();
@@ -549,7 +553,6 @@ class Item extends CI_Controller {
 				if (count ( $global_image_id_array ) > 0)
 					$this->exec_image_generator_script ( $global_image_id_array );
 				
-				$data ['result'] = SUCCESS;
 				$this->load->view ( 'share/upload_success', $data );
 				return;
 			} else {
