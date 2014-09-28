@@ -502,9 +502,9 @@ class Item extends CI_Controller {
 				$itemId = $this->gen_uuid ();
 				$date_now = date ( 'Y-m-d H:i:s' );
 				$description = $this->input->post ( 'description' );
-				$description .= 'Email: ' . $this->input->post ( 'email' ) . "\n";
+				$description .= 'Email: ' . $this->input->post ( 'email' ) . "<br/>";
 				if ($this->input->post ( 'wechatId' ))
-					$description .= 'WeChat ID: ' . $this->input->post ( 'wechatId' ) . "\n";
+					$description .= 'WeChat ID: ' . $this->input->post ( 'wechatId' ) . "<br/>";
 				
 				$input_data ['itemId'] = $itemId;
 				$input_data ['userId'] = DEFAULT_SHARE_USER_ID;
