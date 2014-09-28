@@ -28,7 +28,7 @@ $description_meta = array (
 		'cols' => '30' 
 );
 ?>
-<?php echo form_open_multipart('item/upload');?>
+<?php echo form_open_multipart('item/upload_item_web');?>
 
 	<table>
 		<tr>

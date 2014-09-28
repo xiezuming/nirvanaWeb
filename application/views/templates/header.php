@@ -3,13 +3,13 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8"
 	lang="en-us">
 <title><?php echo $title ?> - WeTag</title>
-<link rel="stylesheet" href="<?php echo base_url('/css/mystyle.css')?>">
+<link rel="stylesheet" href="<?php echo base_url('/css/style_normal.css')?>">
 <script type="text/javascript"
 	src="<?php echo base_url('/js/jquery.js')?>"></script>
 </head>
 
 <body id="content">
-	<h2>WeTag</h2>
+	<h2>Weee!</h2>
 	<hr />
 
 	<?php echo '<div class="main">'?>

@@ -37,6 +37,11 @@ class User_model extends CI_Model {
 			return TRUE;
 		}
 	}
+	public function query_all_users() {
+		$query = $this->db->get ( self::TABLE_USER );
+		$result = $query->result_array ();
+		return $result;
+	}
 	public function get_user($userId) {
 		$where = array (
 				'userId' => $userId 

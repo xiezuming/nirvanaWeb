@@ -332,7 +332,7 @@ class Item extends CI_Controller {
 	 *        	Item's global ID
 	 * @return boolean Returns TRUE if success.
 	 */
-	private function synch_item($global_item_id) {
+	public function synch_item($global_item_id) {
 		log_message ( 'debug', 'Start to synchronize the item to WordPress DB.' );
 		
 		$item = $this->item_model->get_item_by_global_id ( $global_item_id );
@@ -448,7 +448,7 @@ class Item extends CI_Controller {
 			unlink ( $file_path );
 		}
 	}
-	function upload_test() {
+	function upload() {
 		$userId = $this->input->post ( 'userId' );
 		$upload_path = UPLOAD_BASE_PATH . $userId;
 		if (! file_exists ( $upload_path )) {
@@ -471,7 +471,7 @@ class Item extends CI_Controller {
 		
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
-	function upload() {
+	function upload_item_web() {
 		$data ['title'] = 'Upload';
 		$data ['error'] = '';
 		
