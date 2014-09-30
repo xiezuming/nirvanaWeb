@@ -1,10 +1,7 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
-const SUCCESS = 1;
-const FAILURE = 0;
 const UPLOAD_BASE_PATH = '/var/uploads/wetag_app/';
-const LOG_BASE_PATH = '/var/log/wetag/';
 const DEFAULT_SHARE_USER_ID = 'fd3142d3-167b-48c5-8208-2762e2db2fb2';
 const DEFAULT_CATALOGUE_GLOBAL_ID = '1051';
 
@@ -450,13 +447,15 @@ class Item extends CI_Controller {
 	}
 	function upload() {
 		$userId = $this->input->post ( 'userId' );
+		log_message('debug', 'upload image: userid='.$userId);
+		
 		$upload_path = UPLOAD_BASE_PATH . $userId;
 		if (! file_exists ( $upload_path )) {
 			mkdir ( $upload_path, 0777, true );
 		}
 		
 		$config ['upload_path'] = $upload_path;
-		$config ['allowed_types'] = 'gif|jpg|png';
+		$config ['allowed_types'] = '*';
 		$config ['max_size'] = '5120';
 		$config ['overwrite'] = TRUE;
 		

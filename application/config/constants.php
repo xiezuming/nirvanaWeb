@@ -37,5 +37,12 @@ define('FOPEN_WRITE_CREATE_STRICT',				'xb');
 define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 
 
+define('SUCCESS', 1);
+define('FAILURE', 0);
+define('USER_TYPE_WETAG', 'WE');
+define('USER_TYPE_FACEBOOK', 'FB');
+
+define('LOG_BASE_PATH', '/var/log/wetag/');
+
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

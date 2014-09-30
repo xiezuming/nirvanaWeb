@@ -1,8 +1,6 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
-const SUCCESS = 1;
-const FAILURE = 0;
 const UPLOAD_BASE_PATH = '/var/uploads/';
 const THUMBNAILS_BASE_PATH = '/var/uploads/thumbnails/';
 const PYTHON_PLACEHOLD = '***|||RESULT|||***';

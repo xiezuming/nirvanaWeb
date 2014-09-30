@@ -1,8 +1,6 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
-const SUCCESS = 1;
-const FAILURE = 0;
 const PYTHON_PLACEHOLD = '***|||RESULT|||***';
 /**
  */

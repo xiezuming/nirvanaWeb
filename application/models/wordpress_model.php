@@ -5,6 +5,7 @@ class Wordpress_model extends CI_Model {
 	const TABLE_CATALOGUE = 'wp_UPCP_Catalogues';
 	const TABLE_CATALOGUE_ITEM = 'wp_UPCP_Catalogue_Items';
 	const TABLE_CATALOGUE_GROUP = 'wp_UPCP_Catalogue_Groups';
+	const TABLE_ACTIVITY_ITEM = 'wp_UPCP_Activity_Items';
 	/* ======== ITEM ======== */
 	public function get_item($item_id) {
 		$this->db->where ( 'Item_ID', $item_id );
@@ -115,6 +116,30 @@ class Wordpress_model extends CI_Model {
 		$this->db->trans_complete ();
 		
 		return $this->db->trans_status ();
+	}
+	/* ======== ACTIVITY ======== */
+	public function get_item_relations($global_item_id) {
+		$this->db->where ( 'Item_ID', $global_item_id );
+		$query = $this->db->get ( self::TABLE_ACTIVITY_ITEM );
+		return $query->result_array ();
+	}
+	public function get_activity_item_relation($activity_id, $global_item_id) {
+		$this->db->where ( 'Activity_ID', $activity_id );
+		$this->db->where ( 'Item_ID', $global_item_id );
+		$query = $this->db->get ( self::TABLE_ACTIVITY_ITEM );
+		return $query->row_array ();
+	}
+	public function insert_activity_item_relation($activity_id, $global_item_id) {
+		if (! $this->get_activity_item_relation ( $activity_id, $global_item_id )) {
+			$result = $this->db->insert ( self::TABLE_ACTIVITY_ITEM, array (
+					'Activity_ID' => $activity_id,
+					'Item_ID' => $global_item_id 
+			) );
+			if ($this->db->_error_number ())
+				log_message ( 'error', 'Wordpress_model.insert_activity_item_relation: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return $result;
+		}
+		return TRUE;
 	}
 }
 ?>

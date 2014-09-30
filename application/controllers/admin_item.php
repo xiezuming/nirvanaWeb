@@ -1,8 +1,6 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
-const SUCCESS = 1;
-const FAILURE = 0;
 const UPLOAD_BASE_PATH = '/var/uploads/wetag_app/';
 const DEFAULT_SHARE_USER_ID = 'fd3142d3-167b-48c5-8208-2762e2db2fb2';
 const DEFAULT_CATALOGUE_GLOBAL_ID = '1051';

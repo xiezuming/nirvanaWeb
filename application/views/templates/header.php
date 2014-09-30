@@ -2,8 +2,10 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"
 	lang="en-us">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?php echo $title ?> - WeTag</title>
-<link rel="stylesheet" href="<?php echo base_url('/css/style_normal.css')?>">
+<link rel="stylesheet"
+	href="<?php echo base_url('/css/style_normal.css')?>">
 <script type="text/javascript"
 	src="<?php echo base_url('/js/jquery.js')?>"></script>
 </head>

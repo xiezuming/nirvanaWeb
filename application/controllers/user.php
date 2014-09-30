@@ -1,11 +1,8 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
-const SUCCESS = 1;
-const FAILURE = 0;
 const GROUP_TYPE_ID = 5;
-const USER_TYPE_WETAG = 'WE';
-const USER_TYPE_FACEBOOK = 'FB';
+
 /**
  *
  * @property User_model $user_model
