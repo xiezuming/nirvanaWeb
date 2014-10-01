@@ -287,6 +287,11 @@ class Catalogue extends CI_Controller {
 		$success = $this->wordpress_model->fresh_group_catalogues ( $group_catalogues );
 		echo $success ? "SUCCESS:" . count ( $group_catalogues ) . " row(s)" : "Failed to update the WordPress database.";
 	}
+	public function create_activity_catalogue() {
+		$this->load->helper ( 'uuid' );
+		$_POST ['catalogueId'] = gen_uuid ();
+		$this->update_catalogue ();
+	}
 	private function post_catalogue($global_catalogue_id) {
 		log_message ( 'debug', 'Start to post the catalogue to WordPress.' );
 		

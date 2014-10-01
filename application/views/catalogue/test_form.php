@@ -31,7 +31,8 @@ array_push ( $editable_field_cells, $input );
 <?php echo form_open('catalogue/test_synch_catalogue')?>
 
 <label>global_catalogue_id</label>
-<input name="global_catalogue_id" /><br/>
+<input name="global_catalogue_id" />
+<br />
 <input type="submit" value="synchronize" />
 
 <?php echo '</form>'?>
@@ -42,7 +43,31 @@ array_push ( $editable_field_cells, $input );
 <?php echo form_open('catalogue/test_post_catalogue')?>
 
 <label>global_catalogue_id</label>
-<input name="global_catalogue_id" /><br/>
+<input name="global_catalogue_id" />
+<br />
+<input type="submit" value="post" />
+
+<?php echo '</form>'?>
+
+<hr />
+
+<h3>Create Activity Catalogue</h3>
+<?php echo form_open('catalogue/create_activity_catalogue')?>
+
+<table>
+	<tr>
+		<td><label>userId</label></td>
+		<td><input name="userId" size="50" /></td>
+	</tr>
+	<tr>
+		<td><label>catalogueName</label></td>
+		<td><input name="catalogueName" size="50" /></td>
+	</tr>
+	<tr>
+		<td><label>postContent</label></td>
+		<td><textarea name="postContent" cols="40" rows="5"></textarea></td>
+	</tr>
+</table>
 <input type="submit" value="post" />
 
 <?php echo '</form>'?>
