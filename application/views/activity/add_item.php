@@ -50,6 +50,12 @@ $description_meta = array (
 		<td><?php echo form_input('price', set_value('price'), 'size="30"');?></td>
 	</tr>
 	<tr>
+		<td><label><?php echo $red_star?>Condition:</label></td>
+	</tr>
+	<tr>
+		<td><?php echo form_dropdown('condition', $meta_condition, set_value('condition', 'GD'), 'style="width:270px"');?></td>
+	</tr>
+	<tr>
 		<td><label><?php echo $red_star?>Email:</label></td>
 	</tr>
 	<tr>
@@ -62,6 +68,12 @@ $description_meta = array (
 	</tr>
 	<tr>
 		<td><?php echo form_input('wechatId', set_value('wechatId'), 'size="30"');?></td>
+	</tr>
+	<tr>
+		<td><label>ZIP Code:</label></td>
+	</tr>
+	<tr>
+		<td><?php echo form_input('zipcode', set_value('zipcode'), 'size="30"');?></td>
 	</tr>
 	<tr>
 		<td><label>Please review the information carefully. <br />If evey this

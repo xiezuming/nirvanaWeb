@@ -21,30 +21,10 @@ class Activity extends CI_Controller {
 		$this->load->model ( 'wordpress_model' );
 	}
 	/* ---------------- page entry ---------------- */
-	public function test_page() {
-		$fields = array (
-				'from' => 'Excited User <postmaster@letustag.com>',
-				'to' => 'yuc134@gmail.com',
-				'subject' => 'Hello',
-				'text' => 'Testing some Mailgun awesomness!' 
-		);
-		
-		$ch = curl_init (); // initiate curl
-		$url = "https://api.mailgun.net/v2/letustag.com/messages"; // where you want to post data
-		curl_setopt ( $ch, CURLOPT_URL, $url );
-		curl_setopt ( $ch, CURLOPT_USERPWD, 'api:key-693b401bc754cda121106cd60def55b2' );
-		// curl_setopt ( $ch, CURLOPT_HEADER, true );
-		curl_setopt ( $ch, CURLOPT_POST, true ); // tell curl you want to post something
-		curl_setopt ( $ch, CURLOPT_POSTFIELDS, http_build_query ( $fields ) ); // define what you want to post
-		curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true ); // return the output in string format
-		$output = curl_exec ( $ch ); // execute
-		if (! curl_errno ( $ch )) {
-			print_r ( curl_getinfo ( $ch ) );
-		}
-		
-		curl_close ( $ch ); // close curl handle
-		
-		var_dump ( $output ); // show output
+	public function test_page($item_id) {
+		$this->load->helper ( 'uuid' );
+		echo "item_id: $item_id<br/>";
+		echo "b64_item_id: " . encode_uuid_base64 ( $item_id );
 	}
 	function add_item($activity_id) {
 		$activity = $this->activity_model->get_activity ( $activity_id );
@@ -61,8 +41,10 @@ class Activity extends CI_Controller {
 		$this->form_validation->set_rules ( 'email', 'Email Address', 'required||max_length[45]|valid_email' );
 		$this->form_validation->set_rules ( 'title', 'Title', 'required' );
 		$this->form_validation->set_rules ( 'price', 'Price', 'required|integer' );
+		$this->form_validation->set_rules ( 'condition', 'Condition', 'required' );
 		$this->form_validation->set_rules ( 'description', 'Description', 'required' );
 		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', '' );
+		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', '' );
 		
 		if (! $this->form_validation->run ()) {
 			$data ['error'] = '';
@@ -111,6 +93,8 @@ class Activity extends CI_Controller {
 		$this->load->view ( 'templates/footer', $data );
 	}
 	private function load_add_item_view($data) {
+		$data ['meta_condition'] = $this->meta_model->get_meta_code_array ( META_TYPE_CONDITION );
+		
 		$this->load->view ( 'templates/header', $data );
 		$this->load->view ( 'activity/add_item', $data );
 		$this->load->view ( 'templates/footer', $data );
@@ -128,7 +112,8 @@ class Activity extends CI_Controller {
 					'firstName' => '',
 					'lastName' => '',
 					'email' => $email,
-					'wechatId' => $this->input->post ( 'wechatId' ) 
+					'wechatId' => $this->input->post ( 'wechatId' ),
+					'zipcode' => $this->input->post ( 'zipcode' ) 
 			) );
 			if ($user_id) {
 				$user = $this->user_model->get_user ( $user_id );
@@ -162,14 +147,17 @@ class Activity extends CI_Controller {
 		$description = $this->input->post ( 'description' ) . "\n\n";
 		$description .= 'Email: ' . $this->input->post ( 'email' ) . "\n";
 		if ($this->input->post ( 'wechatId' ))
-			$description .= 'WeChat ID: ' . $this->input->post ( 'wechatId' );
+			$description .= 'WeChat ID: ' . $this->input->post ( 'wechatId' ) . "\n";
+		if ($this->input->post ( 'zipcode' ))
+			$description .= 'ZIP Code: ' . $this->input->post ( 'zipcode' );
 		
 		$input_data ['itemId'] = $item_id;
 		$input_data ['userId'] = $user_id;
 		$input_data ['title'] = $this->input->post ( 'title' );
 		$input_data ['category'] = 'ELS'; // TODO better way?
 		$input_data ['expectedPrice'] = $this->input->post ( 'price' );
-		$input_data ['condition'] = 'GD';
+		$input_data ['condition'] = $this->input->post ( 'condition' );
+		;
 		$input_data ['availability'] = 'AB';
 		$input_data ['desc'] = $description;
 		$input_data ['recCreateTime'] = $date_now;
@@ -317,6 +305,7 @@ class Activity extends CI_Controller {
 		$this->load->library ( 'form_validation' );
 		$this->form_validation->set_rules ( 'title', 'Title', 'required' );
 		$this->form_validation->set_rules ( 'price', 'Price', 'required|decimal' );
+		$this->form_validation->set_rules ( 'condition', 'Condition', 'required' );
 		$this->form_validation->set_rules ( 'description', 'Description', 'required' );
 		
 		if (! $this->form_validation->run ()) {
@@ -346,6 +335,7 @@ class Activity extends CI_Controller {
 				'itemId' => $item ['itemId'],
 				'title' => $this->input->post ( 'title' ),
 				'expectedPrice' => $this->input->post ( 'price' ),
+				'condition' => $this->input->post ( 'condition' ),
 				'desc' => $this->input->post ( 'description' ),
 				'recUpdateTime' => date ( 'Y-m-d H:i:s' ),
 				'synchWp' => 'N' 
@@ -383,6 +373,8 @@ class Activity extends CI_Controller {
 		// redirect ( site_url ( "/activity/edit_item/" . $b64_item_id ), 'refresh' );
 	}
 	private function load_edit_item_view($data) {
+		$data ['meta_condition'] = $this->meta_model->get_meta_code_array ( META_TYPE_CONDITION );
+		
 		$this->load->view ( 'templates/header', $data );
 		$this->load->view ( 'activity/edit_item', $data );
 		$this->load->view ( 'templates/footer', $data );

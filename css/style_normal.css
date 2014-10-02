@@ -201,15 +201,6 @@ form {
 	padding: 0;
 }
 
-.select {
-	background-color: #fff;
-	font-size: 11px;
-	font-weight: normal;
-	color: #333;
-	padding: 0;
-	margin: 0 0 3px 0;
-}
-
 .checkbox {
 	background-color: transparent;
 	padding: 0;
@@ -314,9 +305,8 @@ input[type=submit] {
 }
 
 select {
-	color: #050;
-	font: bold 84% 'trebuchet ms', helvetica, sans-serif;
-	background-color: #fed;
+	color: #fff;
+	font-size: 18px;
 }
 
 label.value_text {

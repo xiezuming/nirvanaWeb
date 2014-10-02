@@ -44,5 +44,7 @@ define('USER_TYPE_FACEBOOK', 'FB');
 
 define('LOG_BASE_PATH', '/var/log/wetag/');
 
+define ('META_TYPE_CONDITION', 2);
+
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

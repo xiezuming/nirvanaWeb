@@ -41,5 +41,17 @@ class Meta_model extends CI_Model {
 				'typeId' => $type_id 
 		) )->result_array ();
 	}
+	public function get_meta_code_array($type_id) {
+		$this->db->select ( 'key, value' );
+		$this->db->order_by ( 'pos', 'asc' );
+		$codes = $this->db->get_where ( self::TABLE_CODE, array (
+				'typeId' => $type_id 
+		) )->result_array ();
+		$code_pairs = array ();
+		foreach ( $codes as $code ) {
+			$code_pairs [$code ['key']] = $code ['value'];
+		}
+		return $code_pairs;
+	}
 }
 ?>
