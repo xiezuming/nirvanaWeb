@@ -7,5 +7,5 @@ If you wish to reset your password, all you need to do is <a href='<?php echo $l
 <br/>
 
 Best Regards<br/>
-WeTag Team
+Weee! Team
 
