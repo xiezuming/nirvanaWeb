@@ -358,7 +358,7 @@ class Item extends CI_Controller {
 				'Item_ID' => $global_item_id,
 				'Item_Name' => $item ['title'],
 				'Item_Slug' => '',
-				'Item_Description' => $desc_prefix . $item ['desc'] . $amazon_link,
+				'Item_Description' => $desc_prefix . '<br/>' . str_replace ( "\n", '<br/>', $item ['desc'] ) . $amazon_link,
 				'Item_Price' => '$' . $item ['expectedPrice'],
 				'Item_Photo_URL' => $item_photo_url,
 				'Category_ID' => $catagory_id,
@@ -447,7 +447,7 @@ class Item extends CI_Controller {
 	}
 	function upload() {
 		$userId = $this->input->post ( 'userId' );
-		log_message('debug', 'upload image: userid='.$userId);
+		log_message ( 'debug', 'upload image: userid=' . $userId );
 		
 		$upload_path = UPLOAD_BASE_PATH . $userId;
 		if (! file_exists ( $upload_path )) {
