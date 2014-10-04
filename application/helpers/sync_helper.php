@@ -30,7 +30,7 @@ if (! function_exists ( 'create_wp_item' )) {
 				'Item_ID' => $global_item_id,
 				'Item_Name' => $item ['title'],
 				'Item_Slug' => '',
-				'Item_Description' => $desc_prefix . $item ['desc'] . $amazon_link,
+				'Item_Description' => $desc_prefix . '<br/>' . str_replace ( "\n", '<br/>', $item ['desc'] ) . $amazon_link,
 				'Item_Price' => '$' . $item ['expectedPrice'],
 				'Item_Photo_URL' => $item_photo_url,
 				'Category_ID' => $catagory_id,
