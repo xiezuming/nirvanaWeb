@@ -33,9 +33,21 @@ $description_meta = array (
 	<tr>
 		<td><label><?php echo $red_star?>Picture:</label></td>
 	</tr>
+	<?php
+	for($i = 0; $i < 5; $i ++) {
+		$display_style = ($i == 0) ? 'block' : 'none';
+		?>	
 	<tr>
-		<td><input type="file" name="image_file" size="40" /></td>
+		<td>
+			<div id="image_file_div_<?php echo $i?>" style="display: <?php echo $display_style?>">
+				<input type="file" id="image_file_<?php echo $i?>"
+					name="image_file_<?php echo $i?>" size="40" />
+			</div>
+		</td>
 	</tr>
+	<?php
+	}
+	?>
 	<tr>
 		<td><label><?php echo $red_star?>Description: <br />(item condition
 				and other notable things)</label></td>
@@ -86,3 +98,18 @@ $description_meta = array (
 </table>
 
 <?php echo '</form>'?>
+
+<script type="text/javascript">
+<!--
+for (var i=0; i<4; i++) {
+	$(document).on('change','#image_file_' + i , function(){
+		images_count = $('input[name*="image_file_names[]"]').length;
+		input_name = $(this).attr("name");
+		idx = parseInt(input_name.substr(input_name.length - 1));
+		if (images_count + idx >= 4) return;
+		next_div_id = "image_file_div_" + (idx+1);
+		$( "#" + next_div_id).show( "slow" );
+	});
+}
+//-->
+</script>
