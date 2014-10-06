@@ -173,6 +173,7 @@ class Activity extends CI_Controller {
 		$this->load->helper ( 'uuid' );
 		$item_id = gen_uuid ();
 		$date_now = date ( 'Y-m-d H:i:s' );
+		$title = $this->input->post ( 'title' );
 		$description = $this->input->post ( 'description' ) . "\n\n";
 		$description .= 'Email: ' . $this->input->post ( 'email' ) . "\n";
 		if ($this->input->post ( 'wechatId' ))
@@ -182,8 +183,8 @@ class Activity extends CI_Controller {
 		
 		$input_data ['itemId'] = $item_id;
 		$input_data ['userId'] = $user_id;
-		$input_data ['title'] = $this->input->post ( 'title' );
-		$input_data ['category'] = 'ELS'; // TODO better way?
+		$input_data ['title'] = $title;
+		$input_data ['category'] = $this->query_category_by_title ( $title );
 		$input_data ['expectedPrice'] = $this->input->post ( 'price' );
 		$input_data ['condition'] = $this->input->post ( 'condition' );
 		;
@@ -361,9 +362,12 @@ class Activity extends CI_Controller {
 		}
 		
 		// save the item and his activity relation into the DB
+		$title = $this->input->post ( 'title' );
+		$category = $this->query_category_by_title ( $title );
 		$success = $this->item_model->update_item ( array (
 				'itemId' => $item ['itemId'],
-				'title' => $this->input->post ( 'title' ),
+				'title' => $title,
+				'category' => $category,
 				'expectedPrice' => $this->input->post ( 'price' ),
 				'condition' => $this->input->post ( 'condition' ),
 				'desc' => $this->input->post ( 'description' ),
@@ -452,6 +456,23 @@ class Activity extends CI_Controller {
 			$item = $this->item_model->get_item ( strtoupper ( $item_id ) );
 		}
 		return $item;
+	}
+	public function query_category_by_title($title) {
+		$input = array (
+				$title 
+		);
+		$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_categories_by_title_Web.py';
+		log_message ( 'debug', $cmd );
+		$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
+		
+		$category = 'ELS';
+		$pos = stripos ( $result, PYTHON_PLACEHOLD );
+		if ($pos) {
+			$result = substr ( $result, $pos + strlen ( PYTHON_PLACEHOLD ) );
+			$category = json_decode ( $result, true );
+		}
+		
+		return $category;
 	}
 }
 

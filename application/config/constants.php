@@ -46,5 +46,7 @@ define('LOG_BASE_PATH', '/var/log/wetag/');
 
 define ('META_TYPE_CONDITION', 2);
 
+define ('PYTHON_PLACEHOLD', '***|||RESULT|||***');
+
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

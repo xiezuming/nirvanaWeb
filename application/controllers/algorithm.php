@@ -1,7 +1,6 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
-const PYTHON_PLACEHOLD = '***|||RESULT|||***';
 /**
  */
 class Algorithm extends CI_Controller {
