@@ -60,7 +60,7 @@ class Activity extends CI_Controller {
 		$this->load->library ( 'form_validation' );
 		$this->form_validation->set_rules ( 'email', 'Email Address', 'required||max_length[45]|valid_email' );
 		$this->form_validation->set_rules ( 'title', 'Title', 'required' );
-		$this->form_validation->set_rules ( 'price', 'Price', 'required|integer' );
+		$this->form_validation->set_rules ( 'price', 'Price', 'required|numeric' );
 		$this->form_validation->set_rules ( 'condition', 'Condition', 'required' );
 		$this->form_validation->set_rules ( 'description', 'Description', 'required' );
 		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', '' );
@@ -333,7 +333,7 @@ class Activity extends CI_Controller {
 		$this->load->helper ( 'form' );
 		$this->load->library ( 'form_validation' );
 		$this->form_validation->set_rules ( 'title', 'Title', 'required' );
-		$this->form_validation->set_rules ( 'price', 'Price', 'required|decimal' );
+		$this->form_validation->set_rules ( 'price', 'Price', 'required|numeric' );
 		$this->form_validation->set_rules ( 'condition', 'Condition', 'required' );
 		$this->form_validation->set_rules ( 'description', 'Description', 'required' );
 		

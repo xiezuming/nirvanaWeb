@@ -3,7 +3,6 @@ if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
 const UPLOAD_BASE_PATH = '/var/uploads/';
 const THUMBNAILS_BASE_PATH = '/var/uploads/thumbnails/';
-const PYTHON_PLACEHOLD = '***|||RESULT|||***';
 /**
  *
  * @property Inv_item_model $inv_item_model
