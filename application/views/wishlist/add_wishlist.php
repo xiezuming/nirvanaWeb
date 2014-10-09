@@ -16,7 +16,7 @@ $red_star = '<font color="red">*</font>';
 		</font></td>
 	</tr>
 	<tr>
-		<td><label><?php echo $red_star?>"Title"</label>
+		<td><label><?php echo $red_star?>Title</label>
 			<?php echo form_error('wishlist_text'); ?>
 		</td>
 	</tr>
