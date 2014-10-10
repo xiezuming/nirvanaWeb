@@ -26,7 +26,7 @@
 		$price_max = $wishlist ['price_max'] ? $wishlist ['price_max'] : 'N/A';
 		echo $price_min . ' - ' . $price_max?>
 		</td>
-		<td><?php $publish_date?></td>
+		<td><?php echo $publish_date?></td>
 		<td><button type='button'
 				onclick="show_contact_info_div(<?php echo $i?>)">contact</button></td>
 	</tr>
