@@ -1,13 +1,10 @@
-
-<br />
-<h1 align='center'><?php echo $title?></h1>
-
-<p align='center'></p>
+<h1 align='center'><?php echo $activity['Activity_Name']?></h1>
+<h2 align='center'><?php echo $title?></h2>
 
 <?php
 $red_star = '<font color="red">*</font>';
 ?>
-<?php echo form_open('wishlist/add_wishlist');?>
+<?php echo form_open("wishlist/add_wishlist/" . $activity['Activity_ID']);?>
 
 <table>
 	<tr>

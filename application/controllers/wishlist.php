@@ -6,24 +6,51 @@ if (! defined ( 'BASEPATH' ))
  *
  * @property Wishlist_model $wishlist_model
  * @property User_model $user_model
+ * @property Activity_model $activity_model
  */
 class Wishlist extends CI_Controller {
 	function __construct() {
 		parent::__construct ();
 		$this->load->model ( 'wishlist_model' );
 		$this->load->model ( 'user_model' );
+		$this->load->model ( 'activity_model' );
 	}
-	function index() {
-		$wishlist_array = $this->wishlist_model->query_published_wishlist ();
+	function index($activity_id = 0) {
+		$activity = $this->activity_model->get_activity ( $activity_id );
+		if (! $activity) {
+			show_404 ();
+			return;
+		}
+		
+		$wishlist_rows = $this->wishlist_model->query_published_wishlist ( $activity_id );
 		$data ['title'] = 'Wish List';
+		$data ['activity'] = $activity;
+		
+		$wishlist_array = array ();
+		foreach ( $wishlist_rows as $wishlist ) {
+			$contact_info = "Email: ${wishlist['email']}<br/>";
+			if ($wishlist ['wechatId'])
+				$contact_info .= "WeChat ID: ${wishlist['wechatId']}<br/>";
+			if ($wishlist ['zipcode'])
+				$contact_info .= "ZIP Code: ${wishlist['zipcode']}<br/>";
+			$wishlist ['contact_info'] = $contact_info;
+			array_push ( $wishlist_array, $wishlist );
+		}
 		$data ['wishlist_array'] = $wishlist_array;
 		
 		$this->load->view ( 'templates/header', $data );
 		$this->load->view ( 'wishlist/index', $data );
 		$this->load->view ( 'templates/footer', $data );
 	}
-	function add_wishlist() {
+	function add_wishlist($activity_id = 0) {
+		$activity = $this->activity_model->get_activity ( $activity_id );
+		if (! $activity) {
+			show_404 ();
+			return;
+		}
+		
 		$data ['title'] = 'Submit Your Wish List';
+		$data ['activity'] = $activity;
 		
 		$this->load->helper ( 'form' );
 		$this->load->library ( 'form_validation' );
@@ -53,12 +80,19 @@ class Wishlist extends CI_Controller {
 		$wishlist_text = $this->input->post ( 'wishlist_text' );
 		$price_min = $this->input->post ( 'price_min' ) ? $this->input->post ( 'price_min' ) : NULL;
 		$price_max = $this->input->post ( 'price_max' ) ? $this->input->post ( 'price_max' ) : NULL;
+		$email = $this->input->post ( 'email' );
+		$wechatId = $this->input->post ( 'wechatId' ) ? $this->input->post ( 'wechatId' ) : NULL;
+		$zipcode = $this->input->post ( 'zipcode' ) ? $this->input->post ( 'zipcode' ) : NULL;
 		$result = $this->wishlist_model->add_wishlist ( array (
 				'wishlist_uuid' => $wishlist_uuid,
-				'user_id' => $user ['userId'],
+				'activity_id' => $activity_id,
 				'wishlist_text' => $wishlist_text,
 				'price_min' => $price_min,
-				'price_max' => $price_max 
+				'price_max' => $price_max,
+				'user_id' => $user ['userId'],
+				'email' => $email,
+				'wechatId' => $wechatId,
+				'zipcode' => $zipcode 
 		) );
 		if (! $result) {
 			log_message ( 'error', 'Wishlist.add_wishlist: Failed to update the database.' );
@@ -106,7 +140,7 @@ class Wishlist extends CI_Controller {
 		}
 		return $user;
 	}
-	public function activate_wishlist($b64_wishlist_uuid) {
+	public function activate_wishlist($b64_wishlist_uuid = 0) {
 		$this->load->helper ( 'uuid' );
 		$wishlist_uuid = decode_uuid_base64 ( $b64_wishlist_uuid );
 		$wishlist = $this->wishlist_model->query_wishlist_by_uuid ( $wishlist_uuid );
@@ -120,6 +154,7 @@ class Wishlist extends CI_Controller {
 		) );
 		
 		$data ['title'] = 'Success - Publish Your Item';
+		$data ['wishlist'] = $wishlist;
 		
 		$this->load->view ( 'templates/header', $data );
 		$this->load->view ( 'wishlist/activate_wishlist_success', $data );

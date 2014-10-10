@@ -1,32 +1,20 @@
-<?php
-function mask_email($email, $mask_char = '*', $percent = 50) {
-	list ( $user, $domain ) = preg_split ( "/@/", $email );
-	
-	$len = strlen ( $user );
-	
-	$mask_count = floor ( $len * $percent / 100 );
-	
-	$offset = floor ( ($len - $mask_count) / 2 );
-	
-	$masked = substr ( $user, 0, $offset ) . str_repeat ( $mask_char, $mask_count ) . substr ( $user, $mask_count + $offset );
-	
-	return ($masked . '@' . $domain);
-}
-?>
-<h1 align='center'><?php echo $title?></h1>
-<br />
+<h1 align='center'><?php echo $activity['Activity_Name']?></h1>
+<h2 align='center'><?php echo $title?></h2>
 
-<table>
+<table id='wishlist_table'>
 	<tr>
-
+		<td colspan='4'><?php echo anchor('wishlist/add_wishlist/'.$activity['Activity_ID'], 'Submit Your Wish List')?></td>
 	</tr>
 	<tr>
 		<th>Title</th>
 		<th>Price</th>
-		<th>Email</th>
-		<th>Publish Time</th>
+		<th>Publish Date</th>
+		<th>Contact</th>
 	</tr>
-	<?php foreach ($wishlist_array as $wishlist): ?>
+	<?php
+	for($i = 0; $i < count ( $wishlist_array ); $i ++) {
+		$wishlist = $wishlist_array [$i];
+		?>
 	<tr>
 		<td><?php echo $wishlist['wishlist_text']?></td>
 		<td>
@@ -35,10 +23,31 @@ function mask_email($email, $mask_char = '*', $percent = 50) {
 		$price_max = $wishlist ['price_max'] ? $wishlist ['price_max'] : 'N/A';
 		echo $price_min . ' - ' . $price_max?>
 		</td>
-		<td><?php echo mask_email($wishlist['email'])?></td>
-		<td><?php echo $wishlist['recUpdateTime']?></td>
+		<td><?php echo explode(" ", $wishlist['recUpdateTime'])[0]?></td>
+		<td><button type='button'
+				onclick="show_contact_info_div(<?php echo $i?>)">contact</button></td>
 	</tr>
-	<?php endforeach ?>
+	<tr>
+		<td colspan='4' bgcolor="#F8F8F8">
+			<div id='contact_info_<?php echo $i?>' style="display: none">
+			<?php echo $wishlist['contact_info']?>
+			</div>
+		</td>
+	</tr>
+	<?php
+	}
+	?>
 </table>
 
-
+<script type="text/javascript">
+<!--
+function show_contact_info_div(contact_info_div_id){
+	for (var i=0; i<<?php echo count($wishlist_array)?>; i++) {
+		if (i == contact_info_div_id)
+			$( "#contact_info_" +  i).show( );
+		else
+			$( "#contact_info_" +  i).hide(  );
+	}
+}
+//-->
+</script>

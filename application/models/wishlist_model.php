@@ -1,12 +1,10 @@
 <?php
 class Wishlist_model extends CI_Model {
 	const TABLE_WISHLIST = 'wishlist';
-	public function query_published_wishlist() {
-		$this->db->select ( 'wishlist.*, user.email' );
-		$this->db->from ( 'wishlist' );
-		$this->db->join ( 'user', 'user.userId = wishlist.user_id' );
-		$this->db->where ( "published = 'Y' AND recUpdateTime >= DATE_SUB(NOW(), INTERVAL 14 DAY)" );
-		$this->db->order_by ( "wishlist.recUpdateTime", "desc" );
+	public function query_published_wishlist($activiy_id) {
+		$this->db->from ( self::TABLE_WISHLIST );
+		$this->db->where ( "activity_id = $activiy_id AND published = 'Y' AND recUpdateTime >= DATE_SUB(NOW(), INTERVAL 14 DAY)" );
+		$this->db->order_by ( "recUpdateTime", "desc" );
 		$query = $this->db->get ();
 		$result = $query->result_array ();
 		return $result;
