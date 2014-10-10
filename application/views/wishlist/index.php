@@ -14,6 +14,9 @@
 	<?php
 	for($i = 0; $i < count ( $wishlist_array ); $i ++) {
 		$wishlist = $wishlist_array [$i];
+		$publish_date = $wishlist['recUpdateTime'];
+		if (stripos($publish_date, " "))
+			$publish_date = substr($publish_date, 0, stripos($publish_date, " "));
 		?>
 	<tr>
 		<td><?php echo $wishlist['wishlist_text']?></td>
@@ -23,7 +26,7 @@
 		$price_max = $wishlist ['price_max'] ? $wishlist ['price_max'] : 'N/A';
 		echo $price_min . ' - ' . $price_max?>
 		</td>
-		<td><?php echo explode(" ", $wishlist['recUpdateTime'])[0]?></td>
+		<td><?php $publish_date?></td>
 		<td><button type='button'
 				onclick="show_contact_info_div(<?php echo $i?>)">contact</button></td>
 	</tr>
