@@ -460,7 +460,7 @@ class Activity extends CI_Controller {
 		$input = array (
 				$title 
 		);
-		$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_categories_by_title_Web.py';
+		$cmd = SCRIPT_PATH . 'query_categories_by_title_Web.py';
 		log_message ( 'debug', $cmd );
 		$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
 		

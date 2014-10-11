@@ -87,7 +87,7 @@ if (! function_exists ( 'resize_upload_images' )) {
 				array_push ( $global_image_id_array, $image_row ['Global_Item_Image_ID'] );
 		}
 		if (count ( $global_image_id_array ) > 0) {
-			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'imageGenerator.py' . ' ' . escapeshellarg ( json_encode ( $global_image_id_array ) );
+			$cmd = SCRIPT_PATH . 'imageGenerator.py' . ' ' . escapeshellarg ( json_encode ( $global_image_id_array ) );
 			$log_file = LOG_BASE_PATH . 'imageGenerator-' . date ( 'Y-m-d' ) . '.log';
 			$cmd = $cmd . ' >> ' . $log_file . ' 2>>' . $log_file;
 			log_message ( 'debug', $cmd );

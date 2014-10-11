@@ -428,7 +428,7 @@ class Item extends CI_Controller {
 	 * @return The shell result if $wait_until_done = TRUE
 	 */
 	private function exec_image_generator_script($global_image_id_array, $wait_until_done = FALSE) {
-		$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'imageGenerator.py' . ' ' . escapeshellarg ( json_encode ( $global_image_id_array ) );
+		$cmd = SCRIPT_PATH . 'imageGenerator.py' . ' ' . escapeshellarg ( json_encode ( $global_image_id_array ) );
 		if (! $wait_until_done) {
 			$log_file = LOG_BASE_PATH . 'imageGenerator-' . date ( 'Y-m-d' ) . '.log';
 			$cmd = $cmd . ' >> ' . $log_file . ' 2>>' . $log_file . ' &';

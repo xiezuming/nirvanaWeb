@@ -20,7 +20,7 @@ class Algorithm extends CI_Controller {
 			$input = array (
 					$barcode 
 			);
-			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_item_defaults_by_barcode.py';
+			$cmd = SCRIPT_PATH . 'query_item_defaults_by_barcode.py';
 			log_message ( 'debug', $cmd );
 			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
 			$result = $this->get_real_result ( $result );
@@ -46,7 +46,7 @@ class Algorithm extends CI_Controller {
 					$barcode,
 					'' 
 			);
-			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_item_prices.py';
+			$cmd = SCRIPT_PATH . 'query_item_prices.py';
 			log_message ( 'debug', $cmd );
 			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
 			$result = $this->get_real_result ( $result );
@@ -71,7 +71,7 @@ class Algorithm extends CI_Controller {
 			$input = array (
 					$title 
 			);
-			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_categories_by_title.py';
+			$cmd = SCRIPT_PATH . 'query_categories_by_title.py';
 			log_message ( 'debug', $cmd );
 			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
 			$categories = $this->get_real_result ( $result );
@@ -98,7 +98,7 @@ class Algorithm extends CI_Controller {
 					$title,
 					$catNum 
 			);
-			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_similar_items.py';
+			$cmd = SCRIPT_PATH . 'query_similar_items.py';
 			log_message ( 'debug', $cmd );
 			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
 			log_message ( 'debug', 'query_similar_itmes: $result = ' . $result );
@@ -139,7 +139,7 @@ class Algorithm extends CI_Controller {
 					$catNum,
 					$similarItemUrl 
 			);
-			$cmd = FCPATH . 'scripts' . DIRECTORY_SEPARATOR . 'query_item_info_by_similar_item.py';
+			$cmd = SCRIPT_PATH . 'query_item_info_by_similar_item.py';
 			log_message ( 'debug', $cmd );
 			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
 			$result = $this->get_real_result ( $result );
