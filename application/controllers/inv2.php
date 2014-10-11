@@ -1,7 +1,6 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
-const UPLOAD_BASE_PATH = '/var/uploads/';
 const THUMBNAILS_BASE_PATH = '/var/uploads/thumbnails/';
 /**
  *
