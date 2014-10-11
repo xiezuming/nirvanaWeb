@@ -325,7 +325,7 @@ class Activity extends CI_Controller {
 		$data ['activity'] = $activity;
 		$data ['item'] = $item;
 		$data ['user'] = $user;
-		$data ['image_url_base'] = $image_url = '/images/wetag_app/' . $user_id . '/';
+		$data ['image_url_base'] = $image_url = '/images/weee_app/' . $user_id . '/';
 		$data ['images'] = $image_rows;
 		$data ['error'] = '';
 		
