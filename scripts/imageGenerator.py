@@ -74,7 +74,7 @@ def resize(im,pixel):
         im1 = im
     return im1    
 
-dblogin = operation3.getDBLogin('webdb2')
+dblogin = operation3.getDBLogin('localhost_db_weee')
 #connect to mysqldb
 conn = None
 try:
@@ -104,14 +104,14 @@ except:
 if os.name == 'nt':
     filepath = "D:/temp/uploads/wetag_app/"
 else:
-    filepath = "/var/uploads/wetag_app/"
+    filepath = "/var/uploads/weee_app/"
 
 print 'The image id list = ' + str(imageList)
 
 for image in imageList:
   try:
     cursor.execute("""select userId, imageName from 
-                      wetag.item a join wetag.item_image b on a.Global_Item_ID = b.Global_Item_ID 
+                      item a join item_image b on a.Global_Item_ID = b.Global_Item_ID 
                       where b.Global_Item_Image_ID = %s""",(image,))
     data = cursor.fetchone()
     userid = data[0]
@@ -171,7 +171,7 @@ for image in imageList:
         print 'STOR wetagimg/'+userid+'/'+bigpicture
         sftp.storbinary('STOR '+bigpicture,fp)
         fp.close
-        cursor.execute("""update wetag.item_image set synchWp='Y' where Global_Item_Image_ID = %s""",(image,))
+        cursor.execute("""update item_image set synchWp='Y' where Global_Item_Image_ID = %s""",(image,))
         conn.commit()
         #close sftp
         sftp.quit()

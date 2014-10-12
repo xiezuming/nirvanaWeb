@@ -42,8 +42,8 @@ define('FAILURE', 0);
 define('USER_TYPE_WETAG', 'WE');
 define('USER_TYPE_FACEBOOK', 'FB');
 
-define('LOG_BASE_PATH', '/var/log/wetag/');
-define('UPLOAD_BASE_PATH', '/var/uploads/wetag_app/');
+define('LOG_BASE_PATH', '/var/log/weee_app/');
+define('UPLOAD_BASE_PATH', '/var/uploads/weee_app/');
 define('SCRIPT_PATH', '/var/www/html/weee_algo/scripts/');
 
 define ('META_TYPE_CONDITION', 2);
