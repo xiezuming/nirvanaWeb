@@ -395,7 +395,7 @@ class Activity extends CI_Controller {
 		$data ['product_url'] = $this->get_product_url ( $activity ['Post_URL'], $global_item_id );
 		
 		$this->load->view ( 'templates/header', $data );
-		$this->load->view ( 'activity/sold_item_success', $data );
+		$this->load->view ( 'activity/edit_item_success', $data );
 		$this->load->view ( 'templates/footer', $data );
 		return;
 	}
