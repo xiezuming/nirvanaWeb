@@ -14,6 +14,7 @@ class Report_model extends CI_Model {
 				'itemId' => $data ['itemId'],
 				'reportUserId' => $data ['reportUserId'],
 				'category' => $data ['category'],
+				'url' => $data ['url'],
 				'description' => $data ['description'] 
 		) );
 		if ($this->db->_error_number ()) {
