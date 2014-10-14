@@ -142,7 +142,7 @@ class User extends CI_Controller {
 				}
 			} else {
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'That WeTag account doesn\'t exist. Enter a different email address or get a new account';
+				$data ['message'] = 'That Weee! account doesn\'t exist. Enter a different email address or get a new account';
 			}
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
