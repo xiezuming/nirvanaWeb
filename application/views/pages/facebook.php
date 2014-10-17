@@ -5,7 +5,7 @@
 <title>Facebook</title>
 <script>
 window.onload = function(){
-	window.location = "https://www.facebook.com/pages/Happitailcom/767469703263125";
+	window.location = "https://www.facebook.com/sayweee";
 }
 </script>
 </head>
