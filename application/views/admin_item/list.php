@@ -11,7 +11,7 @@
 	</tr>
 <?php
 foreach ( $items as $item ) {
-	$image_url = '/images/wetag_app/' . $item ['userId'] . '/' . $item ['defaultImage'];
+	$image_url = '/images/weee_app/' . $item ['userId'] . '/' . $item ['defaultImage'];
 	?>
 		<tr>
 		<td><?php echo $item['Global_Item_ID']?></td>

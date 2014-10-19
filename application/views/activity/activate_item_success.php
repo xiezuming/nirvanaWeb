@@ -1,6 +1,6 @@
 <br />
 <br />
-You have successfully edited your item!
+You have successfully posted your item!
 <br />
 Click
 <a href="<?php echo $product_url?>">here</a>

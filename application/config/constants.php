@@ -42,9 +42,13 @@ define('FAILURE', 0);
 define('USER_TYPE_WETAG', 'WE');
 define('USER_TYPE_FACEBOOK', 'FB');
 
-define('LOG_BASE_PATH', '/var/log/wetag/');
+define('LOG_BASE_PATH', '/var/log/weee_app/');
+define('UPLOAD_BASE_PATH', '/var/uploads/weee_app/');
+define('SCRIPT_PATH', '/var/www/html/weee_algo/scripts/');
 
 define ('META_TYPE_CONDITION', 2);
+
+define ('PYTHON_PLACEHOLD', '***|||RESULT|||***');
 
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

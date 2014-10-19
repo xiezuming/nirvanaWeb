@@ -55,7 +55,7 @@ Copy to: <?php echo form_dropdown('user_list', $user_select_list); ?>
 		<td>
 		<?php
 		foreach ( $images as $image ) {
-			$image_url = '/images/wetag_app/' . $item ['userId'] . '/' . $image ['imageName'];
+			$image_url = '/images/weee_app/' . $item ['userId'] . '/' . $image ['imageName'];
 			echo '<a href="' . $image_url . '" target="_blank"><img src="' . $image_url . '" height="150"/></a>';
 		}
 		?>

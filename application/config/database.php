@@ -1,1 +1,1 @@
-/etc/wetag_app/database.php
+/etc/weee_app/database.php
