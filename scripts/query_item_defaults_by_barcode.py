@@ -61,7 +61,7 @@ else:
         
         
     result = {}
-    queryResult = InvAlgo.queryEPID(data[0])
+    queryResult = InvAlgo.queryEPIDMT(data[0])
     # print queryResult
 
     if queryResult.get('title', ''):

@@ -37,8 +37,28 @@ def add_watermark(in_file, text, out_file, angle=23, opacity=0.8):
     watermark.putalpha(alpha)
     Image.composite(watermark, img, watermark).save(out_file, 'JPEG')
 
+def orientationFix(im):
+    try:
+        exif_data = img._getexif()
+        if exif_data[274] == 1 or exif_data[274] == 2:
+            im1 = im
+        elif exif_data[274] == 3 or exif_data[274] == 4:
+            #rotate 180
+            im1 = im.rotate(90)
+        elif exif_data[274] == 5 or exif_data[274] == 6:
+            #rotate 90 clockwise 
+            im1 = im.rotate(270)
+        elif exif_data[274] == 7 or exif_data[274] == 8:
+            #rotate 90 counterclockwise 
+            im1 = im.rotate(180)
+    except Exception,e:
+        print e
+        im1 = im
+    return im1
+
 def resize(im,pixel):
     try:
+        im = orientationFix(im)
         size = im.size
         w1 = size[0]
         h1 = size[1]
@@ -53,7 +73,6 @@ def resize(im,pixel):
         print e
         im1 = im
     return im1    
-
 
 dblogin = operation3.getDBLogin('webdb2')
 #connect to mysqldb

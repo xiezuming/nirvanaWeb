@@ -49,9 +49,9 @@ if not data[0]:
     
 else:
     
-    result = InvAlgo.queryCategory(data[0])
+    result = InvAlgo.queryCategoryMT(data[0])
     if result:
-        result += [{'catNum': '000', 'catNameLong': 'None of the above.'}]
+        result = result[:5] + [{'catNum': '000', 'catNameLong': 'None of the above.'}]
     else:
         result = [{'catNum': '000', 'catNameLong': 'no category found'}]
     # a = [
