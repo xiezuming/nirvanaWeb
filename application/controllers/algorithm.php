@@ -6,6 +6,7 @@ if (! defined ( 'BASEPATH' ))
 class Algorithm extends CI_Controller {
 	function __construct() {
 		parent::__construct ();
+		$this->load->helper ( 'script' );
 	}
 	public function test_page() {
 		$this->load->helper ( 'form' );
@@ -68,17 +69,21 @@ class Algorithm extends CI_Controller {
 			show_error ( 'Internal Error: Title is empty.' );
 			return;
 		} else {
-			$input = array (
+			$categories = call_script ( 'query_categories_by_title.py', array (
 					$title 
-			);
-			$cmd = SCRIPT_PATH . 'query_categories_by_title.py';
-			log_message ( 'debug', $cmd );
-			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
-			$categories = $this->get_real_result ( $result );
+			) );
 			
-			$data ['title'] = 'Step 1/2: Category List';
+			// insert the algo session in the table
+			$this->db->insert ( 'algo_history', array (
+					'title' => $title,
+					'categories' => json_encode ( $categories ) 
+			) );
+			$algo_session_id = $this->db->insert_id ();
+			
+			$data ['title'] = 'Category List';
 			$data ['query_title'] = $title;
 			$data ['categories'] = $categories;
+			$data ['algo_session_id'] = $algo_session_id;
 			
 			$this->load->helper ( 'form' );
 			$this->load->view ( 'templates/header_app', $data );
@@ -94,15 +99,19 @@ class Algorithm extends CI_Controller {
 			show_error ( 'Internal Error: Title or category number is empty.' );
 			return;
 		} else {
-			$input = array (
+			$items = call_script ( 'query_similar_items.py', array (
 					$title,
 					$catNum 
-			);
-			$cmd = SCRIPT_PATH . 'query_similar_items.py';
-			log_message ( 'debug', $cmd );
-			$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
-			log_message ( 'debug', 'query_similar_itmes: $result = ' . $result );
-			$items = $this->get_real_result ( $result );
+			) );
+			
+			// update the selected category num into the table
+			$algo_session_id = $this->input->post ( 'algo_session_id' );
+			if ($algo_session_id) {
+				$this->db->where ( 'algo_session_id', $algo_session_id );
+				$this->db->update ( 'algo_history', array (
+						'selected_category' => $catNum 
+				) );
+			}
 			
 			$this->load->helper ( 'form' );
 			$this->load->helper ( 'html' );

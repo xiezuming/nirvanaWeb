@@ -4,6 +4,7 @@
 <table>
 <?php echo form_open('algorithm/query_similar_itmes')?>
 	<?php echo form_hidden('title', $query_title)?>
+	<?php echo form_hidden('algo_session_id', $algo_session_id)?>
 	
 	<?php $first = true;?>
 	<?php foreach ($categories as $category): ?>
