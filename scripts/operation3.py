@@ -146,6 +146,7 @@ def priceCalc(amazondict={},othersource=[],feecat='unknown',ebaypricemin=0,gsfla
 def getDBLogin(dbname):
 
     dirs = [ '.', os.environ.get('HOME'), '/etc' ]
+    # print dirs
     config_file = 'dbconfig_file.yaml'
     for mydir in dirs:
         myfile = "%s/%s" % (mydir, config_file)
@@ -313,6 +314,7 @@ def url2strmore(url,parser='etree'):
     urllib2Header = {'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.57 Safari/537.1'}
     tryCount = 0
     retStr = ''
+    retUrl = ''
     retObj = None
     while True: #Retry 20 times to avoid temporary connection issue.
         tryCount += 1
@@ -350,7 +352,7 @@ def url2strmore(url,parser='etree'):
     if parser == 'soup':
         return retObj
 
-#End of url2str()
+#End of url2strmore()
 
 
 
