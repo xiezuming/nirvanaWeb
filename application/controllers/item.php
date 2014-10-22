@@ -109,6 +109,45 @@ class Item extends CI_Controller {
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	/**
+	 * Get the item all details for browse
+	 * 
+	 * @param string $item_id        	
+	 */
+	public function browse_item($item_id) {
+		$item = $this->item_model->get_item ( $item_id );
+		if (! $item) {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Can not find the requested item';
+			return;
+		}
+		
+		// convert date to timestamp
+		foreach ( $item as $field_name => $field_value ) {
+			if ($this->endsWith ( $field_name, 'Time' )) {
+				$field_value = strtotime ( $field_value );
+				$item [$field_name] = $field_value;
+			}
+		}
+		// image names
+		$images_row = $this->item_model->get_images ( $item ['Global_Item_ID'] );
+		$images = array ();
+		foreach ( $images_row as $image_row )
+			array_push ( $images, $image_row ['imageName'] );
+		
+		$this->load->model ( 'user_model' );
+		$user = $this->user_model->get_user ( $item ['userId'] );
+		$user ['password'] = '';
+		
+		$data ['result'] = SUCCESS;
+		$data ['data'] = array (
+				'item' => $item,
+				'images' => $images,
+				'user' => $user 
+		);
+		
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	/**
 	 * Query the items.
 	 *
 	 * @param string $key_word        	
@@ -152,6 +191,10 @@ class Item extends CI_Controller {
 	 */
 	public function update_item() {
 		$input_data = $this->get_input_data ();
+		$loc = $this->get_location ( $input_data );
+		if ($loc) {
+			$input_data = array_merge ( $input_data, $loc );
+		}
 		$input_data ['synchWp'] = 'N';
 		$itemId = $input_data ['itemId'];
 		
@@ -698,6 +741,30 @@ class Item extends CI_Controller {
 				
 				// 48 bits for "node"
 				mt_rand ( 0, 0xffff ), mt_rand ( 0, 0xffff ), mt_rand ( 0, 0xffff ) );
+	}
+	private function get_location($input_data) {
+		$this->load->helper ( 'location' );
+		$loc = NULL;
+		if ($input_data ['latitude']) {
+			$loc = get_loc_by_latlng ( $input_data ['latitude'], $input_data ['longitude'] );
+			if ($loc)
+				return array (
+						'region' => build_region_string_by_loc ( $loc ) 
+				);
+		} else {
+			$this->load->model ( 'user_model' );
+			$user = $this->user_model->get_user ( $input_data ['userId'] );
+			if (! empty ( $user ['zipcode'] )) {
+				$loc = get_loc_by_zipcode ( $user ['zipcode'] );
+				if ($loc)
+					return array (
+							'latitude' => $loc ['latitude'],
+							'longitude' => $loc ['longitude'],
+							'region' => build_region_string_by_loc ( $loc ) 
+					);
+			}
+		}
+		return $loc;
 	}
 }
 
