@@ -63,7 +63,7 @@ class Activity extends CI_Controller {
 		$this->form_validation->set_rules ( 'condition', 'Condition', 'required' );
 		$this->form_validation->set_rules ( 'description', 'Description', 'required' );
 		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', '' );
-		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', '' );
+		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'required' );
 		
 		if (! $this->form_validation->run ()) {
 			$data ['error'] = '';
@@ -182,16 +182,26 @@ class Activity extends CI_Controller {
 		
 		$input_data ['itemId'] = $item_id;
 		$input_data ['userId'] = $user_id;
+		$input_data ['inputSource'] = 'WEB';
 		$input_data ['title'] = $title;
-		$input_data ['category'] = $this->query_category_by_title ( $title );
+		$category = $this->query_category_by_title ( $title );
+		$input_data ['category'] = $category ['category'];
+		$input_data ['catNum'] = $category ['catNum'];
 		$input_data ['expectedPrice'] = $this->input->post ( 'price' );
 		$input_data ['condition'] = $this->input->post ( 'condition' );
-		;
 		$input_data ['availability'] = 'AB';
 		$input_data ['desc'] = $description;
 		$input_data ['recCreateTime'] = $date_now;
 		$input_data ['recUpdateTime'] = $date_now;
 		$input_data ['synchWp'] = 'N';
+		
+		$this->load->helper ( 'location' );
+		$loc = get_loc_by_zipcode ( $this->input->post ( 'zipcode' ) );
+		if ($loc) {
+			$input_data ['latitude'] = $loc ['latitude'];
+			$input_data ['longitude'] = $loc ['longitude'];
+			$input_data ['region'] = build_region_string_by_loc ( $loc );
+		}
 		
 		$this->db->trans_start ();
 		
@@ -456,22 +466,23 @@ class Activity extends CI_Controller {
 		}
 		return $item;
 	}
-	public function query_category_by_title($title) {
-		$input = array (
-				$title 
+	private function query_category_by_title($title) {
+		// TODO retun mock data now
+		return array (
+				'category' => 'ELS',
+				'catNum' => '000' 
 		);
-		$cmd = SCRIPT_PATH . 'query_categories_by_title_Web.py';
-		log_message ( 'debug', $cmd );
-		$result = shell_exec ( 'python ' . $cmd . ' ' . escapeshellarg ( json_encode ( $input ) ) );
-		
-		$category = 'ELS';
-		$pos = stripos ( $result, PYTHON_PLACEHOLD );
-		if ($pos) {
-			$result = substr ( $result, $pos + strlen ( PYTHON_PLACEHOLD ) );
-			$category = json_decode ( $result, true );
-		}
-		
-		return $category;
+		/*
+		 * $this->load->helper ( 'script' );
+		 * $categories = call_script ( 'query_categories_by_title.py', array (
+		 * $title
+		 * ) );
+		 *
+		 * if (is_array ( $categories ) && count ( $categories ) > 0) {
+		 * return $categories [0];
+		 * }
+		 * return FALSE;
+		 */
 	}
 }
 
