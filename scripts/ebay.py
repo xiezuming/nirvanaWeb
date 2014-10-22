@@ -2075,7 +2075,10 @@ def queryCategory(strQuery, opener = None):
     if True:
         catSearchStr = '&cpg=4&aid=4&keywords='+urllib.quote(strQuery.strip())
         catSearchUrl = 'http://cgi5.ebay.com/ws/eBayISAPI.dll?NewListing'+catSearchStr
-
+        
+        # catSearchUrl = "http://cgi5.ebay.com/ws/eBayISAPI.dll?NewListing&cpg=3&js=1&aid=4&keywords=kirkland%20orthopedic%20pet%20napper&vMode=iframe"
+        print catSearchUrl
+        
         req = opener.open(catSearchUrl)
         strHTML = req.read()
         
