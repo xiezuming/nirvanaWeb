@@ -348,7 +348,10 @@ def queryCategory(strQuery, format = 'short'):
         else: #Fall back solution: web scraping
             #Email error first.
             alertSubject = 'Wetag App Algo Alert: Error in function queryCategory(strQuery) eBayAPI method'
-            operation3.emailalert(alertSubject, alertBody, ['jwang6@gmail.com', 'wetag.auto@gmail.com','5104493252@tmomail.net'])   
+            try:
+                operation3.emailalert(alertSubject, alertBody, ['jwang6@gmail.com', 'wetag.auto@gmail.com','5104493252@tmomail.net'])   
+            except:
+                pass
             try:
                 status, categoryList, _ = ebay.queryCategory(strQuery)
             except Exception, e:
@@ -424,7 +427,7 @@ def queryCategoryMT(strQuery, format = 'short'):
             alertBody += e.message
         if not status:
             print categoryList
-            categoryResult = [{'catNum': a[0], 'catNameLong': a[1]} for a in categoryList if a[2]]
+            categoryResult = [{'catNum': a[0], 'catNameLong': a[1], 'algoType': 1} for a in categoryList if a[2]]
             # ABFlag = random.randint(0,9)
             # if ABFlag < 5:
                 # for cat in categoryResult:
@@ -443,25 +446,30 @@ def queryCategoryMT(strQuery, format = 'short'):
         else: #Fall back solution: web scraping
             #Email error first.
             alertSubject = 'Wetag App Algo Alert: Error in function queryCategory(strQuery) eBayAPI method'
-            operation3.emailalert(alertSubject, alertBody, ['jwang6@gmail.com', 'wetag.auto@gmail.com','5104493252@tmomail.net'])   
+            try:
+                operation3.emailalert(alertSubject, alertBody, ['jwang6@gmail.com', 'wetag.auto@gmail.com','5104493252@tmomail.net'])   
+            except: pass
             try:
                 status, categoryList, _ = ebay.queryCategory(strQuery)
+                print categoryList
+                print status
             except Exception, e:
                 print e
                 status = 1
                 alertBody += e.message
-                if not status:
-                    #Repacking the categoryList into WeTag app format. Is it faster or not?
-                    categoryResult = [{'catNum': a[0], 'catNameLong': ' ('.join(a[1].split(' (')[:-1])} for a in categoryList if a[2]]
-                else:
-                    alertSubject = 'Wetag App Algo Alert: Error in function queryCategory(strQuery) eBay web scraping method'
+            if not status:
+                #Repacking the categoryList into WeTag app format. Is it faster or not?
+                categoryResult = [{'catNum': a[0], 'catNameLong': 'unknown > ' + ' ('.join(a[1].split(' (')[:-1]),  'algoType': 1} for a in categoryList if a[2]]
+            else:
+                alertSubject = 'Wetag App Algo Alert: Error in function queryCategory(strQuery) eBay web scraping method'
+                try:
                     operation3.emailalert(alertSubject, alertBody, ['jwang6@gmail.com', 'wetag.auto@gmail.com','5104493252@tmomail.net'])
-
-                    
+                except: pass
+        print categoryResult         
         p.join()            
         categoryListML = q1.get()
         print categoryListML
-        categoryResultML = [{'catNum': a.get('catNum', ''),  'catNameLong': a.get('catNameLong', '')} for a in categoryListML[:3]]        
+        categoryResultML = [{'catNum': a.get('catNum', ''),  'catNameLong': a.get('catNameLong', ''),  'algoType': 0} for a in categoryListML[:3]]        
         if not (format == 'long'):
             for cat in categoryResultML:
                 if 'Other' in cat.get('catNameLong') and cat.get('catNameLong').count('>') == 1:
@@ -473,12 +481,25 @@ def queryCategoryMT(strQuery, format = 'short'):
         catNumList = [a.get('catNum', '') for a in categoryResultFinal]
         catNameList = [a.get('catNameLong', '') for a in categoryResultFinal]
         # print catNumList
+        print categoryResult
+        pos = 1
         for cat in categoryResult:
-            if (cat.get('catNum', '') not in catNumList) and (cat.get('catNameLong', '') not in catNameList):
-                categoryResultFinal += [cat]
+            catNum = cat.get('catNum', '').strip
+            catName = cat.get('catNameLong', '') 
+            if catNum in catNumList:
+                matchPos = catNumList.index(catNum)
+                categoryResultFinal[matchPos]['algoType'] = 2
+                pos = matchPos + 2
+            elif catName in catNameList:
+                matchPos = catNameList.index(catName)
+                categoryResultFinal[matchPos]['algoType'] = 2
+                pos = matchPos + 2
+            else:
+                categoryResultFinal = categoryResultFinal[:pos] + [cat] + categoryResultFinal[pos:] 
+                pos += 2
                 if len(categoryResultFinal) == 5:
                     break
-                    
+        
                     
     except Exception, e:
         print 'Error in function queryCategory(strQuery)'
