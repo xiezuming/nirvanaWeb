@@ -44,7 +44,7 @@ define('USER_TYPE_FACEBOOK', 'FB');
 
 define('LOG_BASE_PATH', '/var/log/weee_app/');
 define('UPLOAD_BASE_PATH', '/var/uploads/weee_app/');
-define('SCRIPT_PATH', '/Users/xiezuming/Documents/Project/nirvanaWeb/scripts');
+define('SCRIPT_PATH', '/home/ubuntu/project/weee_algo/scripts/');
 
 define ('META_TYPE_CONDITION', 2);
 
