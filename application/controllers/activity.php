@@ -184,9 +184,7 @@ class Activity extends CI_Controller {
 		$input_data ['userId'] = $user_id;
 		$input_data ['inputSource'] = 'WEB';
 		$input_data ['title'] = $title;
-		$category = $this->query_category_by_title ( $title );
-		$input_data ['category'] = $category ['category'];
-		$input_data ['catNum'] = $category ['catNum'];
+		$input_data = array_merge ( $input_data, $this->query_category_by_title ( $title ) );
 		$input_data ['expectedPrice'] = $this->input->post ( 'price' );
 		$input_data ['condition'] = $this->input->post ( 'condition' );
 		$input_data ['availability'] = 'AB';
@@ -467,22 +465,34 @@ class Activity extends CI_Controller {
 		return $item;
 	}
 	private function query_category_by_title($title) {
-		// TODO retun mock data now
+		$this->load->helper ( 'script' );
+		$categories = call_script ( 'query_categories_by_title.py', array (
+				$title 
+		) );
+		
+		if (is_array ( $categories ) && count ( $categories ) > 0) {
+			$best_category = $categories [0];
+			foreach ( $categories as $category ) {
+				// For algorithm traning purpose, the first one is't best one now.
+				// Current we think the category commended by ebay is better.
+				// algoType 0 is our machine learning offline alog
+				// algoType 1 ebay api
+				// algoType 2 is a result returned by both algos.
+				
+				if ($category ['algoType'] == 1 || $category ['algoType'] == 2) {
+					$best_category = $category;
+					break;
+				}
+			}
+			return array (
+					'category' => $best_category ['catCode'],
+					'catNum' => $best_category ['catNum'] 
+			);
+		}
 		return array (
 				'category' => 'ELS',
 				'catNum' => '000' 
 		);
-		/*
-		 * $this->load->helper ( 'script' );
-		 * $categories = call_script ( 'query_categories_by_title.py', array (
-		 * $title
-		 * ) );
-		 *
-		 * if (is_array ( $categories ) && count ( $categories ) > 0) {
-		 * return $categories [0];
-		 * }
-		 * return FALSE;
-		 */
 	}
 }
 
