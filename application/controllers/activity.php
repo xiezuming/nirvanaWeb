@@ -374,7 +374,8 @@ class Activity extends CI_Controller {
 		$success = $this->item_model->update_item ( array (
 				'itemId' => $item ['itemId'],
 				'title' => $title,
-				'category' => $category,
+				'category' => $category ['category'],
+				'catNum' => $category ['catNum'],
 				'expectedPrice' => $this->input->post ( 'price' ),
 				'condition' => $this->input->post ( 'condition' ),
 				'desc' => $this->input->post ( 'description' ),
