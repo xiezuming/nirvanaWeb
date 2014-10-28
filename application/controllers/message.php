@@ -64,6 +64,11 @@ class Message extends CI_Controller {
 				'message' => $this->input->post ( 'message' ) 
 		);
 		if ($this->message_model->add_message ( $message )) {
+			// Send push notification
+			$this->load->helper ( 'parse_push' );
+			$notification_msg = "${from_user ['alias']} sent you a message.";
+			send_notification ( $to_user_id, $notification_msg );
+			
 			$data ['result'] = SUCCESS;
 		} else {
 			$data ['result'] = FAILURE;
