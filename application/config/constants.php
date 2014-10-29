@@ -50,5 +50,7 @@ define ('META_TYPE_CONDITION', 2);
 
 define ('PYTHON_PLACEHOLD', '***|||RESULT|||***');
 
+define ('PUSH_TYPE_ALERT_MESSAGE', 'a');
+
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

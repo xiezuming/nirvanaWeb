@@ -15,17 +15,15 @@ if (! function_exists ( 'send_notification' )) {
 	 * Send the push notification to the user
 	 *
 	 * @param string $user_id        	
-	 * @param string $message        	
+	 * @param array $playload        	
 	 * @return boolean
 	 */
-	function send_notification($user_id, $message) {
+	function send_notification($user_id, $playload) {
 		$data = array (
 				"where" => array (
 						"userId" => $user_id 
 				),
-				"data" => array (
-						"alert" => $message 
-				) 
+				"data" => $playload 
 		);
 		$data_string = json_encode ( $data );
 		

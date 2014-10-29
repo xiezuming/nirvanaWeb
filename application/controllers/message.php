@@ -50,7 +50,7 @@ class Message extends CI_Controller {
 		$item_uuid = $this->input->post ( 'itemUuid' );
 		$item = $this->item_model->get_item ( $item_uuid );
 		$image = $this->item_model->get_first_image ( $item ['Global_Item_ID'] );
-		
+		$message_text = $this->input->post ( 'message' );
 		$message = array (
 				'messageUuid' => $this->input->post ( 'messageUuid' ),
 				'fromUserId' => $from_user_id,
@@ -61,14 +61,19 @@ class Message extends CI_Controller {
 				'itemUserId' => $item ['userId'],
 				'itemTitle' => $item ['title'],
 				'itemImageName' => $image ['imageName'],
-				'message' => $this->input->post ( 'message' ) 
+				'message' => $message_text 
 		);
 		if ($this->message_model->add_message ( $message )) {
 			// Send push notification
 			$this->load->helper ( 'parse_push' );
 			$from_user_alias = $from_user ['alias'];
-			$notification_msg = "$from_user_alias sent you a message.";
-			send_notification ( $to_user_id, $notification_msg );
+			$playload = array (
+					"alert" => "${from_user_alias}: $message_text",
+					"t" => PUSH_TYPE_ALERT_MESSAGE,
+					"i" => $item_uuid,
+					"u" => $from_user_id 
+			);
+			send_notification ( $to_user_id, $playload );
 			
 			$data ['result'] = SUCCESS;
 		} else {
