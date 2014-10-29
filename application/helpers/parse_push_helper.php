@@ -58,7 +58,7 @@ if (! function_exists ( 'send_notification' )) {
 			return FALSE;
 		}
 		
-		$status = array_key_exists ( 'status', $result ) ? $ret ['status'] : 'ERROR';
+		$status = array_key_exists ( 'status', $ret ) ? $ret ['status'] : 'ERROR';
 		if ($status != true) {
 			log_message ( 'error', "The status in the Parse Push api response is not OK: ${status}. json = $ret_json" );
 			return FALSE;
