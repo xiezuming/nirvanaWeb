@@ -116,6 +116,63 @@ class User extends CI_Controller {
 		$this->load->view ( 'user/edit_profile', $data );
 		$this->load->view ( 'templates/footer_app' );
 	}
+	public function api_edit_profile() {
+		$this->load->helper ( 'form' );
+		
+		$user_id = $this->input->post ( 'userId' );
+		// init load
+		if (!$user_id) {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Internal Error';
+			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+			return;
+		}
+		$user = $this->user_model->get_user ( $user_id );
+		if (! $user) {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Internal Error: Can not find the user.';
+			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+			return;
+		}
+		
+		$this->load->library ( 'form_validation' );
+		$this->form_validation->set_rules ( 'firstName', 'First Name', 'required|max_length[45]' );
+		$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
+		$this->form_validation->set_rules ( 'alias', 'Alias', 'required|max_length[45]' );
+		$this->form_validation->set_rules ( 'email', 'Email Address', 'required|valid_email|max_length[45]|callback_email_check[' . $user ['userId'] . ',' . $user ['userType'] . ']' );
+		$this->form_validation->set_rules ( 'password', 'Password', 'required' );
+		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'required|max_length[10]' );
+		$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
+		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
+		$this->form_validation->set_rules ( 'user_groups', 'Group', '' );
+		
+		if (! $this->form_validation->run ()) {
+			$this->form_validation->set_error_delimiters('', '');
+			$data ['result'] = FAILURE;
+			$data ['message'] = validation_errors();
+			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+			return;
+		}
+		$input = $this->input->post ();
+		$update_data = array (
+				'firstName' => $input ['firstName'],
+				'lastName' => $input ['lastName'],
+				'alias' => $input ['alias'],
+				'email' => $input ['email'],
+				'password' => md5 ( $input ['password'] ),
+				'phoneNumber' => $input ['phoneNumber'],
+				'wechatId' => $input ['wechatId'],
+				'zipcode' => $input ['zipcode'] 
+		);
+		$success = $this->user_model->update_user ( $user_id, $update_data );
+		if ($success) {
+			$data ['result'] = SUCCESS;
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Internal Error: Failed to update the database.';
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 	public function sign_up_success() {
 		echo "SUCCESS";
 	}
