@@ -108,6 +108,36 @@ class Item extends CI_Controller {
 		
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	public function get_item_by_global_id($global_item_id) {
+		$item = $this->item_model->get_item_by_global_id($global_item_id);
+		if ($item) {
+			// convert date to timestamp
+			foreach ( $item as $field_name => $field_value ) {
+				if ($this->endsWith ( $field_name, 'Time' )) {
+					$field_value = strtotime ( $field_value );
+					$item [$field_name] = $field_value;
+				}
+			}
+			// image names
+			$images = $this->item_model->get_images ( $item ['Global_Item_ID'] );
+			$image_names = array ();
+			foreach ( $images as $image )
+				array_push ( $image_names, $image ['imageName'] );
+			$item ['photoNames'] = implode ( ";", $image_names );
+			if (count ( $image_names ) > 0)
+				$item ['defaultPhotoName'] = $image_names [0];
+				
+			$data ['result'] = SUCCESS;
+			$data ['data'] = array (
+					'item' => $item
+			);
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Can not find the item: ' . $global_item_id;
+		}
+	
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
 	/**
 	 * Get the item all details for browse
 	 * 
