@@ -121,7 +121,7 @@ class User extends CI_Controller {
 		
 		$user_id = $this->input->post ( 'userId' );
 		// init load
-		if (!$user_id) {
+		if (! $user_id) {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'Internal Error';
 			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
@@ -140,16 +140,15 @@ class User extends CI_Controller {
 		$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'alias', 'Alias', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'email', 'Email Address', 'required|valid_email|max_length[45]|callback_email_check[' . $user ['userId'] . ',' . $user ['userType'] . ']' );
-		$this->form_validation->set_rules ( 'password', 'Password', 'required' );
+		$this->form_validation->set_rules ( 'password', 'Password', '' );
 		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'required|max_length[10]' );
 		$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
 		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
-		$this->form_validation->set_rules ( 'user_groups', 'Group', '' );
 		
 		if (! $this->form_validation->run ()) {
-			$this->form_validation->set_error_delimiters('', '');
+			$this->form_validation->set_error_delimiters ( '', '' );
 			$data ['result'] = FAILURE;
-			$data ['message'] = validation_errors();
+			$data ['message'] = validation_errors ();
 			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 			return;
 		}
@@ -159,11 +158,13 @@ class User extends CI_Controller {
 				'lastName' => $input ['lastName'],
 				'alias' => $input ['alias'],
 				'email' => $input ['email'],
-				'password' => md5 ( $input ['password'] ),
 				'phoneNumber' => $input ['phoneNumber'],
 				'wechatId' => $input ['wechatId'],
 				'zipcode' => $input ['zipcode'] 
 		);
+		if (! empty ( $input ['password'] )) {
+			$update_data ['password'] = md5 ( $input ['password'] );
+		}
 		$success = $this->user_model->update_user ( $user_id, $update_data );
 		if ($success) {
 			$data ['result'] = SUCCESS;
@@ -219,6 +220,34 @@ class User extends CI_Controller {
 			} else {
 				$input_data ['userType'] = USER_TYPE_FACEBOOK;
 				$input_data ['alias'] = $input_data ['firstName'];
+				$user_id = $this->user_model->create_user ( $input_data );
+				if (! $user_id) {
+					$data ['result'] = FAILURE;
+					$data ['message'] = 'Internal Error: Falied to crate the user.';
+				}
+			}
+			if ($user_id) {
+				$data ['result'] = SUCCESS;
+				$user ['password'] = '';
+				$data ['data'] = $this->user_model->get_user ( $user_id );
+			}
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function sign_in_wx() {
+		$input_data = $this->input->post ();
+		$wxUnionId = $input_data ['wxUnionId'];
+		if (empty ( $wxUnionId )) {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Internal Error: Weixin user union id is empty.';
+		} else {
+			$user = $this->user_model->query_user ( array (
+					'wxUnionId' => $wxUnionId
+			) );
+			if ($user) {
+				$user_id = $user ['userId'];
+			} else {
+				$input_data ['userType'] = USER_TYPE_WEIXIN;
 				$user_id = $this->user_model->create_user ( $input_data );
 				if (! $user_id) {
 					$data ['result'] = FAILURE;

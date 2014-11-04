@@ -41,6 +41,7 @@ define('SUCCESS', 1);
 define('FAILURE', 0);
 define('USER_TYPE_WETAG', 'WE');
 define('USER_TYPE_FACEBOOK', 'FB');
+define('USER_TYPE_WEIXIN', 'WX');
 
 define('LOG_BASE_PATH', '/var/log/weee_app/');
 define('UPLOAD_BASE_PATH', '/var/uploads/weee_app/');

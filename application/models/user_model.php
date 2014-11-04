@@ -16,7 +16,10 @@ class User_model extends CI_Model {
 				'fbUserId' => empty ( $data ['fbUserId'] ) ? '' : $data ['fbUserId'],
 				'phoneNumber' => empty ( $data ['phoneNumber'] ) ? '' : $data ['phoneNumber'],
 				'wechatId' => empty ( $data ['wechatId'] ) ? '' : $data ['wechatId'],
-				'zipcode' => empty ( $data ['zipcode'] ) ? '' : $data ['zipcode'] 
+				'zipcode' => empty ( $data ['zipcode'] ) ? '' : $data ['zipcode'],
+				'wxOpenId' => empty ( $data ['wxOpenId'] ) ? '' : $data ['wxOpenId'],
+				'wxUnionId' => empty ( $data ['wxUnionId'] ) ? '' : $data ['wxUnionId'],
+				'headImgUrl' => empty ( $data ['headImgUrl'] ) ? '' : $data ['headImgUrl']
 		);
 		$this->db->insert ( self::TABLE_USER, $user );
 		if ($this->db->_error_number ()) {
