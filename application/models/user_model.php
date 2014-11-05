@@ -12,7 +12,7 @@ class User_model extends CI_Model {
 				'alias' => $data ['alias'],
 				'firstName' => $data ['firstName'],
 				'lastName' => $data ['lastName'],
-				'email' => $data ['email'],
+				'email' => empty ( $data ['email'] ) ? '' : $data ['email'],
 				'fbUserId' => empty ( $data ['fbUserId'] ) ? '' : $data ['fbUserId'],
 				'phoneNumber' => empty ( $data ['phoneNumber'] ) ? '' : $data ['phoneNumber'],
 				'wechatId' => empty ( $data ['wechatId'] ) ? '' : $data ['wechatId'],

@@ -248,6 +248,8 @@ class User extends CI_Controller {
 				$user_id = $user ['userId'];
 			} else {
 				$input_data ['userType'] = USER_TYPE_WEIXIN;
+				$input_data ['firstName'] = $input_data['alias'];
+				$input_data ['lastName'] = 'Weee!';
 				$user_id = $this->user_model->create_user ( $input_data );
 				if (! $user_id) {
 					$data ['result'] = FAILURE;
