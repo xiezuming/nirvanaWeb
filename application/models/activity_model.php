@@ -16,6 +16,14 @@ class Activity_model extends CI_Model {
 			log_message ( 'error', 'Activity_model.get_activities_by_item: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 		return $query->result_array ();
 	}
+	public function get_activities_by_point($latitude, $longitude) {
+		$this->db->from ( self::TABLE_ACTIVITY );
+		$this->db->where ( "ST_Contains(Activity_Region, GeomFromText('POINT($latitude $longitude)')) = TRUE" );
+		$query = $this->db->get ();
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Activity_model.get_activities_by_point: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $query->result_array ();
+	}
 	public function get_activity_item_relation($activity_id, $global_item_id) {
 		$this->db->where ( 'Activity_ID', $activity_id );
 		$this->db->where ( 'Global_Item_ID', $global_item_id );

@@ -109,7 +109,7 @@ class Item extends CI_Controller {
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function get_item_by_global_id($global_item_id) {
-		$item = $this->item_model->get_item_by_global_id($global_item_id);
+		$item = $this->item_model->get_item_by_global_id ( $global_item_id );
 		if ($item) {
 			// convert date to timestamp
 			foreach ( $item as $field_name => $field_value ) {
@@ -126,21 +126,21 @@ class Item extends CI_Controller {
 			$item ['photoNames'] = implode ( ";", $image_names );
 			if (count ( $image_names ) > 0)
 				$item ['defaultPhotoName'] = $image_names [0];
-				
+			
 			$data ['result'] = SUCCESS;
 			$data ['data'] = array (
-					'item' => $item
+					'item' => $item 
 			);
 		} else {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'Can not find the item: ' . $global_item_id;
 		}
-	
+		
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	/**
 	 * Get the item all details for browse
-	 * 
+	 *
 	 * @param string $item_id        	
 	 */
 	public function browse_item($item_id) {
@@ -263,6 +263,17 @@ class Item extends CI_Controller {
 			$this->item_model->insert_image ( $globalItemId, $insertImageName );
 		foreach ( $deleteImageNameArray as $deleteImageName )
 			$this->item_model->delete_image ( $globalItemId, $deleteImageName );
+			
+			// connect the item to the activity based on location
+		$latitude = $item ['latitude'];
+		$longitude = $item ['longitude'];
+		if ($latitude && $longitude) {
+			$this->load->model ( 'activity_model' );
+			$activities = $this->activity_model->get_activities_by_point ( $latitude, $longitude );
+			foreach ( $activities as $activity ) {
+				$this->activity_model->insert_activity_item_relation ( $activity ['Activity_ID'], $globalItemId );
+			}
+		}
 		
 		$this->db->trans_complete ();
 		
