@@ -10,6 +10,7 @@ const DEFAULT_CATALOGUE_GLOBAL_ID = '1051';
  * @property Catalogue_model $catalogue_model
  * @property Meta_model $meta_model
  * @property Wordpress_model $wordpress_model
+ * @property Activity_model $activity_model
  */
 class Item extends CI_Controller {
 	function __construct() {
@@ -18,6 +19,7 @@ class Item extends CI_Controller {
 		$this->load->model ( 'catalogue_model' );
 		$this->load->model ( 'meta_model' );
 		$this->load->model ( 'wordpress_model' );
+		$this->load->model ( 'activity_model' );
 	}
 	/* ---------------- page entry ---------------- */
 	public function test_page() {
@@ -268,7 +270,6 @@ class Item extends CI_Controller {
 		$latitude = $item ['latitude'];
 		$longitude = $item ['longitude'];
 		if ($latitude && $longitude) {
-			$this->load->model ( 'activity_model' );
 			$activities = $this->activity_model->get_activities_by_point ( $latitude, $longitude );
 			foreach ( $activities as $activity ) {
 				$this->activity_model->insert_activity_item_relation ( $activity ['Activity_ID'], $globalItemId );
@@ -451,6 +452,8 @@ class Item extends CI_Controller {
 		);
 		$newImageRowArray = $this->item_model->get_images ( $global_item_id );
 		
+		$activitiesRowArray = $this->activity_model->get_activities_by_item ( $global_item_id );
+		
 		$wp_db = $this->load->database ( 'wp', TRUE );
 		if (! $wp_db->initialize ()) {
 			log_message ( 'error', 'Item.synch_item: Failed to connect the database.' );
@@ -477,6 +480,10 @@ class Item extends CI_Controller {
 				$success = $this->wordpress_model->insert_image ( $item_image_id, $global_item_id, $item_image_url );
 				if (! $success)
 					break;
+			}
+			// update activity table
+			foreach ( $activitiesRowArray as $activitiesRow ) {
+				$this->wordpress_model->insert_activity_item_relation ( $activitiesRow ['Activity_ID'], $global_item_id );
 			}
 		}
 		
