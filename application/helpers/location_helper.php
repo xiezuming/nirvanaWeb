@@ -102,18 +102,8 @@ if (! function_exists ( 'get_loc_by_latlng' )) {
 		$query = $CI->db->get ( 'cache_location' );
 		$location_rows = $query->result_array ();
 		if (count ( $location_rows ) > 0) {
-			$min_distance = $radius * $radius * 8;
-			$nearest_location = NULL;
-			foreach ( $location_rows as $location_row ) {
-				$y = $location_row ['latitude'] - $latitude;
-				$x = $location_row ['longitude'] - $longitude;
-				$distance = $x * $x + $y * $y;
-				if ($distance < $min_distance) {
-					$min_distance = $distance;
-					$nearest_location = $location_row;
-				}
-			}
-			return $nearest_location;
+			// TODO: find nearest location
+			return $location_rows[0];
 		}
 		
 		// Retreive the zipcode information from the google api
