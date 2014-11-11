@@ -45,10 +45,6 @@ class Item_model extends CI_Model {
 	public function count_items($where) {
 		log_message ( 'debug', "Item_model.count_items" );
 		$this->db->from ( self::TABLE_ITEM );
-		$this->db->join ( 'catalogue', 'item.userId = catalogue.catalogueId' );
-		if (isset ( $where ['group_key'] )) {
-			$this->db->join ( 'user_group', 'item.userId = user_group.user_id' );
-		}
 		if ($where) {
 			$this->db->where ( $where );
 		}
@@ -59,13 +55,9 @@ class Item_model extends CI_Model {
 		return $result;
 	}
 	public function query_items($where, $limit, $offset = null) {
-		$this->db->select ( 'item.Global_Item_ID, item.itemId, item.userId, item.title, item.expectedPrice, min(item_image.imageName) as \'defaultImage\', wpPostId' );
+		$this->db->select ( 'item.Global_Item_ID, item.itemId, item.userId, item.title, item.expectedPrice, min(item_image.imageName) as \'defaultImage\'' );
 		$this->db->from ( self::TABLE_ITEM );
 		$this->db->join ( self::TABLE_IMAGE, 'item.Global_Item_ID = item_image.Global_Item_ID' );
-		$this->db->join ( 'catalogue', 'item.userId = catalogue.catalogueId' );
-		if (isset ( $where ['group_key'] )) {
-			$this->db->join ( 'user_group', 'item.userId = user_group.user_id' );
-		}
 		if ($where) {
 			$this->db->where ( $where );
 		}

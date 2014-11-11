@@ -94,11 +94,11 @@ if (! function_exists ( 'get_loc_by_latlng' )) {
 	 */
 	function get_loc_by_latlng($latitude, $longitude) {
 		$CI = & get_instance ();
-		$radius = 0.1;
-		$CI->db->where ( 'latitude > ', $latitude - $radius );
-		$CI->db->where ( 'latitude < ', $latitude + $radius );
-		$CI->db->where ( 'longitude > ', $longitude - $radius );
-		$CI->db->where ( 'longitude < ', $longitude + $radius );
+		$range = calculate_latitude_longitude_range ( $latitude, $longitude, 5 );
+		$CI->db->where ( 'latitude > ', $range ['latitude_min'] );
+		$CI->db->where ( 'latitude < ', $range ['latitude_max'] );
+		$CI->db->where ( 'longitude > ', $range ['longitude_min'] );
+		$CI->db->where ( 'longitude < ', $range ['longitude_max'] );
 		$query = $CI->db->get ( 'cache_location' );
 		$location_rows = $query->result_array ();
 		if (count ( $location_rows ) > 0) {
@@ -189,3 +189,35 @@ if (! function_exists ( 'build_region_string_by_loc' )) {
 		return $location ['locality'] . ', ' . $location ['administrative_area_level_1_s'];
 	}
 }
+
+if (! function_exists ( 'calculate_latitude_longitude_range' )) {
+	/**
+	 *
+	 * Get the range of latitude & longitude covering the circle region of the point
+	 *
+	 * @param float $latitude
+	 *        	The latitude of the point
+	 * @param float $longitude
+	 *        	The longitude of the point
+	 * @param float $radius
+	 *        	The radius of the region
+	 * @param string $unit
+	 *        	The unit of radius. 'Mi' or 'Km'
+	 * @return The range of latitude & longitude. latitude_min/latitude_max/longitude_min/longitude_max
+	 */
+	function calculate_latitude_longitude_range($latitude, $longitude, $radius, $unit = 'Mi') {
+		$longitude_delta = $radius / (111.1 / cos ( deg2rad ( $latitude ) ));
+		$latitude_delta = $radius / 111.1;
+		if ($unit == 'Mi') {
+			$longitude_delta = $longitude_delta * 1.609344;
+			$latitude_delta = $latitude_delta * 1.609344;
+		}
+		return array (
+				'longitude_min' => $longitude - $longitude_delta,
+				'longitude_max' => $longitude + $longitude_delta,
+				'latitude_min' => $latitude - $latitude_delta,
+				'latitude_max' => $latitude + $latitude_delta 
+		);
+	}
+}
+

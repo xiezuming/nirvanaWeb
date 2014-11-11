@@ -190,17 +190,29 @@ class Item extends CI_Controller {
 		$where ['availability'] = 'AB';
 		$key_word = $this->input->post ( 'key_word' );
 		if ($key_word) {
-			$key_word_where = "(LOWER(item.title) LIKE '%" . strtolower ( $key_word ) . "%'
-					OR LOWER(item.desc) LIKE '%" . strtolower ( $key_word ) . "%')";
+			$key_word_where = "(item.title LIKE '%${key_word}%' OR item.desc LIKE '%${key_word}%')";
 			$where [$key_word_where] = NULL;
 		}
 		$category = $this->input->post ( 'category' );
 		if ($category) {
 			$where ['category'] = $category;
 		}
-		$group = $this->input->post ( 'group_key' );
-		if ($group) {
-			$where ['group_key'] = $group;
+		if ($radius = $this->input->post ( 'radius' )) {
+			$this->load->helper ( 'location' );
+			$latitude = $this->input->post ( 'latitude' );
+			$longitude = $this->input->post ( 'longitude' );
+			if (! $latitude || ! $longitude) {
+				$loc = get_loc_by_zipcode ( $this->input->post ( 'user_zip_code' ) );
+				if ($loc) {
+					$latitude = $loc ['latitude'];
+					$longitude = $loc ['longitude'];
+				}
+			}
+			$range = calculate_latitude_longitude_range ( $latitude, $longitude, $radius );
+			$where ['latitude > '] = $range ['latitude_min'];
+			$where ['latitude < '] = $range ['latitude_max'];
+			$where ['longitude > '] = $range ['longitude_min'];
+			$where ['longitude < '] = $range ['longitude_max'];
 		}
 		$limit = $this->input->post ( 'limit' ) ? $this->input->post ( 'limit' ) : 5;
 		$offset = $this->input->post ( 'offset' ) ? $this->input->post ( 'offset' ) : 0;
