@@ -82,7 +82,7 @@ class Event extends CI_Controller {
 		$user_id = $input ['user_id'];
 		$events = $this->event_model->get_events_where ( array (
 				'user_id' => $user_id,
-				'event_type' => 'sell_to_wetag' 
+				'event_type' => 'sell_to_weee' 
 		) );
 		if (count ( $events ) > 0) {
 			if (time () - strtotime ( $events [0] ['event_create_time'] ) < 3600 * 24 * 7) { // 7 days
@@ -92,12 +92,12 @@ class Event extends CI_Controller {
 				return;
 			}
 		}
-		$input ['event_type'] = 'sell_to_wetag';
+		$input ['event_type'] = 'sell_to_weee';
 		$success = $this->event_model->add_event ( $input );
 		if ($success) {
 			$user = $this->user_model->get_user ( $user_id );
 			$data ['result'] = SUCCESS;
-			$data ['message'] = 'We will email you our offer to your email at ' . $user ['userName'] . ' within 24 hours';
+			$data ['message'] = 'We will email you our offer to your email at ' . $user ['email'] . ' within 24 hours';
 		} else {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'DB Error';
