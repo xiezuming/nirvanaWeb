@@ -31,7 +31,9 @@ $description_meta = array (
 		<td><?php echo form_input('title', set_value('title'), 'size="30"');?></td>
 	</tr>
 	<tr>
-		<td><label><?php echo $red_star?>Picture:</label></td>
+		<td><label><?php echo $red_star?>Picture:</label>
+			<p style="width: 250">(If no response when you click "Choose File",
+				please click the upper right and choose "Open with browser")</p></td>
 	</tr>
 	<?php
 	for($i = 0; $i < 5; $i ++) {
