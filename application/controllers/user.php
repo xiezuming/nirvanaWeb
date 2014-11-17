@@ -50,71 +50,19 @@ class User extends CI_Controller {
 		$this->load->view ( 'user/sign_up', $data );
 		$this->load->view ( 'templates/footer_app' );
 	}
-	public function edit_profile($user_id = '') {
-		$this->load->helper ( 'form' );
-		
-		if (! $user_id) {
-			$user_id = $this->input->post ( 'userId' );
-			if (! $user_id)
-				show_error ( 'Invalid user id.' );
+	public function sign_up_success() {
+		echo "SUCCESS";
+	}
+	public function api_get_user_info($user_id) {
+		$user = $this->user_model->get_user ( $user_id );
+		if ($user) {
+			$data ['result'] = SUCCESS;
+			$data ['data'] = $user;
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'No User.';
 		}
-		
-		// init load
-		$data ['user'] = $this->user_model->get_user ( $user_id );
-		if (! $data ['user']) {
-			show_error ( 'Invalid user.' );
-		}
-		$data ['user'] ['user_groups'] = $this->get_user_group_key_array ( $user_id );
-		
-		if ($this->input->post ()) {
-			$this->load->library ( 'form_validation' );
-			$this->form_validation->set_rules ( 'firstName', 'First Name', 'required|max_length[45]' );
-			$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
-			$this->form_validation->set_rules ( 'alias', 'Alias', 'required|max_length[45]' );
-			$this->form_validation->set_rules ( 'email', 'Email Address', 'required|valid_email|max_length[45]|callback_email_check[' . $data ['user'] ['userId'] . ',' . $data ['user'] ['userType'] . ']' );
-			$this->form_validation->set_rules ( 'password', 'Password', 'matches[password_confirm]' );
-			$this->form_validation->set_rules ( 'password_confirm', 'Password Confirmation', '' );
-			$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'required|max_length[10]' );
-			$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
-			$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
-			$this->form_validation->set_rules ( 'user_groups', 'Group', '' );
-			
-			if ($this->form_validation->run ()) {
-				$input = $this->input->post ();
-				$update_data = array (
-						'firstName' => $input ['firstName'],
-						'lastName' => $input ['lastName'],
-						'alias' => $input ['alias'],
-						'email' => $input ['email'],
-						'phoneNumber' => $input ['phoneNumber'],
-						'wechatId' => $input ['wechatId'],
-						'zipcode' => $input ['zipcode'] 
-				);
-				if (! empty ( $input ['password'] )) {
-					$update_data ['password'] = md5 ( $input ['password'] );
-				}
-				$success = $this->user_model->update_user ( $user_id, $update_data );
-				
-				$user_groups = $this->input->post ( 'user_groups' );
-				if ($success && $this->user_model->update_user_group ( $user_id, $user_groups )) {
-					$this->session->set_flashdata ( 'falshmsg', array (
-							'type' => 'message',
-							'content' => 'Update successfully.' 
-					) );
-					redirect ( site_url ( "/user/edit_profile/" . $user_id ), 'refresh' );
-				} else {
-					echo "DB ERROR.";
-					return;
-				}
-			}
-			$data ['userId'] = $user_id;
-		}
-		
-		$data ['group_array'] = $this->get_all_group_array ();
-		$data ['title'] = 'Edit Profile';
-		$this->load->view ( 'templates/header_app', $data );
-		$this->load->view ( 'user/edit_profile', $data );
-		$this->load->view ( 'templates/footer_app' );
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
 	public function api_edit_profile() {
 		$this->load->helper ( 'form' );
@@ -167,15 +115,13 @@ class User extends CI_Controller {
 		}
 		$success = $this->user_model->update_user ( $user_id, $update_data );
 		if ($success) {
+			$data ['data'] = $this->user_model->get_user ( $user_id );
 			$data ['result'] = SUCCESS;
 		} else {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'Internal Error: Failed to update the database.';
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
-	}
-	public function sign_up_success() {
-		echo "SUCCESS";
 	}
 	public function sign_in() {
 		$email = $this->input->post ( 'email' );
@@ -192,7 +138,6 @@ class User extends CI_Controller {
 			if ($user) {
 				if ($user ['password'] == md5 ( $password )) {
 					$data ['result'] = SUCCESS;
-					$user ['password'] = '';
 					$data ['data'] = $user;
 				} else {
 					$data ['result'] = FAILURE;
@@ -228,7 +173,6 @@ class User extends CI_Controller {
 			}
 			if ($user_id) {
 				$data ['result'] = SUCCESS;
-				$user ['password'] = '';
 				$data ['data'] = $this->user_model->get_user ( $user_id );
 			}
 		}
@@ -242,13 +186,13 @@ class User extends CI_Controller {
 			$data ['message'] = 'Internal Error: Weixin user union id is empty.';
 		} else {
 			$user = $this->user_model->query_user ( array (
-					'wxUnionId' => $wxUnionId
+					'wxUnionId' => $wxUnionId 
 			) );
 			if ($user) {
 				$user_id = $user ['userId'];
 			} else {
 				$input_data ['userType'] = USER_TYPE_WEIXIN;
-				$input_data ['firstName'] = $input_data['alias'];
+				$input_data ['firstName'] = $input_data ['alias'];
 				$input_data ['lastName'] = 'Weee!';
 				$user_id = $this->user_model->create_user ( $input_data );
 				if (! $user_id) {
@@ -258,7 +202,6 @@ class User extends CI_Controller {
 			}
 			if ($user_id) {
 				$data ['result'] = SUCCESS;
-				$user ['password'] = '';
 				$data ['data'] = $this->user_model->get_user ( $user_id );
 			}
 		}
@@ -283,8 +226,12 @@ class User extends CI_Controller {
 				$user_id = $user ['userId'];
 				$reset_key = $this->user_model->create_reset_key ( $user_id );
 				if ($reset_key) {
+					$subject = '[Weee!] How to reset your password';
 					$link = site_url ( 'user/reset_password/' . $user_id . '/' . $reset_key );
-					$result = $this->send_reset_password_email ( $email_address, $link );
+					$body_html = $this->load->view ( 'user/reset_password_mail', array (
+							'link' => $link 
+					), TRUE );
+					$result = $this->send_email ( $email_address, $subject, $body_html );
 					if ($result) {
 						$data ['result'] = SUCCESS;
 						$data ['message'] = 'Instructions on how to reset your password have been sent to ' . $email_address . '.';
@@ -355,6 +302,75 @@ class User extends CI_Controller {
 		$this->load->view ( 'user/reset_password', $data );
 		$this->load->view ( 'templates/footer' );
 	}
+	public function api_send_verify_mail($user_id) {
+		$this->load->helper ( 'url' );
+		
+		$user = $this->user_model->get_user ( $user_id );
+		if (! $user || empty ( $user ['email'] )) {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'The email address is empty.';
+			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+			return;
+		}
+		
+		$email_address = $user ['email'];
+		$reset_key = $this->user_model->create_reset_key ( $user_id, $email_address );
+		if ($reset_key) {
+			$this->load->helper ( 'uuid' );
+			$subject = '[Weee!] Verify your email address';
+			$link = site_url ( 'user/verify_email/' . encode_uuid_base64 ( $user_id ) . '/' . encode_uuid_base64 ( $reset_key ) );
+			$body_html = $this->load->view ( 'user/verification_mail', array (
+					'link' => $link 
+			), TRUE );
+			$result = $this->send_email ( $email_address, $subject, $body_html );
+			if ($result) {
+				$data ['result'] = SUCCESS;
+				$data ['message'] = 'The verification email has been sent to ' . $email_address . '.';
+			} else {
+				$data ['result'] = FAILURE;
+				$data ['message'] = 'Internal Error: Can not send the email.';
+			}
+		} else {
+			$data ['result'] = FAILURE;
+			$data ['message'] = 'Internal Error';
+		}
+		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	public function verify_email($user_id = '', $reset_key = '') {
+		if (empty ( $user_id ) || empty ( $reset_key )) {
+			show_error ( 'Error URL.' );
+		}
+		$this->load->helper ( 'uuid' );
+		
+		$user_id = decode_uuid_base64 ( $user_id );
+		$reset_key = decode_uuid_base64 ( $reset_key );
+		
+		$reset_row = $this->user_model->get_reset_row ( $reset_key );
+		if (! $reset_row || $reset_row ['userId'] != $user_id) {
+			show_error ( 'Error URL.' );
+		}
+		
+		$key_used = $reset_row ['key_used'];
+		if ($key_used != 'N') {
+			show_error ( 'Used key. Send verification email request again.' );
+		}
+		
+		$request_time = $reset_row ['request_time'];
+		if (time () - strtotime ( $request_time ) > 3600 * 24 * 7) { // 1 Week
+			show_error ( 'Invalid key. Send verification email request again.' );
+		}
+		
+		$email = $reset_row ['email'];
+		$this->user_model->update_user ( $user_id, array (
+				'verified_email' => $email 
+		) );
+		$this->user_model->clear_reset_key ( $reset_key );
+		
+		$data ['title'] = 'Email Verified';
+		$this->load->view ( 'templates/header', $data );
+		$this->load->view ( 'user/verification_email_success', $data );
+		$this->load->view ( 'templates/footer' );
+	}
 	public function update_wish_list() {
 		$user_id = $this->input->post ( 'userId' );
 		$wish_list = $this->input->post ( 'wishList' );
@@ -371,6 +387,13 @@ class User extends CI_Controller {
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 	}
+	/**
+	 * Call back function for the email field validation
+	 *
+	 * @param string $email        	
+	 * @param array $params        	
+	 * @return boolean
+	 */
 	public function email_check($email, $params = '') {
 		$params = explode ( ',', $params );
 		$user_id = empty ( $params [0] ) ? '' : $params [0];
@@ -387,14 +410,12 @@ class User extends CI_Controller {
 		}
 		return TRUE;
 	}
-	private function send_reset_password_email($email, $link) {
+	private function send_email($email, $subject, $body_html) {
 		$fields = array (
-				'from' => 'Weee! Automated message do not reply <robot@letustag.com>',
+				'from' => 'Weee! Automated message do not reply <noreply@letustag.com>',
 				'to' => $email,
-				'subject' => '[Weee!] How to reset your password',
-				'html' => $this->load->view ( 'user/reset_password_mail', array (
-						'link' => $link 
-				), TRUE ) 
+				'subject' => $subject,
+				'html' => $body_html 
 		);
 		
 		$ch = curl_init (); // initiate curl

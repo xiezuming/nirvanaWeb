@@ -19,7 +19,7 @@ class User_model extends CI_Model {
 				'zipcode' => empty ( $data ['zipcode'] ) ? '' : $data ['zipcode'],
 				'wxOpenId' => empty ( $data ['wxOpenId'] ) ? '' : $data ['wxOpenId'],
 				'wxUnionId' => empty ( $data ['wxUnionId'] ) ? '' : $data ['wxUnionId'],
-				'headImgUrl' => empty ( $data ['headImgUrl'] ) ? '' : $data ['headImgUrl']
+				'headImgUrl' => empty ( $data ['headImgUrl'] ) ? '' : $data ['headImgUrl'] 
 		);
 		$this->db->insert ( self::TABLE_USER, $user );
 		if ($this->db->_error_number ()) {
@@ -92,11 +92,12 @@ class User_model extends CI_Model {
 		}
 	}
 	/* Password Reset *************** */
-	public function create_reset_key($userId) {
+	public function create_reset_key($userId, $email = NULL) {
 		$reset_key = $this->gen_uuid ();
 		$date = array (
 				'userId' => $userId,
-				'reset_key' => $reset_key 
+				'reset_key' => $reset_key,
+				'email' => $email 
 		);
 		$this->db->insert ( self::TABLE_RESET, $date );
 		if ($this->db->_error_number ()) {
