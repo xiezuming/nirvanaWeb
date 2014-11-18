@@ -13,7 +13,7 @@ if (! function_exists ( 'send_email' )) {
 	 */
 	function send_email($from, $to, $subject, $email_body) {
 		if (! $from)
-			$from = 'Weee! Automated message do not reply <robot@letustag.com>';
+			$from = 'Weee! Automated message do not reply <noreply@letustag.com>';
 		
 		$fields = array (
 				'from' => $from,

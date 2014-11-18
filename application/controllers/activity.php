@@ -245,6 +245,7 @@ class Activity extends CI_Controller {
 	}
 	private function send_item_success_email($item, $email) {
 		$this->load->helper ( 'uuid' );
+		$this->load->helper ( 'myemail' );
 		
 		$email_subject = 'POST/EDIT: "' . $item ['title'] . '"';
 		$email_body = $this->load->view ( 'activity/item_success_message_body', array (
@@ -257,21 +258,7 @@ class Activity extends CI_Controller {
 				'subject' => $email_subject,
 				'html' => $email_body 
 		);
-		
-		$ch = curl_init (); // initiate curl
-		$url = $this->config->config ['mail'] ['api_url']; // where you want to post data
-		curl_setopt ( $ch, CURLOPT_URL, $url );
-		curl_setopt ( $ch, CURLOPT_USERPWD, $this->config->config ['mail'] ['user_pwd'] );
-		// curl_setopt ( $ch, CURLOPT_HEADER, true );
-		curl_setopt ( $ch, CURLOPT_POST, true ); // tell curl you want to post something
-		curl_setopt ( $ch, CURLOPT_POSTFIELDS, http_build_query ( $fields ) ); // define what you want to post
-		curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true ); // return the output in string format
-		$output = curl_exec ( $ch ); // execute
-		if (curl_errno ( $ch )) {
-			log_message ( 'error', 'Faild to call email api: ' . print_r ( curl_getinfo ( $ch ), TRUE ) );
-		}
-		curl_close ( $ch ); // close curl handle
-		log_message ( 'debug', 'email api output: ' . print_r ( $output, TRUE ) );
+		send_email ( null, $email, $email_subject, $email_body );
 	}
 	public function activate_item($b64_item_id) {
 		$item = $this->query_item_by_b64uuid ( $b64_item_id );

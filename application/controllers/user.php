@@ -231,7 +231,8 @@ class User extends CI_Controller {
 					$body_html = $this->load->view ( 'user/reset_password_mail', array (
 							'link' => $link 
 					), TRUE );
-					$result = $this->send_email ( $email_address, $subject, $body_html );
+					$this->load->helper ( 'myemail' );
+					$result = send_email ( null, $email_address, $subject, $body_html );
 					if ($result) {
 						$data ['result'] = SUCCESS;
 						$data ['message'] = 'Instructions on how to reset your password have been sent to ' . $email_address . '.';
@@ -322,7 +323,8 @@ class User extends CI_Controller {
 			$body_html = $this->load->view ( 'user/verification_mail', array (
 					'link' => $link 
 			), TRUE );
-			$result = $this->send_email ( $email_address, $subject, $body_html );
+			$this->load->helper ( 'myemail' );
+			$result = send_email ( null, $email_address, $subject, $body_html );
 			if ($result) {
 				$data ['result'] = SUCCESS;
 				$data ['message'] = 'The verification email has been sent to ' . $email_address . '.';
@@ -408,31 +410,6 @@ class User extends CI_Controller {
 			$this->form_validation->set_message ( 'email_check', 'Email Address is registered by another account.' );
 			return FALSE;
 		}
-		return TRUE;
-	}
-	private function send_email($email, $subject, $body_html) {
-		$fields = array (
-				'from' => 'Weee! Automated message do not reply <noreply@letustag.com>',
-				'to' => $email,
-				'subject' => $subject,
-				'html' => $body_html 
-		);
-		
-		$ch = curl_init (); // initiate curl
-		$url = $this->config->config ['mail'] ['api_url']; // where you want to post data
-		curl_setopt ( $ch, CURLOPT_URL, $url );
-		curl_setopt ( $ch, CURLOPT_USERPWD, $this->config->config ['mail'] ['user_pwd'] );
-		// curl_setopt ( $ch, CURLOPT_HEADER, true );
-		curl_setopt ( $ch, CURLOPT_POST, true ); // tell curl you want to post something
-		curl_setopt ( $ch, CURLOPT_POSTFIELDS, http_build_query ( $fields ) ); // define what you want to post
-		curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true ); // return the output in string format
-		$output = curl_exec ( $ch ); // execute
-		if (curl_errno ( $ch )) {
-			log_message ( 'error', 'Faild to call email api: ' . print_r ( curl_getinfo ( $ch ), TRUE ) );
-			return FALSE;
-		}
-		curl_close ( $ch ); // close curl handle
-		log_message ( 'debug', 'email api output: ' . print_r ( $output, TRUE ) );
 		return TRUE;
 	}
 	private function get_user_group_key_array($user_id) {
