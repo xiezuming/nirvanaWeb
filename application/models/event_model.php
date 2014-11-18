@@ -21,8 +21,17 @@ class Event_model extends CI_Model {
 			log_message ( 'error', 'Event_model.add_event: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 			return FALSE;
 		} else {
-			return TRUE;
+			return $this->db->insert_id ();
 		}
+	}
+	public function mark_event_finished($event_id) {
+		$this->db->where ( 'event_id', $event_id );
+		$result = $this->db->update ( self::TABLE_EVENT, array (
+				'event_finished' => 'Y' 
+		) );
+		if ($this->db->_error_number ())
+			log_message ( 'error', 'Event_model.mark_event_finished: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+		return $result;
 	}
 }
 ?>

@@ -12,8 +12,11 @@ if (! function_exists ( 'send_email' )) {
 	 * @return boolean TRUE if send successfully.
 	 */
 	function send_email($from, $to, $subject, $email_body) {
+		$CI = & get_instance ();
 		if (! $from)
 			$from = 'Weee! Automated message do not reply <noreply@letustag.com>';
+		if (! $to)
+			$to = $CI->config->config ['mail'] ['report_address'];
 		
 		$fields = array (
 				'from' => $from,
@@ -23,7 +26,6 @@ if (! function_exists ( 'send_email' )) {
 		);
 		$result = TRUE;
 		$ch = curl_init (); // initiate curl
-		$CI =& get_instance();
 		$url = $CI->config->config ['mail'] ['api_url']; // where you want to post data
 		curl_setopt ( $ch, CURLOPT_URL, $url );
 		curl_setopt ( $ch, CURLOPT_USERPWD, $CI->config->config ['mail'] ['user_pwd'] );
