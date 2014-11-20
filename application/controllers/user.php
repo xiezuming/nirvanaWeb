@@ -324,8 +324,7 @@ class User extends CI_Controller {
 					'link' => $link 
 			), TRUE );
 			$this->load->helper ( 'myemail' );
-			// $result = send_email ( null, $email_address, $subject, $body_html );
-			$result = 1;
+			$result = send_email ( null, $email_address, $subject, $body_html );
 			if ($result) {
 				$data ['result'] = SUCCESS;
 				$data ['message'] = sprintf ( $this->lang->line ( 'info_verify_email_response' ), $email_address );
