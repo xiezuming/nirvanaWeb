@@ -27,7 +27,7 @@ class Algorithm extends CI_Controller {
 			$result = $this->get_real_result ( $result );
 			if (empty ( $result )) {
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'No result found for barcode.';
+				$data ['message'] = 'Internal Error: No result found for barcode.';
 			} else {
 				$data ['result'] = SUCCESS;
 				$data ['data'] = array (
@@ -53,7 +53,7 @@ class Algorithm extends CI_Controller {
 			$result = $this->get_real_result ( $result );
 			if (empty ( $result )) {
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'No result found for barcode.';
+				$data ['message'] = 'Internal Error: No result found for barcode.';
 			} else {
 				$data ['result'] = SUCCESS;
 				$data ['data'] = array (
@@ -154,7 +154,7 @@ class Algorithm extends CI_Controller {
 			$result = $this->get_real_result ( $result );
 			if (empty ( $result )) {
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'No result found for barcode.';
+				$data ['message'] = 'Internal Error: No result found for title & catNum.';
 			} else {
 				$result ['title'] = $title;
 				$result ['catNum'] = $catNum;

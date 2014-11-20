@@ -1,5 +1,5 @@
 
-<h2>Please choose an item similar to yours:</h2>
+<h2><?=lang('label_choose_item')?></h2>
 
 <?php echo form_open('algorithm/query_item_info_by_similar_item')?>
 <?php echo form_hidden('title', $query_title)?>

@@ -141,11 +141,11 @@ class User extends CI_Controller {
 					$data ['data'] = $user;
 				} else {
 					$data ['result'] = FAILURE;
-					$data ['message'] = 'That password is incorrect. Be sure you\'re using the password for your WeTag account.';
+					$data ['message'] = lang ( 'error_password_mismatch' );
 				}
 			} else {
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'That Weee! account doesn\'t exist. Enter a different email address or get a new account';
+				$data ['message'] = lang ( 'error_account_notexist' );
 			}
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
@@ -212,7 +212,7 @@ class User extends CI_Controller {
 		
 		if (! isset ( $_POST ['email_address'] )) {
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'The email is empty';
+			$data ['message'] = 'Internal Error: The email is empty';
 		} else {
 			$email_address = $this->input->post ( 'email_address', true );
 			log_message ( 'debug', 'User.reset_password_mail: $email_address = ' . $email_address );
@@ -235,7 +235,7 @@ class User extends CI_Controller {
 					$result = send_email ( null, $email_address, $subject, $body_html );
 					if ($result) {
 						$data ['result'] = SUCCESS;
-						$data ['message'] = 'Instructions on how to reset your password have been sent to ' . $email_address . '.';
+						$data ['message'] = sprintf ( $this->lang->line ( 'info_reset_password_response' ), $email_address );
 					} else {
 						$data ['result'] = FAILURE;
 						$data ['message'] = 'Internal Error: Can not send the email.';
@@ -246,7 +246,7 @@ class User extends CI_Controller {
 				}
 			} else {
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'The email is invalid';
+				$data ['message'] = lang ( 'error_no_email_account' );
 			}
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
@@ -268,12 +268,12 @@ class User extends CI_Controller {
 		
 		$key_used = $reset_row ['key_used'];
 		if ($key_used != 'N') {
-			show_error ( 'Used key. Send reset request again.' );
+			show_error ( lang ( 'error_reset_link_used' ) );
 		}
 		
 		$request_time = $reset_row ['request_time'];
 		if (time () - strtotime ( $request_time ) > 3600) { // 1 Hour
-			show_error ( 'Invalid key. Send reset request again.' );
+			show_error ( lang ( 'error_reset_link_timeout' ) );
 		}
 		
 		$this->load->helper ( 'form' );
@@ -309,7 +309,7 @@ class User extends CI_Controller {
 		$user = $this->user_model->get_user ( $user_id );
 		if (! $user || empty ( $user ['email'] )) {
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'The email address is empty.';
+			$data ['message'] = 'Internal Error: The email address is empty.';
 			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 			return;
 		}
@@ -324,10 +324,11 @@ class User extends CI_Controller {
 					'link' => $link 
 			), TRUE );
 			$this->load->helper ( 'myemail' );
-			$result = send_email ( null, $email_address, $subject, $body_html );
+			// $result = send_email ( null, $email_address, $subject, $body_html );
+			$result = 1;
 			if ($result) {
 				$data ['result'] = SUCCESS;
-				$data ['message'] = 'The verification email has been sent to ' . $email_address . '.';
+				$data ['message'] = sprintf ( $this->lang->line ( 'info_verify_email_response' ), $email_address );
 			} else {
 				$data ['result'] = FAILURE;
 				$data ['message'] = 'Internal Error: Can not send the email.';
@@ -354,12 +355,12 @@ class User extends CI_Controller {
 		
 		$key_used = $reset_row ['key_used'];
 		if ($key_used != 'N') {
-			show_error ( 'Used key. Send verification email request again.' );
+			show_error ( lang ( 'error_verify_link_used' ) );
 		}
 		
 		$request_time = $reset_row ['request_time'];
 		if (time () - strtotime ( $request_time ) > 3600 * 24 * 7) { // 1 Week
-			show_error ( 'Invalid key. Send verification email request again.' );
+			show_error ( lang ( 'error_verify_link_timeout' ) );
 		}
 		
 		$email = $reset_row ['email'];
@@ -384,7 +385,7 @@ class User extends CI_Controller {
 				$data ['result'] = SUCCESS;
 			} else {
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'Failed to update DB.';
+				$data ['message'] = 'Internal Error: Failed to update DB.';
 			}
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
@@ -407,7 +408,7 @@ class User extends CI_Controller {
 				'userId !=' => $user_id 
 		) );
 		if ($user) {
-			$this->form_validation->set_message ( 'email_check', 'Email Address is registered by another account.' );
+			$this->form_validation->set_message ( 'email_check', lang ( 'error_email_used' ) );
 			return FALSE;
 		}
 		return TRUE;

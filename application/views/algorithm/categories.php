@@ -1,5 +1,5 @@
 
-<h2>Please choose the most relevant category:</h2>
+<h2><?=lang('label_choose_category')?></h2>
 
 <table>
 <?php echo form_open('algorithm/query_similar_itmes')?>

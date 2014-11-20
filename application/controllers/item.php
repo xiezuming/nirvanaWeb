@@ -105,7 +105,7 @@ class Item extends CI_Controller {
 			);
 		} else {
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'Can not find the item: ' . $itemId;
+			$data ['message'] = 'Internal Error: Can not find the item: ' . $itemId;
 		}
 		
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
@@ -135,7 +135,7 @@ class Item extends CI_Controller {
 			);
 		} else {
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'Can not find the item: ' . $global_item_id;
+			$data ['message'] = 'Internal Error: Can not find the item: ' . $global_item_id;
 		}
 		
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
@@ -149,7 +149,7 @@ class Item extends CI_Controller {
 		$item = $this->item_model->get_item ( $item_id );
 		if (! $item) {
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'Can not find the requested item';
+			$data ['message'] = 'Internal Error: Can not find the requested item';
 			return;
 		}
 		
@@ -293,7 +293,7 @@ class Item extends CI_Controller {
 		if ($this->db->trans_status () === FALSE) {
 			log_message ( 'error', 'Item.update_item: Failed to update the database.' );
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'Failed to update the database.';
+			$data ['message'] = 'Internal Error: Failed to update the database.';
 			$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 			return;
 		}
@@ -332,7 +332,7 @@ class Item extends CI_Controller {
 				$data ['result'] = SUCCESS;
 			} else {
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'Failed to update the database.';
+				$data ['message'] = 'Internal Error: Failed to update the database.';
 			}
 		} else {
 			// May be the item didn't be upload to the server. It's OK to return SUCCESS.

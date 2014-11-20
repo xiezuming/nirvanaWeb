@@ -111,12 +111,12 @@ class Event extends CI_Controller {
 				'event_type' => 'sell_to_weee' 
 		) );
 		if (count ( $events ) > 0) {
-			/*if (time () - strtotime ( $events [0] ['event_create_time'] ) < 3600 * 24 * 7) { // 7 days
+			if (time () - strtotime ( $events [0] ['event_create_time'] ) < OFTEN_SELL_TO_US) { // 7 days
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'You can send the request only once a week.';
+				$data ['message'] = lang ( 'error_sell_us_often' );
 				$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 				return;
-			}*/
+			}
 		}
 		$input ['event_type'] = 'sell_to_weee';
 		$event_id = $this->event_model->add_event ( $input );
@@ -125,7 +125,7 @@ class Event extends CI_Controller {
 			
 			$user = $this->user_model->get_user ( $user_id );
 			$data ['result'] = SUCCESS;
-			$data ['message'] = 'We will email you our offer to your email at ' . $user ['email'] . ' within 24 hours';
+			$data ['message'] = sprintf ( $this->lang->line ( 'info_sell_us_response' ), $user ['email'] );
 		} else {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'DB Error';
@@ -140,12 +140,12 @@ class Event extends CI_Controller {
 				'event_type' => 'donate' 
 		) );
 		if (count ( $events ) > 0) {
-			/*if (time () - strtotime ( $events [0] ['event_create_time'] ) < 3600 * 24 * 30) { // 30 days
+			if (time () - strtotime ( $events [0] ['event_create_time'] ) < OFTEN_DONATE) { // 30 days
 				$data ['result'] = FAILURE;
-				$data ['message'] = 'You can send the request only once a month.';
+				$data ['message'] = lang ( 'error_donate_often' );
 				$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
 				return;
-			}*/
+			}
 		}
 		$input ['event_type'] = 'donate';
 		$event_id = $this->event_model->add_event ( $input );
@@ -153,7 +153,7 @@ class Event extends CI_Controller {
 			$this->_send_notification_email ( $event_id );
 			
 			$data ['result'] = SUCCESS;
-			$data ['message'] = 'We have received your donation request. We will connect you later.';
+			$data ['message'] = lang ( 'info_donate_response' );
 		} else {
 			$data ['result'] = FAILURE;
 			$data ['message'] = 'DB Error';
@@ -190,7 +190,7 @@ class Event extends CI_Controller {
 		return $needle === "" || substr ( $haystack, - strlen ( $needle ) ) === $needle;
 	}
 	private function _send_notification_email($event_id) {
-		send_email ( null, null, '[Weee!] New Event', 'New Event.' . anchor ( "event/index/$event_id", 'View' ) );
+		send_email ( null, null, '[Weee!] New Event', 'New Event. ' . anchor ( "event/index/$event_id", 'View' ) );
 	}
 }
 
