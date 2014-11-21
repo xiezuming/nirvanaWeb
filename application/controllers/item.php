@@ -187,7 +187,6 @@ class Item extends CI_Controller {
 	 * @param integer $offset        	
 	 */
 	public function query_items() {
-		$where ['availability'] = 'AB';
 		$key_word = $this->input->post ( 'key_word' );
 		if ($key_word) {
 			$key_word_where = "(item.title LIKE '%${key_word}%' OR item.desc LIKE '%${key_word}%')";
@@ -196,6 +195,12 @@ class Item extends CI_Controller {
 		$category = $this->input->post ( 'category' );
 		if ($category) {
 			$where ['category'] = $category;
+		}
+		$availability = $this->input->post ( 'availability' );
+		if ($availability) {
+			$where ['availability'] = $availability;
+		} else {
+			$where ['(availability = \'AB\' OR availability = \'SD\')'] = NULL;
 		}
 		if ($radius = $this->input->post ( 'radius' )) {
 			$this->load->helper ( 'location' );

@@ -55,7 +55,14 @@ class Item_model extends CI_Model {
 		return $result;
 	}
 	public function query_items($where, $limit, $offset = null) {
-		$this->db->select ( 'item.Global_Item_ID, item.itemId, item.userId, item.title, item.expectedPrice, min(item_image.imageName) as \'defaultImage\'' );
+		$this->db->select ( '
+				item.Global_Item_ID, 
+				item.itemId, 
+				item.userId, 
+				item.title, 
+				item.expectedPrice, 
+				item.availability,
+				min(item_image.imageName) as \'defaultImage\'' );
 		$this->db->from ( self::TABLE_ITEM );
 		$this->db->join ( self::TABLE_IMAGE, 'item.Global_Item_ID = item_image.Global_Item_ID' );
 		if ($where) {
