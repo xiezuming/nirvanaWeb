@@ -64,11 +64,14 @@ class Message extends CI_Controller {
 				'message' => $message_text 
 		);
 		if ($this->message_model->add_message ( $message )) {
+			$unread_message_count = $this->message_model->count_unread_messages ( $to_user_id );
 			// Send push notification
 			$this->load->helper ( 'parse_push' );
 			$from_user_alias = $from_user ['alias'];
 			$playload = array (
 					"alert" => "${from_user_alias}: $message_text",
+					"badge" => $unread_message_count,
+					"sound" => "alert.aiff",
 					"t" => PUSH_TYPE_ALERT_MESSAGE,
 					"i" => $item_uuid,
 					"u" => $from_user_id 
@@ -88,7 +91,16 @@ class Message extends CI_Controller {
 	 * POST: messageUuid, fromUserId, toUserId, itemUuid
 	 */
 	public function mark_message_read() {
-		if ($this->message_model->mark_message_read ( $this->input->post () )) {
+		$where = array (
+				'fromUserId' => $this->input->post ( 'fromUserId' ),
+				'toUserId' => $this->input->post ( 'toUserId' ),
+				'itemUuid' => $this->input->post ( 'itemUuid' ) 
+		);
+		if ($this->input->post ( 'recCreateTime' )) {
+			$rec_create_time = $this->input->post ( 'recCreateTime' );
+			$where ["recCreateTime <= FROM_UNIXTIME($rec_create_time)"] = NULL;
+		}
+		if ($this->message_model->mark_message_read ( $where )) {
 			$data ['result'] = SUCCESS;
 		} else {
 			$data ['result'] = FAILURE;
