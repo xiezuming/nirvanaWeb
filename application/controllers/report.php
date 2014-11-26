@@ -36,16 +36,34 @@ class Report extends CI_Controller {
 		$report_id = $this->report_model->add_report ( $this->input->post () );
 		if ($report_id) {
 			$data ['result'] = SUCCESS;
-			// send the email to the administrator
+			
 			$this->load->helper ( 'myemail' );
 			$this->load->helper ( 'url' );
+			
+			// send the email to the administrator
 			$email_to = $this->config->config ['mail'] ['report_address'];
-			$email_subject = "Somebody reported a item";
+			$email_subject = "[Weee! Admin] Somebody reported a item";
 			$email_body = "New report: " . anchor ( "report/index/$report_id", 'View' );
 			send_email ( '', $email_to, $email_subject, $email_body );
+			
+			// send the confirm email to the reporter
+			$user_id = $this->input->post ( 'reportUserId' );
+			$user = $this->user_model->get_user ( $user_id );
+			$item_id = $this->input->post ( 'itemId' );
+			$item = $this->item_model->get_item ( $item_id );
+			if ($user && $item) {
+				$data ['user'] = $user;
+				$data ['item'] = $item;
+				$email_to = $user ['email'];
+				$email_subject = "[Weee!] Report Item";
+				$email_body = $this->load->view ( 'report/email_template_report_confirm', $data, true );
+				send_email ( '', $email_to, $email_subject, $email_body );
+			} else {
+				log_message ( 'error', "Can't find the user[$user_id] or item[$item_id]" );
+			}
 		} else {
 			$data ['result'] = FAILURE;
-			$data ['message'] = 'DB Error';
+			$data ['message'] = 'Internal Error: Failed to update database.';
 		}
 		
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );

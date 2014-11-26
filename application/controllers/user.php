@@ -137,6 +137,7 @@ class User extends CI_Controller {
 			) );
 			if ($user) {
 				if ($user ['password'] == md5 ( $password )) {
+					$this->_update_user_app_login_time ( $user ['userId'] );
 					$data ['result'] = SUCCESS;
 					$data ['data'] = $user;
 				} else {
@@ -172,6 +173,7 @@ class User extends CI_Controller {
 				}
 			}
 			if ($user_id) {
+				$this->_update_user_app_login_time ( $user_id );
 				$data ['result'] = SUCCESS;
 				$data ['data'] = $this->user_model->get_user ( $user_id );
 			}
@@ -201,6 +203,7 @@ class User extends CI_Controller {
 				}
 			}
 			if ($user_id) {
+				$this->_update_user_app_login_time ( $user_id );
 				$data ['result'] = SUCCESS;
 				$data ['data'] = $this->user_model->get_user ( $user_id );
 			}
@@ -421,6 +424,11 @@ class User extends CI_Controller {
 	private function get_all_group_array() {
 		$this->load->model ( 'meta_model' );
 		return $this->meta_model->get_meta_codes ( GROUP_TYPE_ID );
+	}
+	private function _update_user_app_login_time($user_id) {
+		$this->user_model->update_user ( $user_id, array (
+				'lastAppLoginTime' => date ( 'Y-m-d H:i:s' ) 
+		) );
 	}
 }
 

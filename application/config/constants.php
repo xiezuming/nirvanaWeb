@@ -51,6 +51,8 @@ define ( 'SCRIPT_PATH', '/home/ubuntu/project/weee_algo/scripts/' );
 define ( 'META_TYPE_CONDITION', 2 );
 define ( 'OFTEN_SELL_TO_US', 10 ); // TODO for test, 3600 * 24 * 7
 define ( 'OFTEN_DONATE', 10 ); // TODO for test, 3600 * 24 * 30
+define ( 'SKIP_EMAIL', FALSE );
+define ( 'SKIP_PUSH_NOTIFICATION', FALSE );
 
 define ( 'PYTHON_PLACEHOLD', '***|||RESULT|||***' );
 

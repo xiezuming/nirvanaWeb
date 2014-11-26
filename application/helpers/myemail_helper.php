@@ -24,6 +24,10 @@ if (! function_exists ( 'send_email' )) {
 				'subject' => $subject,
 				'html' => $email_body 
 		);
+		if (SKIP_EMAIL) {
+			log_message ( 'debug', 'Skip email sending for development. email fields:' . print_r ( $fields, true ) );
+			return;
+		}
 		$result = TRUE;
 		$ch = curl_init (); // initiate curl
 		$url = $CI->config->config ['mail'] ['api_url']; // where you want to post data

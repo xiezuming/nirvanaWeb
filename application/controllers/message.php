@@ -64,20 +64,12 @@ class Message extends CI_Controller {
 				'message' => $message_text 
 		);
 		if ($this->message_model->add_message ( $message )) {
-			$unread_message_count = $this->message_model->count_unread_messages ( $to_user_id );
-			// Send push notification
-			$this->load->helper ( 'parse_push' );
-			$from_user_alias = $from_user ['alias'];
-			$playload = array (
-					"alert" => "${from_user_alias}: $message_text",
-					"badge" => $unread_message_count,
-					"sound" => "alert.aiff",
-					"t" => PUSH_TYPE_ALERT_MESSAGE,
-					"i" => $item_uuid,
-					"u" => $from_user_id 
-			);
-			send_notification ( $to_user_id, $playload );
-			
+			// If the user used app, send the push notification, otherwise send a email.
+			if ($to_user ['lastAppLoginTime']) {
+				$this->_send_push_notification ( $from_user, $to_user, $item, $message_text );
+			} else {
+				$this->_send_email_notification ( $from_user, $to_user, $item, $message_text );
+			}
 			$data ['result'] = SUCCESS;
 		} else {
 			$data ['result'] = FAILURE;
@@ -107,6 +99,47 @@ class Message extends CI_Controller {
 			$data ['message'] = 'Internal Error: Failed to update the database.';
 		}
 		$this->output->set_content_type ( 'application/json' )->set_output ( json_encode ( $data ) );
+	}
+	/**
+	 * Call Parser server API to send a push notification.
+	 *
+	 * @param array $from_user        	
+	 * @param array $to_user        	
+	 * @param array $item        	
+	 * @param string $message_text        	
+	 */
+	private function _send_push_notification($from_user, $to_user, $item, $message_text) {
+		$unread_message_count = $this->message_model->count_unread_messages ( $to_user ['userId'] );
+		$this->load->helper ( 'parse_push' );
+		$playload = array (
+				"alert" => "{$from_user ['alias']}: $message_text",
+				"badge" => $unread_message_count,
+				"sound" => "alert.aiff",
+				"t" => PUSH_TYPE_ALERT_MESSAGE,
+				"i" => $item ['itemId'],
+				"u" => $from_user ['userId'] 
+		);
+		send_notification ( $to_user ['userId'], $playload );
+	}
+	/**
+	 * Call email sending API the send a new message notification.s
+	 *
+	 * @param array $from_user        	
+	 * @param array $to_user        	
+	 * @param array $item        	
+	 * @param string $message_text        	
+	 */
+	private function _send_email_notification($from_user, $to_user, $item, $message_text) {
+		$this->load->helper ( 'myemail' );
+		$this->load->helper ( 'url' );
+		$email_to = $to_user ['email'];
+		$email_subject = "[Weee!] Notification";
+		$data ['to_user'] = $to_user;
+		$data ['from_user'] = $from_user;
+		$data ['item'] = $item;
+		$data ['message_text'] = $message_text;
+		$email_body = $this->load->view ( 'message/email_template_new_message', $data, true );
+		send_email ( '', $email_to, $email_subject, $email_body );
 	}
 }
 

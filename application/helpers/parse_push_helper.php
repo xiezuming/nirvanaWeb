@@ -26,6 +26,10 @@ if (! function_exists ( 'send_notification' )) {
 				"data" => $playload 
 		);
 		$data_string = json_encode ( $data );
+		if (SKIP_PUSH_NOTIFICATION) {
+			log_message ( 'debug', 'Skip push notification sending for development. content:' . $data_string );
+			return;
+		}
 		
 		$CI = & get_instance ();
 		$appid = $CI->config->config ['parse'] ['appid'];
