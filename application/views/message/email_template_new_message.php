@@ -1,4 +1,4 @@
-Dear <?=$to_user['lastName']?>,<br />
+Dear <?=$to_user['firstName']?>,<br />
 <br />
 Someone is interested in your item '<?=$item['title']?>'. The following is the message. To reply, please download the Weee! App from <?=anchor('pages/view/download_app', 'here');?> or reply to <?=$from_user['email']?>.<br/> 
 <br/>

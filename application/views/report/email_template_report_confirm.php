@@ -1,4 +1,4 @@
-Dear <?=$user['lastName']?>,<br />
+Dear <?=$user['firstName']?>,<br />
 <br />
 We have received your report of the item '<?=$item['title']?>'. We will review the item carefully and take appropriate actions.
 <br />
