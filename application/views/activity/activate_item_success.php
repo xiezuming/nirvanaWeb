@@ -1,12 +1,8 @@
-<br />
-<br />
-You have successfully posted your item!
-<br />
-Click
-<a href="<?php echo $product_url?>">here</a>
-to view your item or
-<a href="<?php echo $activity_url?>">here</a>
-to view the event page.
-<br />
-<br />
-<br />
+<div class="container">
+  <h3>You have successfully posted your item!</h3>
+  <p>
+    Click <a href="<?php echo $product_url?>">here</a> to view your item
+    or <a href="<?php echo $activity_url?>">here</a> to view the event
+    page.
+  </p>
+</div>

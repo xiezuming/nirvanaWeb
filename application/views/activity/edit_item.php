@@ -1,135 +1,196 @@
+<style>
+<!--
+img.preview {
+	width: 200;
+	margin-top: -32;
+	border: 1 solid
+}
 
-<h1>
-		<?php echo $activity['Activity_Name']?>
-	</h1>
+img.close_img {
+	float: right;
+	cursor: pointer;
+	position: relative;
+}
 
-<?php echo $activity['Activity_Desc']?>
-<br />
-<br />
+div.image_block {
+	float: left;
+	margin-bottom: 10;
+	margin-right: 10;
+	width: 200;
+}
+-->
+</style>
 
-<font color='red'>
-	<?php echo $error;?>
+<?php $red_star = '<font color="red">*</font>';?>
 
-	<?php echo validation_errors(); ?>
-	</font>
+<div class="container">
+  <div class="page-header">
+    <h1><?=$activity['Activity_Name']?></h1>
+    <p class="lead"><?=$activity['Activity_Desc']?></p>
+  </div>
 
-<?php
-$red_star = '<font color="red">*</font>';
-$description_meta = array (
-		'name' => 'description',
-		'id' => 'description',
-		'value' => set_value ( 'description', $item ['desc'] ),
-		'rows' => '10',
-		'cols' => '30' 
-);
-?>
-<?php echo form_open_multipart('activity/edit_item/'.$b64_item_id);?>
+  <div class="content row">
+    <div class="col-sm-6 col-sm-offset-3">
+      <div id="order_form" class="panel panel-default">
+        <div class="panel-body ">
+          <?php if ($error || validation_errors()){?>
+          <div class="alert alert-danger" role="alert">
+            <?=$error?>
+            <?=validation_errors()?>
+          </div>
+          <?php }?>
+          
+          <form method="post"
+            action="<?=site_url("activity/edit_item/{$b64_item_id}")?>">
 
-<table>
-	<tr>
-		<td><label><?php echo $red_star?>Title: (include Gender &amp; Size)</label></td>
-	</tr>
-	<tr>
-		<td><?php echo form_input('title', set_value('title', $item['title']), 'size="30"');?></td>
-	</tr>
-	<tr>
-		<td><label><?php echo $red_star?>Picture:</label>
-		<p style="width: 250">(If no response when you click "Choose File",
-				please click the upper right and choose "Open with browser")</p></td>
-	</tr>
-	<tr>
-		<td>
-		<?php
-		$div_id = 0;
-		foreach ( $images as $image ) {
-			$image_url = $image_url_base . $image ['imageName'];
-			$image_url_small = str_replace ( '.jpg', '-360.jpg', $image_url );
-			?>
-			<div id="image_div_<?php echo $div_id?>">
-				<input type="hidden" id="image_hidden_<?php echo $div_id?>"
-					name="image_file_names[]" value="<?php echo $image ['imageName']?>">
-				<a href="<?php echo $image_url?>" target="_blank"><img
-					src="<?php echo $image_url_small?>" width="200"></a>
-				<button type="button" onclick="hide_image_div(<?php echo $div_id?>)">Delete</button>
-				<br />
-			</div>
-		<?php
-			$div_id ++;
-		}
-		?>
-		</td>
-	</tr>
-	<?php
-	for($i = 0; $i < 5; $i ++) {
-		$display_style = ($i == 0 && count ( $images ) < 5) ? 'block' : 'none';
-		?>	
-	<tr>
-		<td>
-			<div id="image_file_div_<?php echo $i?>" style="display: <?php echo $display_style?>">
-				<input type="file" id="image_file_<?php echo $i?>"
-					name="image_file_<?php echo $i?>" size="40" />
-			</div>
-		</td>
-	</tr>
-	<?php
-	}
-	?>
-	<tr>
-		<td><label><?php echo $red_star?>Description: <br />(item condition
-				and other notable things)</label></td>
-	</tr>
-	<tr>
-		<td><?php echo form_textarea($description_meta)?></td>
-	</tr>
-	<tr>
-		<td><label><?php echo $red_star?>Price:</label></td>
-	</tr>
-	<tr>
-		<td><?php echo form_input('price', set_value('price', $item['expectedPrice']), 'size="30"');?></td>
-	</tr>
-	<tr>
-		<td><label><?php echo $red_star?>Condition:</label></td>
-	</tr>
-	<tr>
-		<td><?php echo form_dropdown('condition', $meta_condition, set_value('condition', $item['condition']), 'style="width:270px"');?></td>
-	</tr>
-	<tr>
-		<td><label>Email: <?php echo $user['email']?></label></td>
-	</tr>
-	<tr>
-		<td><label>WeChat ID: <?php echo $user['wechatId']?></label></td>
-	</tr>
-	<tr>
-		<td><label>ZIP Code: <?php echo $user['zipcode']?></label></td>
-	</tr>
-	<tr>
-		<td align="center"><input type="submit" value="Update" /></td>
-	</tr>
-</table>
+            <div class="form-group">
+              <?=form_label("{$red_star}Title", 'title')?>
+              <?=form_input('title', set_value('title', $item['title']), 'class="form-control" placeholder="include Gender &amp; Size"')?>
+            </div>
 
-<?php echo '</form>'?>
+            <div class="form-group">
+              <?=form_label("{$red_star}Picture", 'image_file')?>
+              <div id="images_div">
+              <?php
+              foreach ( $images as $image ) {
+               $image_url = $image_url_base . $image ['imageName'];
+               $image_url_small = str_replace ( '.jpg', '-360.jpg', $image_url );
+               ?>
+                <div class="image_block">
+                  <img class="close_img"
+                    src="<?=base_url ('css/img/close.png')?>"
+                    onclick="remove_image_div(this);" /> <img
+                    class="preview" src="<?=$image_url_small?>" /> <input
+                    type="hidden" name="image_file_names[]"
+                    value="<?=$image ['imageName']?>">
+                </div>
+              <?php }?>
+              </div>
+              <div style="clear: both;"></div>
+              <input type="file" id="image_file" class="form-control" />
+              <div id="choose_file_unsupport" class="alert alert-info"
+                role="alert">If no response when you click "Choose
+                File", please click the upper right and choose "Open
+                with Browser"</div>
+            </div>
+
+            <div class="form-group">
+              <?=form_label("{$red_star}Description", 'description' )?>
+              <?=form_textarea('description', set_value('description', $item['desc']), 'class="form-control" placeholder="item condition and other notable things"')?>
+            </div>
+
+            <div class="form-group">
+              <?=form_label("{$red_star}Price", 'price')?>
+              <div class="input-group">
+                <span class="input-group-addon">$</span>
+                <?=form_input('price', set_value('price', $item['expectedPrice']), 'class="form-control"')?>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <?=form_label("{$red_star}Condition", 'condition')?>
+              <?=form_dropdown('condition', $meta_condition, set_value('condition', $item['condition']), 'class="form-control"');?>
+            </div>
+
+            <fieldset disabled>
+
+              <div class="form-group">
+              <?=form_label("Email", 'email')?>
+              <?=form_input('', $user['email'], 'class="form-control"')?>
+              </div>
+
+              <div class="form-group">
+              <?=form_label("ZIP Code", 'zipcode')?>
+              <?=form_input('', $user['zipcode'], 'class="form-control"')?>
+            </div>
+
+              <div class="form-group">
+              <?=form_label("WeChat ID", 'wechatId')?>
+              <?=form_input('', $user['wechatId'], 'class="form-control"')?>
+            </div>
+
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="image_div_template" class="image_block" style="display: none;">
+  <img class="close_img" src="<?=base_url ('css/img/close.png')?>"
+    onclick="remove_image_div(this);" /> <img class="preview" /> <input
+    type="hidden" name="image_data[]" />
+</div>
+
 
 <script type="text/javascript">
-<!--
-for (var i=0; i<4; i++) {
-	$(document).on('change','#image_file_' + i , function(){
-		images_count = $('input[name*="image_file_names[]"]').length;
-		input_name = $(this).attr("name");
-		idx = parseInt(input_name.substr(input_name.length - 1));
-		if (images_count + idx >= 4) return;
-		next_div_id = "image_file_div_" + (idx+1);
-		$( "#" + next_div_id).show( "slow" );
-	});
+var ua = navigator.userAgent.toLowerCase();
+if(!(ua.match(/MicroMessenger/i)=="micromessenger" && ua.match(/Android/i)=="android")) {
+  $("#choose_file_unsupport").hide();
 }
-function hide_image_div(image_div_id){
-	$( "#image_hidden_" +  image_div_id).remove();
-	$( "#image_div_" +  image_div_id).hide( "slow" );
 
-	images_count = $('input[name*="image_file_names[]"]').length;
-	idx = 3 - images_count;
-	next_idx = idx + 1;
-	if ( $('#image_file_' + idx).val() && $( "#image_file_div_" + next_idx).css('display') == 'none')
-		$( "#image_file_div_" + next_idx).show( "slow" );
+$('#image_file').change(function(event){
+  var MAX_LENGTH = 1024;
+  console.log(event);
+
+  var input = event.target;
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var image = e.target.result;
+      var tempImg = new Image();
+      tempImg.src = image;
+      tempImg.onload = function() {
+   
+        var tempW = tempImg.width;
+        var tempH = tempImg.height;
+        if (tempW > tempH) {
+            if (tempW > MAX_LENGTH) {
+               tempH *= MAX_LENGTH / tempW;
+               tempW = MAX_LENGTH;
+            }
+        } else {
+            if (tempH > MAX_LENGTH) {
+               tempW *= MAX_LENGTH / tempH;
+               tempH = MAX_LENGTH;
+            }
+        }
+        console.log('resize the image to:' + tempW + "*" + tempH);
+        
+        var canvas = document.createElement('canvas');
+        canvas.width = tempW;
+        canvas.height = tempH;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(this, 0, 0, tempW, tempH);
+        var dataURL = canvas.toDataURL("image/jpeg");
+      
+        var images_div = $('#images_div');
+        var image_div = $("#image_div_template").clone().removeAttr("id");
+        image_div.children("img.preview").attr('src', dataURL);
+        image_div.children("input").attr('value', dataURL);
+        image_div.appendTo(images_div);
+        image_div.show('slow');
+
+        $('#image_file').val('');
+        if (images_div.children().length >= 5) {
+          $('#image_file').hide();
+        }
+      }
+      
+    };
+
+    reader.readAsDataURL(input.files[0]);
+  }
+});
+
+function remove_image_div(me) {
+  $(me).parent().hide('slow', function() {
+    this.remove();
+  });
+  $('#image_file').show();
 }
-//-->
 </script>

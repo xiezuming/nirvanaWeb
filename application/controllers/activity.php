@@ -25,9 +25,9 @@ class Activity extends CI_Controller {
 		$this->load->library ( 'form_validation' );
 		
 		$data ['title'] = 'TEST';
-		$this->load->view ( 'templates/header', $data );
+		$this->load->view ( 'templates/web_header', $data );
 		$this->load->view ( 'activity/test_form', $data );
-		$this->load->view ( 'templates/footer', $data );
+		$this->load->view ( 'templates/web_footer', $data );
 	}
 	function get_item_b64UUID() {
 		$itemId = $this->input->post ( 'itemId' );
@@ -80,12 +80,12 @@ class Activity extends CI_Controller {
 		// save the image file to server folder
 		$image_names = $this->save_uploaded_image ( $user ['userId'] );
 		if (count ( $image_names ) == 0) {
-			$data ['error'] = $this->upload->display_errors ();
+			$data ['error'] = 'Please choose the picture.';
 			return $this->load_add_item_view ( $data );
 		}
 		
-		// save the item and his activity relation into the DB
-		$item = $this->save_item ( $user ['userId'], $image_names, $activity_id );
+		// save the item into the DB
+		$item = $this->save_item ( $user ['userId'], $image_names );
 		if (! $item) {
 			log_message ( 'error', 'Activity.save_item: Failed to update the database.' );
 			$data ['error'] = 'Failed to update the database.';
@@ -104,19 +104,19 @@ class Activity extends CI_Controller {
 		resize_upload_images ( $global_item_id, $this->item_model );
 		
 		// send the email
-		$this->send_item_success_email ( $item, $user ['email'] );
+		$this->send_item_success_email ( $item, $user ['email'], $activity_id );
 		
 		$data ['title'] = 'Success - Submit Your Item';
-		$this->load->view ( 'templates/header', $data );
+		$this->load->view ( 'templates/web_header', $data );
 		$this->load->view ( 'activity/add_item_success', $data );
-		$this->load->view ( 'templates/footer', $data );
+		$this->load->view ( 'templates/web_footer', $data );
 	}
 	private function load_add_item_view($data) {
 		$data ['meta_condition'] = $this->meta_model->get_meta_code_array ( META_TYPE_CONDITION );
 		
-		$this->load->view ( 'templates/header', $data );
+		$this->load->view ( 'templates/web_header', $data );
 		$this->load->view ( 'activity/add_item', $data );
-		$this->load->view ( 'templates/footer', $data );
+		$this->load->view ( 'templates/web_footer', $data );
 	}
 	private function create_user() {
 		$email = $this->input->post ( 'email' );
@@ -146,6 +146,32 @@ class Activity extends CI_Controller {
 			mkdir ( $upload_path, 0777, true );
 		}
 		
+		$image_names = array ();
+		$base_time = time ();
+		$images_data = $this->input->post ( 'image_data' );
+		if ($images_data) {
+			foreach ( $images_data as $image_data ) {
+				if ($image_data) {
+					$image_data = str_replace ( 'data:image/jpeg;base64,', '', $image_data );
+					$image_data = str_replace ( ' ', '+', $image_data );
+					$image_data = base64_decode ( $image_data );
+					$image_name = ($base_time ++) . '.jpg';
+					$file = UPLOAD_BASE_PATH . $user_id . DIRECTORY_SEPARATOR . $image_name;
+					log_message ( 'debug', "Upload.image: Save the uploaded jpg to $image_name" );
+					file_put_contents ( $file, $image_data );
+					array_push ( $image_names, $image_name );
+				}
+			}
+		}
+		
+		return $image_names;
+	}
+	private function save_uploaded_image_bak($user_id) {
+		$upload_path = UPLOAD_BASE_PATH . $user_id;
+		if (! file_exists ( $upload_path )) {
+			mkdir ( $upload_path, 0777, true );
+		}
+		
 		$config ['upload_path'] = $upload_path;
 		$config ['allowed_types'] = 'gif|jpg|png';
 		$config ['max_size'] = '5120';
@@ -167,7 +193,7 @@ class Activity extends CI_Controller {
 		
 		return $image_names;
 	}
-	private function save_item($user_id, $image_names, $activity_id) {
+	private function save_item($user_id, $image_names) {
 		// Build item data
 		$this->load->helper ( 'uuid' );
 		$item_id = gen_uuid ();
@@ -187,7 +213,7 @@ class Activity extends CI_Controller {
 		$input_data = array_merge ( $input_data, $this->query_category_by_title ( $title ) );
 		$input_data ['expectedPrice'] = $this->input->post ( 'price' );
 		$input_data ['condition'] = $this->input->post ( 'condition' );
-		$input_data ['availability'] = 'AB';
+		$input_data ['availability'] = 'XX';
 		$input_data ['desc'] = $description;
 		$input_data ['recCreateTime'] = $date_now;
 		$input_data ['recUpdateTime'] = $date_now;
@@ -212,9 +238,6 @@ class Activity extends CI_Controller {
 		foreach ( $image_names as $image_name ) {
 			$this->item_model->insert_image ( $global_item_id, $image_name );
 		}
-		
-		// add the new item into the activity
-		$this->activity_model->insert_activity_item_relation ( $activity_id, $global_item_id );
 		
 		$this->db->trans_complete ();
 		
@@ -243,13 +266,14 @@ class Activity extends CI_Controller {
 		$this->wordpress_model->db = $wp_db;
 		return sync_wp_item ( $global_item_id, $user_id, $wp_item, $image_row_array, $this->wordpress_model );
 	}
-	private function send_item_success_email($item, $email) {
+	private function send_item_success_email($item, $email, $activity_id) {
 		$this->load->helper ( 'uuid' );
 		$this->load->helper ( 'myemail' );
 		
 		$email_subject = 'POST/EDIT: "' . $item ['title'] . '"';
 		$email_body = $this->load->view ( 'activity/item_success_message_body', array (
-				'b64_item_id' => encode_uuid_base64 ( $item ['itemId'] ) 
+				'b64_item_id' => encode_uuid_base64 ( $item ['itemId'] ),
+				'activity_id' => $activity_id 
 		), TRUE );
 		
 		$fields = array (
@@ -260,67 +284,60 @@ class Activity extends CI_Controller {
 		);
 		send_email ( null, $email, $email_subject, $email_body );
 	}
-	public function activate_item($b64_item_id) {
+	public function activate_item($b64_item_id, $activity_id = 1) {
 		$item = $this->query_item_by_b64uuid ( $b64_item_id );
-		if (! $item) {
+		$activity = $this->activity_model->get_activity ( $activity_id );
+		if (! $item || ! $activity) {
 			show_error ( 'Invalid URL' );
 			return;
 		}
+		
+		// mark the item as 'For Sale'
+		$this->item_model->update_item ( array (
+				'itemId' => $item ['itemId'],
+				'availability' => 'AB',
+				'recUpdateTime' => date ( 'Y-m-d H:i:s' ) 
+		) );
+		
+		// add the item into the activity
 		$global_item_id = $item ['Global_Item_ID'];
-		$activities = $this->activity_model->get_activities_by_item ( $global_item_id );
-		if (count ( $activities ) == 0) {
-			show_error ( 'Invalid URL' );
-			return;
-		}
-		$activity = $activities [0];
+		$this->activity_model->insert_activity_item_relation ( $activity_id, $global_item_id );
 		
-		$activity_item_relations = $this->activity_model->get_item_activity_relation ( $global_item_id );
-		
-		$wp_db = $this->load->database ( 'wp', TRUE );
-		if (! $wp_db->initialize ()) {
-			log_message ( 'error', 'Activity.activate_item: Failed to connect the database.' );
-			echo 'Failed to publish your item.';
+		// synchronize WordPress DB
+		$result = $this->sync_item_to_wordpress ( $global_item_id, $item ['userId'] );
+		if (! $result) {
+			$data ['error'] = 'Failed to update the WordPress database.';
+			return $this->load_edit_item_view ( $data );
 		}
-		$this->wordpress_model->db = $wp_db;
-		
-		foreach ( $activity_item_relations as $activity_item_relation ) {
-			$this->wordpress_model->insert_activity_item_relation ( $activity_item_relation ['Activity_ID'], $global_item_id );
-		}
+		$this->wordpress_model->insert_activity_item_relation ( $activity_id, $global_item_id );
 		
 		$data ['title'] = 'Success - Publish Your Item';
 		$data ['activity_url'] = $activity ['Post_URL'];
 		$data ['product_url'] = $this->get_product_url ( $activity ['Post_URL'], $global_item_id );
 		
-		$this->load->view ( 'templates/header', $data );
+		$this->load->view ( 'templates/web_header', $data );
 		$this->load->view ( 'activity/activate_item_success', $data );
-		$this->load->view ( 'templates/footer', $data );
+		$this->load->view ( 'templates/web_footer', $data );
 	}
-	public function edit_item($b64_item_id) {
-		log_message ( 'debug', 'Activity.edit_item: ' . print_r ( $this->input->post (), true ) );
-		
+	public function edit_item($b64_item_id, $activity_id = 1) {
 		$item = $this->query_item_by_b64uuid ( $b64_item_id );
-		if (! $item) {
+		$activity = $this->activity_model->get_activity ( $activity_id );
+		if (! $item || ! $activity) {
 			show_error ( 'Invalid URL' );
 			return;
 		}
+		
 		$global_item_id = $item ['Global_Item_ID'];
 		$user_id = $item ['userId'];
 		$image_rows = $this->item_model->get_images ( $global_item_id );
 		$user = $this->user_model->get_user ( $user_id );
-		
-		$activities = $this->activity_model->get_activities_by_item ( $global_item_id );
-		if (count ( $activities ) == 0) {
-			show_error ( 'Invalid URL' );
-			return;
-		}
-		$activity = $activities [0];
 		
 		$data ['title'] = 'Edit Item - ' . $activity ['Activity_Name'];
 		$data ['b64_item_id'] = $b64_item_id;
 		$data ['activity'] = $activity;
 		$data ['item'] = $item;
 		$data ['user'] = $user;
-		$data ['image_url_base'] = $image_url = '/images/weee_app/' . $user_id . '/';
+		$data ['image_url_base'] = '/images/weee_app/' . $user_id . '/';
 		$data ['images'] = $image_rows;
 		$data ['error'] = '';
 		
@@ -335,27 +352,26 @@ class Activity extends CI_Controller {
 			return $this->load_edit_item_view ( $data );
 		}
 		
+		$image_names = $this->save_uploaded_image ( $user ['userId'] );
 		$old_image_names = $this->input->post ( 'image_file_names' );
-		$image_file_slected = isset ( $_FILES ['image_file_0'] ) && isset ( $_FILES ['image_file_0'] ['error'] ) && $_FILES ['image_file_0'] ['error'] != 4;
-		if (! $old_image_names || $image_file_slected) {
-			// save the image file to server folder
-			$image_names = $this->save_uploaded_image ( $user ['userId'] );
-			if (count ( $image_names ) == 0) {
-				$data ['error'] = $this->upload->display_errors ();
-				return $this->load_edit_item_view ( $data );
-			}
+		if (! $old_image_names && count ( $image_names ) == 0) {
+			$data ['error'] = 'Please choose the picture.';
+			log_message ( 'debug', print_r ( $data, true ) );
+			return $this->load_edit_item_view ( $data );
+		}
+		// insert new images;
+		if (count ( $image_names ) > 0) {
 			foreach ( $image_names as $image_name ) {
 				$this->item_model->insert_image ( $global_item_id, $image_name );
 			}
 		}
-		
 		// delete removeded old images
 		foreach ( $image_rows as $image_row ) {
 			if (! in_array ( $image_row ['imageName'], $old_image_names ))
 				$this->item_model->delete_image ( $global_item_id, $image_row ['imageName'] );
 		}
 		
-		// save the item and his activity relation into the DB
+		// save the item into the DB
 		$title = $this->input->post ( 'title' );
 		$category = $this->query_category_by_title ( $title );
 		$success = $this->item_model->update_item ( array (
@@ -390,31 +406,27 @@ class Activity extends CI_Controller {
 		$data ['activity_url'] = $activity ['Post_URL'];
 		$data ['product_url'] = $this->get_product_url ( $activity ['Post_URL'], $global_item_id );
 		
-		$this->load->view ( 'templates/header', $data );
+		$this->load->view ( 'templates/web_header', $data );
 		$this->load->view ( 'activity/edit_item_success', $data );
-		$this->load->view ( 'templates/footer', $data );
+		$this->load->view ( 'templates/web_footer', $data );
 		return;
 	}
 	private function load_edit_item_view($data) {
 		$data ['meta_condition'] = $this->meta_model->get_meta_code_array ( META_TYPE_CONDITION );
 		
-		$this->load->view ( 'templates/header', $data );
+		$this->load->view ( 'templates/web_header', $data );
 		$this->load->view ( 'activity/edit_item', $data );
-		$this->load->view ( 'templates/footer', $data );
+		$this->load->view ( 'templates/web_footer', $data );
 	}
-	public function sold_item($b64_item_id) {
+	public function sold_item($b64_item_id, $activity_id = 1) {
 		$item = $this->query_item_by_b64uuid ( $b64_item_id );
-		if (! $item) {
+		$activity = $this->activity_model->get_activity ( $activity_id );
+		if (! $item || ! $activity) {
 			show_error ( 'Invalid URL' );
 			return;
 		}
+		
 		$global_item_id = $item ['Global_Item_ID'];
-		$activities = $this->activity_model->get_activities_by_item ( $global_item_id );
-		if (count ( $activities ) == 0) {
-			show_error ( 'Invalid URL' );
-			return;
-		}
-		$activity = $activities [0];
 		
 		$result = $this->item_model->update_item ( array (
 				'itemId' => $item ['itemId'],
@@ -428,13 +440,13 @@ class Activity extends CI_Controller {
 				$data ['activity_url'] = $activity ['Post_URL'];
 				$data ['product_url'] = $this->get_product_url ( $activity ['Post_URL'], $global_item_id );
 				
-				$this->load->view ( 'templates/header', $data );
+				$this->load->view ( 'templates/web_header', $data );
 				$this->load->view ( 'activity/sold_item_success', $data );
-				$this->load->view ( 'templates/footer', $data );
+				$this->load->view ( 'templates/web_footer', $data );
 				return;
 			}
 		}
-		echo 'Failed to mark hte item as sold.';
+		echo 'Failed to mark the item as sold.';
 	}
 	private function get_product_url($activity_url, $global_item_id) {
 		if (strpos ( $activity_url, '?' ) !== false)

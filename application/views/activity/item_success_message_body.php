@@ -1,7 +1,7 @@
 <?php
-$activate_url = site_url ( '/activity/activate_item/' . $b64_item_id );
-$edit_url = site_url ( '/activity/edit_item/' . $b64_item_id );
-$sold_url = site_url ( '/activity/sold_item/' . $b64_item_id );
+$activate_url = site_url ( "/activity/activate_item/$b64_item_id/$activity_id" );
+$edit_url = site_url ( "/activity/edit_item/$b64_item_id/$activity_id" );
+$sold_url = site_url ( "/activity/sold_item/$b64_item_id/$activity_id" );
 ?>
 
 <font color="red">IMPORTANT - FURTHER ACTION IS REQUIRED TO COMPLETE
