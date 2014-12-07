@@ -23,3 +23,8 @@
 	position: relative;
 	top: -50;
 }
+
+.loading{
+	background: url(img/loading.gif) center center no-repeat;
+	padding: 1px 20px;
+}

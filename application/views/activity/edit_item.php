@@ -66,6 +66,7 @@ div.image_block {
                 </div>
               <?php }?>
               </div>
+              <span id="image_loading" class="loading" />
               <div style="clear: both;"></div>
               <input type="file" id="image_file" class="form-control" />
               <div id="choose_file_unsupport" class="alert alert-info"
@@ -133,12 +134,15 @@ if(!(ua.match(/MicroMessenger/i)=="micromessenger" && ua.match(/Android/i)=="and
   $("#choose_file_unsupport").hide();
 }
 
+$('#image_loading').hide();
+
 $('#image_file').change(function(event){
   var MAX_LENGTH = 1024;
   console.log(event);
 
   var input = event.target;
   if (input.files && input.files[0]) {
+    $('#image_loading').show();
     var reader = new FileReader();
     reader.onload = function (e) {
       var image = e.target.result;
@@ -167,7 +171,8 @@ $('#image_file').change(function(event){
         var ctx = canvas.getContext("2d");
         ctx.drawImage(this, 0, 0, tempW, tempH);
         var dataURL = canvas.toDataURL("image/jpeg");
-      
+
+        $('#image_loading').hide();
         var images_div = $('#images_div');
         var image_div = $("#image_div_template").clone().removeAttr("id");
         image_div.children("img.preview").attr('src', dataURL);
