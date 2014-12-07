@@ -61,7 +61,7 @@ class CI_Config {
 	function __construct()
 	{
 		$this->config =& get_config();
-		log_message('debug', "Config Class Initialized");
+		log_message('info', "Config Class Initialized");
 
 		// Set the base_url automatically if none was provided
 		if ($this->config['base_url'] == '')

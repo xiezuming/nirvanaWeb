@@ -55,7 +55,7 @@ class CI_Session {
 	 */
 	public function __construct($params = array())
 	{
-		log_message('debug', "Session Class Initialized");
+		log_message('info', "Session Class Initialized");
 
 		// Set the super object to a local variable for use throughout the class
 		$this->CI =& get_instance();
@@ -121,7 +121,7 @@ class CI_Session {
 		// Delete expired sessions if necessary
 		$this->_sess_gc();
 
-		log_message('debug', "Session routines successfully run");
+		log_message('info', "Session routines successfully run");
 	}
 
 	// --------------------------------------------------------------------

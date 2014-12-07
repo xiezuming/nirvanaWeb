@@ -36,7 +36,7 @@ class CI_Utf8 {
 	 */
 	function __construct()
 	{
-		log_message('debug', "Utf8 Class Initialized");
+		log_message('info', "Utf8 Class Initialized");
 
 		global $CFG;
 
@@ -47,7 +47,7 @@ class CI_Utf8 {
 			AND $CFG->item('charset') == 'UTF-8'			// Application charset must be UTF-8
 			)
 		{
-			log_message('debug', "UTF-8 Support Enabled");
+			log_message('info', "UTF-8 Support Enabled");
 
 			define('UTF8_ENABLED', TRUE);
 
