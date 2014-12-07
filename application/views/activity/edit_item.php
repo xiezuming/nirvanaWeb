@@ -66,7 +66,7 @@ div.image_block {
                 </div>
               <?php }?>
               </div>
-              <span id="image_loading" class="loading" />
+              <span id="image_loading" class="loading"></span>
               <div style="clear: both;"></div>
               <input type="file" id="image_file" class="form-control" />
               <div id="choose_file_unsupport" class="alert alert-info"

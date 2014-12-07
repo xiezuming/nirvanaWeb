@@ -51,7 +51,7 @@ div.image_block {
             <div class="form-group">
               <?=form_label("{$red_star}Picture", 'image_file')?>
               <div id="images_div"></div>
-              <span id="image_loading" class="loading" />
+              <span id="image_loading" class="loading"></span>
               <div style="clear: both;"></div>
               <input type="file" id="image_file" class="form-control" />
               <div id="choose_file_unsupport" class="alert alert-info"
