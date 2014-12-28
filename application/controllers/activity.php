@@ -302,6 +302,9 @@ class Activity extends CI_Controller {
 		// add the item into the activity
 		$global_item_id = $item ['Global_Item_ID'];
 		$this->activity_model->insert_activity_item_relation ( $activity_id, $global_item_id );
+		if ($activity ['Global_Catalogue_ID']) {
+			$this->activity_model->insert_item_into_catalog ( $activity ['Global_Catalogue_ID'], $global_item_id );
+		}
 		
 		// synchronize WordPress DB
 		$result = $this->sync_item_to_wordpress ( $global_item_id, $item ['userId'] );

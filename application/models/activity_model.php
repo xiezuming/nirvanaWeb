@@ -1,4 +1,8 @@
 <?php
+/**
+ *
+ * @property CI_DB_active_record $db
+ */
 class Activity_model extends CI_Model {
 	const TABLE_ACTIVITY = 'activity';
 	const TABLE_ACTIVITY_ITEM = 'activity_item';
@@ -48,6 +52,20 @@ class Activity_model extends CI_Model {
 			) );
 			if ($this->db->_error_number ())
 				log_message ( 'error', 'Activity_model.insert_activity_item_relation: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
+			return $result;
+		}
+		return TRUE;
+	}
+	public function insert_item_into_catalog($global_catalogue_id, $global_item_id) {
+		$this->db->where ( 'Global_Catalogue_ID', $global_catalogue_id );
+		$this->db->where ( 'Global_Item_ID', $global_item_id );
+		if ($this->db->count_all_results ( 'catalogue_item' ) == 0) {
+			$result = $this->db->insert ( 'catalogue_item', array (
+					'Global_Catalogue_ID' => $global_catalogue_id,
+					'Global_Item_ID' => $global_item_id 
+			) );
+			if ($this->db->_error_number ())
+				log_message ( 'error', 'Activity_model.insert_item_into_catalog: ' . $this->db->_error_number () . ':' . $this->db->_error_message () );
 			return $result;
 		}
 		return TRUE;
