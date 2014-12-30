@@ -282,14 +282,18 @@ class Item extends CI_Controller {
 			$this->item_model->insert_image ( $globalItemId, $insertImageName );
 		foreach ( $deleteImageNameArray as $deleteImageName )
 			$this->item_model->delete_image ( $globalItemId, $deleteImageName );
-			
+		
+		if ($item ['availability'] == 'AB') {
 			// connect the item to the activity based on location
-		$latitude = $item ['latitude'];
-		$longitude = $item ['longitude'];
-		if ($latitude && $longitude) {
-			$activities = $this->activity_model->get_activities_by_point ( $latitude, $longitude );
-			foreach ( $activities as $activity ) {
-				$this->activity_model->insert_activity_item_relation ( $activity ['Activity_ID'], $globalItemId );
+			$latitude = $item ['latitude'];
+			$longitude = $item ['longitude'];
+			if ($latitude && $longitude) {
+				$activities = $this->activity_model->get_activities_by_point ( $latitude, $longitude );
+				foreach ( $activities as $activity ) {
+					$this->activity_model->insert_activity_item_relation ( $activity ['Activity_ID'], $globalItemId );
+					if ($activity ['Global_Catalogue_ID'])
+						$this->activity_model->insert_item_into_catalog ( $activity ['Global_Catalogue_ID'], $globalItemId );
+				}
 			}
 		}
 		
