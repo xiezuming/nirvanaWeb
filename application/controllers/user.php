@@ -1,7 +1,6 @@
 <?php
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
-const GROUP_TYPE_ID = 5;
 
 /**
  *
@@ -27,15 +26,13 @@ class User extends CI_Controller {
 		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'required|max_length[10]' );
 		$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
 		$this->form_validation->set_rules ( 'wechatId', 'WeChat ID', 'max_length[45]' );
-		$this->form_validation->set_rules ( 'user_groups', 'Group', '' );
 		
 		if ($this->form_validation->run ()) {
 			$input_data = $this->input->post ();
 			$input_data ['userType'] = USER_TYPE_WETAG;
 			$input_data ['alias'] = $input_data ['firstName'];
 			$user_id = $this->user_model->create_user ( $input_data );
-			$user_groups = $this->input->post ( 'user_groups' );
-			if ($user_id && $this->user_model->update_user_group ( $user_id, $user_groups )) {
+			if ($user_id) {
 				$this->load->view ( 'user/jump_sign_up_success' );
 				return;
 			} else {
@@ -44,7 +41,6 @@ class User extends CI_Controller {
 			}
 		}
 		
-		$data ['group_array'] = $this->get_all_group_array ();
 		$data ['title'] = 'Sign Up';
 		$this->load->view ( 'templates/header_app', $data );
 		$this->load->view ( 'user/sign_up', $data );
@@ -408,16 +404,6 @@ class User extends CI_Controller {
 			return FALSE;
 		}
 		return TRUE;
-	}
-	private function get_user_group_key_array($user_id) {
-		$user_group_key_array = array ();
-		foreach ( $this->user_model->get_user_groups ( $user_id ) as $user_group_row )
-			array_push ( $user_group_key_array, $user_group_row ['group_key'] );
-		return $user_group_key_array;
-	}
-	private function get_all_group_array() {
-		$this->load->model ( 'meta_model' );
-		return $this->meta_model->get_meta_codes ( GROUP_TYPE_ID );
 	}
 	private function _update_user_app_login_time($user_id) {
 		$this->user_model->update_user ( $user_id, array (

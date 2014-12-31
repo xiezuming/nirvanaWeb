@@ -50,14 +50,6 @@ $red_star = '<font color="red">*</font>';
 			<td><?php echo form_input('wechatId', set_value('wechatId'), 'size="25"');?></td>
 		</tr>
 		<tr>
-			<td><label>Group:</label></td>
-		</tr>
-		<?php foreach ($group_array as $group) {?>
-		<tr>
-			<td><?php echo '<label>' . form_checkbox('user_groups[]', $group['key'], set_checkbox('user_groups', $group['key'])) . $group['value'] . '</label>' ?></td>
-		</tr>
-		<?php }?>
-		<tr>
 			<td colspan='2' align='center'><input type="submit" value="Create" /></td>
 		</tr>
 	</table>
