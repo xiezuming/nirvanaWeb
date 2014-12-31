@@ -87,7 +87,9 @@ class User extends CI_Controller {
 		$this->form_validation->set_rules ( 'firstName', 'First Name', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'lastName', 'Last Name', 'required|max_length[45]' );
 		$this->form_validation->set_rules ( 'alias', 'Alias', 'required|max_length[45]' );
-		$this->form_validation->set_rules ( 'email', 'Email Address', 'required|valid_email|max_length[45]|callback_email_check[' . $user ['userId'] . ',' . $user ['userType'] . ']' );
+		$email = $this->input->post ( 'email' );
+		$check_email = ($email === $user ['email']) ? '' : '|callback_email_check';
+		$this->form_validation->set_rules ( 'email', 'Email Address', 'required|valid_email|max_length[45]' . $check_email );
 		$this->form_validation->set_rules ( 'password', 'Password', '' );
 		$this->form_validation->set_rules ( 'zipcode', 'ZIP Code', 'required|max_length[10]' );
 		$this->form_validation->set_rules ( 'phoneNumber', 'Phone Number', 'max_length[45]' );
@@ -132,8 +134,7 @@ class User extends CI_Controller {
 			$data ['message'] = 'Internal Error: email or password is empty.';
 		} else {
 			$user = $this->user_model->query_user ( array (
-					'email' => $email,
-					'userType' => USER_TYPE_WETAG 
+					'email' => $email 
 			) );
 			if ($user) {
 				if ($user ['password'] == md5 ( $password )) {
@@ -396,18 +397,11 @@ class User extends CI_Controller {
 	 * Call back function for the email field validation
 	 *
 	 * @param string $email        	
-	 * @param array $params        	
 	 * @return boolean
 	 */
-	public function email_check($email, $params = '') {
-		$params = explode ( ',', $params );
-		$user_id = empty ( $params [0] ) ? '' : $params [0];
-		$user_type = empty ( $params [1] ) ? USER_TYPE_WETAG : $params [1];
-		log_message ( 'debug', '------------' . $email . ',' . $user_id . ',' . $user_type );
+	public function email_check($email) {
 		$user = $this->user_model->query_user ( array (
-				'email' => $email,
-				'userType' => $user_type,
-				'userId !=' => $user_id 
+				'email' => $email 
 		) );
 		if ($user) {
 			$this->form_validation->set_message ( 'email_check', lang ( 'error_email_used' ) );
