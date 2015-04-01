@@ -24,6 +24,7 @@ class Message extends CI_Controller {
 	public function query_messages() {
 		$user_id = $this->input->post ( 'userId' );
 		$where = "(fromUserId = '$user_id' OR toUserId = '$user_id')";
+		$where .= ' AND itemUuid is not NULL';
 		
 		$rec_create_time = $this->input->post ( 'startTime' );
 		if ($rec_create_time)
@@ -53,8 +54,10 @@ class Message extends CI_Controller {
 		$message_text = $this->input->post ( 'message' );
 		$message = array (
 				'messageUuid' => $this->input->post ( 'messageUuid' ),
+				'fromUser' => $from_user ['Global_User_ID'],
 				'fromUserId' => $from_user_id,
 				'fromUserName' => $from_user ['alias'],
+				'toUser' => $to_user ['Global_User_ID'],
 				'toUserId' => $to_user_id,
 				'toUserName' => $to_user ['alias'],
 				'itemUuid' => $item_uuid,
