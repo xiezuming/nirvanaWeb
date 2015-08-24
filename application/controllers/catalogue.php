@@ -6,6 +6,7 @@ if (! defined ( 'BASEPATH' ))
  *
  * @property Catalogue_model $catalogue_model
  * @property Item_model $item_model
+ * @property User_model $user_model
  * @property Wordpress_model $wordpress_model
  */
 class Catalogue extends CI_Controller {
@@ -14,6 +15,7 @@ class Catalogue extends CI_Controller {
 		$this->load->model ( 'catalogue_model' );
 		$this->load->model ( 'item_model' );
 		$this->load->model ( 'wordpress_model' );
+		$this->load->model ( 'user_model' );
 	}
 	public function test_page() {
 		$this->load->helper ( 'form' );
@@ -63,6 +65,13 @@ class Catalogue extends CI_Controller {
 		$input_data = $this->get_input_data ();
 		$input_data ['synchWp'] = 'N';
 		$catalgoue_id = $input_data ['catalogueId'];
+		$user_id = $input_data ['userId'];
+		
+		$user = $this->user_model->get_user ( $user_id );
+		if (! $user) {
+			return output_json_result ( false, 'Internal Error: invalid user id' );
+		}
+		$input_data ['wpPostUrl'] = WEEE_WEB_BASE_URL . "/item/u/{$user['Global_User_ID']}";
 		
 		// retrieve the new relations from post
 		$new_releation_itemIds = array ();
@@ -78,7 +87,6 @@ class Catalogue extends CI_Controller {
 		log_message ( 'debug', 'update_catalogue: $new_releation_itemIds = ' . print_r ( $new_releation_itemIds, TRUE ) );
 		
 		$this->db->trans_start ();
-		
 		$catalgoue = $this->catalogue_model->get_catalogue ( $catalgoue_id );
 		if ($catalgoue) {
 			// fill $old_releation_itemIds
@@ -87,7 +95,6 @@ class Catalogue extends CI_Controller {
 			foreach ( $relations as $relation ) {
 				array_push ( $old_releation_itemIds, $relation ['Global_Item_ID'] );
 			}
-			
 			$this->catalogue_model->update_catalogue ( $input_data );
 		} else {
 			// Insert mode
@@ -118,10 +125,10 @@ class Catalogue extends CI_Controller {
 		}
 		
 		// synchronize to wp database
-		$this->synch_catalogue ( $global_catalogue_id );
+		// $this->synch_catalogue ( $global_catalogue_id );
 		
 		// post the catalogue
-		$this->post_catalogue ( $global_catalogue_id );
+		// $this->post_catalogue ( $global_catalogue_id );
 		
 		$data ['result'] = SUCCESS;
 		$data ['data'] = $this->catalogue_model->get_catalogue_by_global_id ( $global_catalogue_id );

@@ -44,6 +44,9 @@ define ( 'USER_TYPE_WETAG', 'WE' );
 define ( 'USER_TYPE_FACEBOOK', 'FB' );
 define ( 'USER_TYPE_WEIXIN', 'WX' );
 
+define ( 'WEEE_WEB_BASE_URL', 'http://www.sayweee.com');
+//define ( 'WEEE_WEB_BASE_URL', 'http://localhost');
+
 define ( 'LOG_BASE_PATH', '/var/log/weee_app/' );
 define ( 'UPLOAD_BASE_PATH', '/var/uploads/weee_app/' );
 define ( 'SCRIPT_PATH', '/home/ubuntu/project/weee_algo/scripts/' );
