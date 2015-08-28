@@ -2,6 +2,12 @@
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
 
+if (! function_exists ( 'endsWith' )) {
+	function endsWith($haystack, $needle) {
+		return $needle === "" || substr ( $haystack, - strlen ( $needle ) ) === $needle;
+	}
+}
+
 if (! function_exists ( 'output_json_result' )) {
 	function output_json_result($result, $message = NULL, $object = NULL) {
 		$data ['result'] = $result;
